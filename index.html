@@ -1083,10 +1083,23 @@ async function submitAuth() {
       return;
     }
 
+    if (authMode === 'signup') {
+      // Show confirmation message inside the modal instead of closing it
+      const errEl = document.getElementById('authError');
+      errEl.style.background = 'rgba(74, 157, 111, 0.1)';
+      errEl.style.borderColor = 'rgba(74, 157, 111, 0.3)';
+      errEl.style.color = '#4a9d6f';
+      errEl.textContent = '✓ Account created! Please check your email and click the confirmation link before logging in.';
+      errEl.classList.add('visible');
+      btn.textContent = 'Go to Log In';
+      btn.disabled = false;
+      btn.onclick = () => { errEl.classList.remove('visible'); errEl.style = ''; toggleAuthMode(); };
+      return;
+    }
     saveAuth(data.token, data.user);
     document.getElementById('authModal').classList.remove('visible');
     await updateNavForUser();
-    showToast(authMode === 'login' ? 'Welcome back!' : 'Account created! Welcome.');
+    showToast('Welcome back!');
   } catch(e) {
     errEl.textContent = 'Something went wrong. Please try again.';
     errEl.classList.add('visible');

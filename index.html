@@ -1093,7 +1093,12 @@ async function submitAuth() {
       errEl.classList.add('visible');
       btn.textContent = 'Go to Log In';
       btn.disabled = false;
-      btn.onclick = () => { errEl.classList.remove('visible'); errEl.style = ''; toggleAuthMode(); };
+      btn.onclick = () => { 
+        errEl.classList.remove('visible'); 
+        errEl.removeAttribute('style');
+        btn.onclick = submitAuth;
+        showAuth('login'); 
+      };
       return;
     }
     saveAuth(data.token, data.user);

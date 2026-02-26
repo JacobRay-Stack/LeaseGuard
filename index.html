@@ -604,6 +604,132 @@
   }
   .usage-dot.used { background: var(--accent); }
 
+
+  /* Auth Modal */
+  .auth-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .auth-overlay.visible { display: flex; }
+  .auth-modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px;
+    max-width: 380px;
+    width: 100%;
+    position: relative;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .auth-modal h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+  .auth-modal .auth-sub {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .auth-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .auth-input:focus { border-color: var(--accent); }
+  .auth-submit-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--accent);
+    color: #0e0f11;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 12px;
+  }
+  .auth-submit-btn:hover { background: var(--accent2); }
+  .auth-switch {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .auth-switch a {
+    color: var(--accent);
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .auth-error {
+    background: rgba(224, 92, 92, 0.1);
+    border: 1px solid rgba(224, 92, 92, 0.3);
+    border-radius: 6px;
+    padding: 10px 14px;
+    color: var(--red);
+    font-size: 13px;
+    margin-bottom: 12px;
+    display: none;
+  }
+  .auth-error.visible { display: block; }
+
+  /* Top nav */
+  .top-nav {
+    display: flex;
+    justify-content: flex-end;
+    max-width: 860px;
+    margin: 0 auto 0;
+    padding: 0 24px;
+    gap: 10px;
+  }
+  .nav-btn {
+    padding: 7px 16px;
+    border-radius: 7px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+  }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: #0e0f11; border-color: var(--accent); }
+  .nav-btn.primary:hover { background: var(--accent2); }
+  .user-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .credit-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 600;
+  }
   /* Disclaimer */
   .disclaimer {
     text-align: center;
@@ -615,6 +741,26 @@
 </style>
 </head>
 <body>
+
+<div class="top-nav" id="topNav">
+  <button class="nav-btn" onclick="showAuth('login')">Log In</button>
+  <button class="nav-btn primary" onclick="showAuth('signup')">Sign Up</button>
+</div>
+
+<!-- Auth Modal -->
+<div class="auth-overlay" id="authModal">
+  <div class="auth-modal">
+    <button onclick="document.getElementById('authModal').classList.remove('visible')" style="position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;">✕</button>
+    <h2 id="authTitle">Create Account</h2>
+    <p class="auth-sub" id="authSub">Sign up to save your analyses and manage credits</p>
+    <div class="auth-error" id="authError"></div>
+    <input class="auth-input" type="email" id="authEmail" placeholder="Email address">
+    <input class="auth-input" type="password" id="authPassword" placeholder="Password">
+    <button class="auth-submit-btn" id="authSubmitBtn" onclick="submitAuth()">Create Account</button>
+    <div class="auth-switch" id="authSwitch">Already have an account? <a onclick="toggleAuthMode()">Log in</a></div>
+  </div>
+</div>
+
 <div class="container">
   <header>
     <div class="logo">
@@ -794,25 +940,7 @@ function updateUsageUI() {
   }
 }
 
-// Check for successful payment on page load
-window.addEventListener('load', () => {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('paid') === 'true') {
-    const u = getUsage();
-    const plan = params.get('plan') || 'basic';
-    if (plan === 'pro') {
-      u.pro = true;
-      u.paid = 9999;
-      showToast('Pro plan activated! You have unlimited analyses.');
-    } else {
-      u.paid = (u.paid || 0) + PAID_CREDITS;
-      showToast('Payment successful! You have 5 analyses ready.');
-    }
-    saveUsage(u);
-    window.history.replaceState({}, '', window.location.pathname);
-  }
-  updateUsageUI();
-});
+// Payment and usage handled in auth load event above
 
 function showToast(msg) {
   const t = document.createElement('div');
@@ -841,6 +969,142 @@ async function startCheckout(plan) {
     btn.disabled = false;
   }
 }
+
+
+// ── Auth ───────────────────────────────────────────────────
+let authMode = 'signup';
+let currentUser = null;
+let authToken = null;
+
+function getStoredAuth() {
+  try {
+    const t = localStorage.getItem('atc_token');
+    const u = localStorage.getItem('atc_user');
+    if (t && u) { authToken = t; currentUser = JSON.parse(u); }
+  } catch(e) {}
+}
+
+function saveAuth(token, user) {
+  authToken = token;
+  currentUser = user;
+  localStorage.setItem('atc_token', token);
+  localStorage.setItem('atc_user', JSON.stringify(user));
+}
+
+function clearAuth() {
+  authToken = null;
+  currentUser = null;
+  localStorage.removeItem('atc_token');
+  localStorage.removeItem('atc_user');
+}
+
+function showAuth(mode) {
+  authMode = mode || 'signup';
+  const isLogin = authMode === 'login';
+  document.getElementById('authTitle').textContent = isLogin ? 'Welcome Back' : 'Create Account';
+  document.getElementById('authSub').textContent = isLogin ? 'Log in to access your analyses' : 'Sign up to save your analyses and manage credits';
+  document.getElementById('authSubmitBtn').textContent = isLogin ? 'Log In' : 'Create Account';
+  document.getElementById('authSwitch').innerHTML = isLogin ? "Don't have an account? <a onclick=\"toggleAuthMode()\">Sign up</a>" : "Already have an account? <a onclick=\"toggleAuthMode()\">Log in</a>";
+  document.getElementById('authError').classList.remove('visible');
+  document.getElementById('authModal').classList.add('visible');
+}
+
+function toggleAuthMode() {
+  showAuth(authMode === 'signup' ? 'login' : 'signup');
+}
+
+async function submitAuth() {
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const btn = document.getElementById('authSubmitBtn');
+  const errEl = document.getElementById('authError');
+  errEl.classList.remove('visible');
+
+  if (!email || !password) {
+    errEl.textContent = 'Please enter your email and password.';
+    errEl.classList.add('visible');
+    return;
+  }
+
+  btn.textContent = 'Please wait...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: authMode, email, password })
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      errEl.textContent = data.error;
+      errEl.classList.add('visible');
+      btn.textContent = authMode === 'login' ? 'Log In' : 'Create Account';
+      btn.disabled = false;
+      return;
+    }
+
+    saveAuth(data.token, data.user);
+    document.getElementById('authModal').classList.remove('visible');
+    await updateNavForUser();
+    showToast(authMode === 'login' ? 'Welcome back!' : 'Account created! Welcome.');
+  } catch(e) {
+    errEl.textContent = 'Something went wrong. Please try again.';
+    errEl.classList.add('visible');
+    btn.textContent = authMode === 'login' ? 'Log In' : 'Create Account';
+    btn.disabled = false;
+  }
+}
+
+async function updateNavForUser() {
+  const nav = document.getElementById('topNav');
+  if (!authToken || !currentUser) {
+    nav.innerHTML = '<button class="nav-btn" onclick="showAuth(\'login\')">Log In</button><button class="nav-btn primary" onclick="showAuth(\'signup\')">Sign Up</button>';
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'getCredits', token: authToken })
+    });
+    const credits = await res.json();
+    const label = credits.plan === 'pro' ? 'Pro — Unlimited' : `${credits.credits} analyses left`;
+    nav.innerHTML = `<div class="user-nav"><span>${currentUser.email}</span><span class="credit-badge">${label}</span><button class="nav-btn" onclick="logout()">Log Out</button></div>`;
+  } catch(e) {
+    nav.innerHTML = `<div class="user-nav"><span>${currentUser.email}</span><button class="nav-btn" onclick="logout()">Log Out</button></div>`;
+  }
+}
+
+function logout() {
+  clearAuth();
+  updateNavForUser();
+  showToast('Logged out.');
+}
+
+// Init on load
+window.addEventListener('load', async () => {
+  getStoredAuth();
+  await updateNavForUser();
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('paid') === 'true') {
+    const plan = params.get('plan') || 'basic';
+    const u = getUsage();
+    if (plan === 'pro') {
+      u.pro = true; u.paid = 9999;
+      showToast('Pro plan activated! You have unlimited analyses.');
+    } else {
+      u.paid = (u.paid || 0) + PAID_CREDITS;
+      showToast('Payment successful! You have 5 analyses ready.');
+    }
+    saveUsage(u);
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+  updateUsageUI();
+});
 
 // ── File handling ────────────────────────────────────────── ──────────────────────────────────────────
 const dropZone = document.getElementById('dropZone');

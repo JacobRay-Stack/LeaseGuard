@@ -1,85 +1,63 @@
 const https = require('https');
 
-module.exports = async function handler(req, res) {
+module.exports = function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { contractText } = req.body;
+  let body = '';
+  req.on('data', chunk => { body += chunk; });
+  req.on('end', () => {
+    let contractText = '';
+    try {
+      contractText = JSON.parse(body).contractText || '';
+    } catch(e) {
+      return res.status(400).json({ error: 'Invalid JSON' });
+    }
 
-  if (!contractText || contractText.trim().length < 50) {
-    return res.status(400).json({ error: 'Contract text too short' });
-  }
+    if (contractText.trim().length < 50) {
+      return res.status(400).json({ error: 'Too short' });
+    }
 
-  const systemPrompt = `You are a rental/lease contract analyst. Analyze the provided lease or rental agreement and return a JSON object with the following structure:
+    const payload = JSON.stringify({
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 1000,
+      system: 'You are a lease analyst. Return ONLY a JSON object with keys: summary, score (good/warn/bad), scoreLabel, keyTerms (array of {label,value}), redFlags (array of strings), missingClauses (array of strings).',
+      messages: [{ role: 'user', content: 'Analyze this lease:\n\n' + contractText.slice(0, 8000) }]
+    });
 
-{
-  "summary": "A 3-4 sentence plain English summary of the overall contract.",
-  "score": "good|warn|bad",
-  "scoreLabel": "Tenant-Friendly|Review Carefully|Concerning",
-  "keyTerms": [
-    {"label": "Monthly Rent", "value": "$X"},
-    {"label": "Lease Term", "value": "X months"},
-    {"label": "Security Deposit", "value": "$X"},
-    {"label": "Move-in Date", "value": "..."},
-    {"label": "Late Fee", "value": "..."},
-    {"label": "Pet Policy", "value": "..."}
-  ],
-  "redFlags": [
-    "Description of red flag 1",
-    "Description of red flag 2"
-  ],
-  "missingClauses": [
-    "Description of missing or vague clause 1",
-    "Description of missing or vague clause 2"
-  ]
-}
-
-Be thorough but concise. Red flags are clauses that are unusual, one-sided, or could harm the tenant. Missing clauses are standard protections that should be in every lease but aren't clearly stated. Return ONLY valid JSON, no other text.`;
-
-  const body = JSON.stringify({
-    model: 'claude-3-5-sonnet-20241022',
-    max_tokens: 1000,
-    system: systemPrompt,
-    messages: [{ role: 'user', content: `Analyze this lease agreement:\n\n${contractText.slice(0, 12000)}` }]
-  });
-
-  return new Promise((resolve) => {
     const options = {
       hostname: 'api.anthropic.com',
       path: '/v1/messages',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(body),
+        'Content-Length': Buffer.byteLength(payload),
         'x-api-key': process.env.ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01'
       }
     };
 
-    const request = https.request(options, (response) => {
+    const apiReq = https.request(options, (apiRes) => {
       let data = '';
-      response.on('data', chunk => data += chunk);
-      response.on('end', () => {
+      apiRes.on('data', c => { data += c; });
+      apiRes.on('end', () => {
         try {
           const parsed = JSON.parse(data);
-          const raw = parsed.content?.[0]?.text || '';
-          const clean = raw.replace(/```json|```/g, '').trim();
-          const result = JSON.parse(clean);
-          res.status(200).json(result);
-        } catch (err) {
-          res.status(500).json({ error: 'Failed to parse response', raw: data });
+          if (parsed.error) return res.status(500).json({ error: parsed.error.message });
+          const text = parsed.content[0].text.replace(/```json|```/g, '').trim();
+          res.status(200).json(JSON.parse(text));
+        } catch(e) {
+          res.status(500).json({ error: 'Parse error', raw: data.slice(0, 500) });
         }
-        resolve();
       });
     });
 
-    request.on('error', (err) => {
-      res.status(500).json({ error: err.message });
-      resolve();
+    apiReq.on('error', (e) => {
+      res.status(500).json({ error: e.message });
     });
 
-    request.write(body);
-    request.end();
+    apiReq.write(payload);
+    apiReq.end();
   });
 };

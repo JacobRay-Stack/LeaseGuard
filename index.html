@@ -608,48 +608,15 @@ async function analyzeContract() {
   document.getElementById('loading').classList.add('visible');
   document.getElementById('results').classList.remove('visible');
 
-  const systemPrompt = `You are a rental/lease contract analyst. Analyze the provided lease or rental agreement and return a JSON object with the following structure:
-
-{
-  "summary": "A 3-4 sentence plain English summary of the overall contract.",
-  "score": "good|warn|bad",
-  "scoreLabel": "Tenant-Friendly|Review Carefully|Concerning",
-  "keyTerms": [
-    {"label": "Monthly Rent", "value": "$X"},
-    {"label": "Lease Term", "value": "X months"},
-    {"label": "Security Deposit", "value": "$X"},
-    {"label": "Move-in Date", "value": "..."},
-    {"label": "Late Fee", "value": "..."},
-    {"label": "Pet Policy", "value": "..."}
-  ],
-  "redFlags": [
-    "Description of red flag 1",
-    "Description of red flag 2"
-  ],
-  "missingClauses": [
-    "Description of missing or vague clause 1",
-    "Description of missing or vague clause 2"
-  ]
-}
-
-Be thorough but concise. Red flags are clauses that are unusual, one-sided, or could harm the tenant. Missing clauses are standard protections that should be in every lease but aren't clearly stated. Return ONLY valid JSON, no other text.`;
-
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: `Analyze this lease agreement:\n\n${text.slice(0, 12000)}` }]
-      })
+      body: JSON.stringify({ contractText: text })
     });
 
-    const data = await response.json();
-    const raw = data.content?.[0]?.text || '';
-    const clean = raw.replace(/```json|```/g, '').trim();
-    const result = JSON.parse(clean);
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Analysis failed');
     renderResults(result);
   } catch (err) {
     document.getElementById('loading').classList.remove('visible');

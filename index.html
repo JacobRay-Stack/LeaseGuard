@@ -691,14 +691,33 @@
   .auth-error.visible { display: block; }
 
   /* Top nav */
-  .top-nav { display: flex; gap: 10px; }
-  .header { position: relative; }
-  .header-nav {
-    position: absolute;
-    top: 0;
-    right: 0;
+  .header-top {
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+  .top-nav-right {
+    display: flex;
+    align-items: center;
     gap: 10px;
+    flex-shrink: 0;
+  }
+  .user-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .user-nav span {
+    font-size: 12px;
+    color: var(--muted);
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .nav-btn {
     padding: 7px 16px;
@@ -771,11 +790,13 @@
 </div>
 
 <div class="container">
-  <header style="position:relative;">
-    <div id="topNav" style="position:absolute;top:0;right:0;display:flex;gap:10px;"></div>
-    <div class="logo">
-      <div class="logo-icon">⚖️</div>
-      <div class="logo-text">Analyze<span>ThisContract</span></div>
+  <header>
+    <div class="header-top">
+      <div class="logo">
+        <div class="logo-icon">⚖️</div>
+        <div class="logo-text">Analyze<span>ThisContract</span></div>
+      </div>
+      <div id="topNav" class="top-nav-right"></div>
     </div>
     <p>Drop any contract and get an instant plain-English breakdown — red flags, missing clauses, and key terms included.</p>
   </header>
@@ -801,8 +822,8 @@
 
     <label class="input-label" for="contractText">Paste text manually</label>
     <textarea id="contractText" placeholder="Paste the full text of your contract here..."></textarea>
-    <div class="usage-counter" id="usageCounter">
-      <div class="usage-dots" id="usageDots"></div>
+    <div id="usageCounter" style="display:none;">
+      <div id="usageDots"></div>
       <span id="usageText"></span>
     </div>
     <div class="error-msg" id="errorMsg"></div>
@@ -1127,8 +1148,23 @@ async function updateNavForUser() {
       body: JSON.stringify({ action: 'getCredits', token: authToken })
     });
     const credits = await res.json();
-    const label = credits.plan === 'pro' ? 'Pro — Unlimited' : `${credits.credits} analyses left`;
-    nav.innerHTML = `<div class="user-nav"><span>${currentUser.email}</span><span class="credit-badge">${label}</span><button class="nav-btn" onclick="logout()">Log Out</button></div>`;
+
+    // Sync localStorage with DB credits to avoid mismatch
+    if (credits && !credits.error) {
+      const u = getUsage();
+      if (credits.plan === 'pro') {
+        u.pro = true; u.paid = 9999;
+      } else {
+        u.pro = false;
+        u.paid = 0;
+        u.free = Math.max(0, 3 - (credits.credits || 0));
+      }
+      saveUsage(u);
+    }
+
+    const label = credits.plan === 'pro' ? '✦ Pro — Unlimited' : `${credits.credits} ${credits.credits === 1 ? 'analysis' : 'analyses'} left`;
+    const email = currentUser.email || '';
+    nav.innerHTML = `<div class="user-nav"><span title="${email}">${email}</span><span class="credit-badge">${label}</span><button class="nav-btn" onclick="logout()">Log Out</button></div>`;
   } catch(e) {
     nav.innerHTML = `<div class="user-nav"><span>${currentUser.email}</span><button class="nav-btn" onclick="logout()">Log Out</button></div>`;
   }
@@ -1243,10 +1279,25 @@ async function analyzeContract() {
   errorMsg.classList.remove('visible');
 
   // Check usage limit
-  const { remaining } = getRemainingAnalyses();
-  if (remaining <= 0) {
-    document.getElementById('paywallModal').classList.add('visible');
-    return;
+  if (authToken) {
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'getCredits', token: authToken })
+      });
+      const credits = await res.json();
+      if (credits.plan !== 'pro' && credits.credits <= 0) {
+        document.getElementById('paywallModal').classList.add('visible');
+        return;
+      }
+    } catch(e) {}
+  } else {
+    const { remaining } = getRemainingAnalyses();
+    if (remaining <= 0) {
+      document.getElementById('paywallModal').classList.add('visible');
+      return;
+    }
   }
 
   if (!text || text.length < 50) {
@@ -1268,8 +1319,20 @@ async function analyzeContract() {
 
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Analysis failed');
-    incrementUsage();
-    updateUsageUI();
+    // Decrement DB credits if logged in
+    if (authToken) {
+      try {
+        await fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'decrementCredit', token: authToken })
+        });
+        await updateNavForUser();
+      } catch(e) {}
+    } else {
+      incrementUsage();
+      updateUsageUI();
+    }
     renderResults(result);
   } catch (err) {
     document.getElementById('loading').classList.remove('visible');

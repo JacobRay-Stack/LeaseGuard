@@ -1,6 +1,6 @@
 const https = require('https');
 
-module.exports = async function handler(req, res) {
+module.exports = function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -8,33 +8,41 @@ module.exports = async function handler(req, res) {
   let body = '';
   req.on('data', chunk => { body += chunk; });
   req.on('end', () => {
-    const stripeKey = process.env.STRIPE_SECRET_KEY;
-    
-    // Build success and cancel URLs
+    let plan = 'basic';
+    try { plan = JSON.parse(body).plan || 'basic'; } catch(e) {}
+
     const origin = req.headers.origin || 'https://analyzethiscontract.com';
-    const successUrl = `${origin}?session_id={CHECKOUT_SESSION_ID}&paid=true`;
+    const successUrl = `${origin}?session_id={CHECKOUT_SESSION_ID}&paid=true&plan=${plan}`;
     const cancelUrl = `${origin}?cancelled=true`;
+
+    const isPro = plan === 'pro';
 
     const params = new URLSearchParams({
       'payment_method_types[0]': 'card',
       'line_items[0][price_data][currency]': 'usd',
-      'line_items[0][price_data][product_data][name]': 'Contract Analysis',
-      'line_items[0][price_data][product_data][description]': '5 contract analyses',
-      'line_items[0][price_data][unit_amount]': '499',
+      'line_items[0][price_data][product_data][name]': isPro ? 'AnalyzeThisContract Pro' : 'AnalyzeThisContract Basic',
+      'line_items[0][price_data][product_data][description]': isPro ? 'Unlimited contract analyses per month' : '5 contract analyses',
+      'line_items[0][price_data][unit_amount]': isPro ? '999' : '499',
+      'line_items[0][price_data][recurring][interval]': isPro ? 'month' : '',
       'line_items[0][quantity]': '1',
-      'mode': 'payment',
+      'mode': isPro ? 'subscription' : 'payment',
       'success_url': successUrl,
       'cancel_url': cancelUrl,
-    }).toString();
+    });
+
+    // Remove empty recurring interval for one-time payment
+    if (!isPro) params.delete('line_items[0][price_data][recurring][interval]');
+
+    const paramStr = params.toString();
 
     const options = {
       hostname: 'api.stripe.com',
       path: '/v1/checkout/sessions',
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${stripeKey}`,
+        'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`,
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Content-Length': Buffer.byteLength(params)
+        'Content-Length': Buffer.byteLength(paramStr)
       }
     };
 
@@ -52,11 +60,8 @@ module.exports = async function handler(req, res) {
       });
     });
 
-    apiReq.on('error', (e) => {
-      res.status(500).json({ error: e.message });
-    });
-
-    apiReq.write(params);
+    apiReq.on('error', (e) => res.status(500).json({ error: e.message }));
+    apiReq.write(paramStr);
     apiReq.end();
   });
 };

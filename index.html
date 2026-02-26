@@ -691,14 +691,7 @@
   .auth-error.visible { display: block; }
 
   /* Top nav */
-  .top-nav {
-    display: flex;
-    justify-content: flex-end;
-    max-width: 860px;
-    margin: 0 auto 0;
-    padding: 0 24px;
-    gap: 10px;
-  }
+  .top-nav { display: flex; gap: 10px; }
   .nav-btn {
     padding: 7px 16px;
     border-radius: 7px;
@@ -742,10 +735,7 @@
 </head>
 <body>
 
-<div class="top-nav" id="topNav">
-  <button class="nav-btn" onclick="showAuth('login')">Log In</button>
-  <button class="nav-btn primary" onclick="showAuth('signup')">Sign Up</button>
-</div>
+
 
 <!-- Auth Modal -->
 <div class="auth-overlay" id="authModal">
@@ -767,7 +757,8 @@
       <div class="logo-icon">⚖️</div>
       <div class="logo-text">Analyze<span>ThisContract</span></div>
     </div>
-    <p>Drop any contract and get an instant plain-English breakdown — red flags, missing clauses, and key terms included.</p>
+    </div>
+    <p style="order:3;width:100%;text-align:center;">Drop any contract and get an instant plain-English breakdown — red flags, missing clauses, and key terms included.</p>
   </header>
 
   <div class="input-card" id="inputSection">

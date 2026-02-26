@@ -20,7 +20,7 @@ module.exports = function handler(req, res) {
     }
 
     const payload = JSON.stringify({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-3-5-sonnet-20240620',
       max_tokens: 1000,
       system: 'You are a lease analyst. Return ONLY a JSON object with keys: summary, score (good/warn/bad), scoreLabel, keyTerms (array of {label,value}), redFlags (array of strings), missingClauses (array of strings).',
       messages: [{ role: 'user', content: 'Analyze this lease:\n\n' + contractText.slice(0, 8000) }]

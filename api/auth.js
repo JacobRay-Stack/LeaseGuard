@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
   req.on('data', chunk => { body += chunk; });
   req.on('end', async () => {
     try {
-      const { action, email, password, token } = JSON.parse(body);
+      const { action, email, password, token, phone, emailOptIn } = JSON.parse(body);
 
       if (action === 'signup') {
         const result = await supabaseRequest('/auth/v1/signup', 'POST', { email, password });
@@ -46,7 +46,7 @@ module.exports = async function handler(req, res) {
           await supabaseRequest(
             '/rest/v1/user_credits',
             'POST',
-            { user_id: result.user.id, email, plan: 'free', credits: 3 }
+            { user_id: result.user.id, email, plan: 'free', credits: 3, phone: phone || null, email_opt_in: emailOptIn || false }
           );
         }
         return res.status(200).json({ user: result.user, session: result.session });

@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeaseGuard — Rental Contract Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>if (typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+<style>
+  :root {
+    --bg: #0e0f11;
+    --surface: #16181c;
+    --surface2: #1e2027;
+    --border: #2a2d35;
+    --accent: #e8c96d;
+    --accent2: #c4a44a;
+    --red: #e05c5c;
+    --green: #5cb88a;
+    --blue: #5b9bd5;
+    --text: #f0ece3;
+    --muted: #8a8f9e;
+    --radius: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+
+  .logo-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  .logo-text span { color: var(--accent); }
+
+  header p {
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 300;
+    max-width: 460px;
+    margin: 0 auto;
+  }
+
+  /* Input section */
+  .input-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.6s ease 0.1s both;
+  }
+
+  .input-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 14px 16px;
+    resize: vertical;
+    min-height: 200px;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: var(--muted); }
+
+  .analyze-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 15px;
+    background: var(--accent);
+    color: #0e0f11;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .analyze-btn:hover { background: var(--accent2); transform: translateY(-1px); }
+  .analyze-btn:active { transform: translateY(0); }
+  .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* Loading */
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 48px;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  .loading.visible { display: block; }
+
+  .spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  .loading p { color: var(--muted); font-size: 14px; }
+
+  /* Results */
+  .results {
+    display: none;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .results.visible { display: block; }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .result-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .result-card p, .result-card li {
+    font-size: 14px;
+    color: #c8c4bb;
+    line-height: 1.75;
+  }
+
+  .result-card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .result-card li {
+    padding: 10px 14px;
+    border-radius: 6px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .li-icon { flex-shrink: 0; margin-top: 1px; }
+
+  /* Red flags */
+  .flag-item {
+    background: rgba(224, 92, 92, 0.08);
+    border: 1px solid rgba(224, 92, 92, 0.2);
+  }
+
+  .flag-item .li-icon { color: var(--red); }
+
+  /* Missing clauses */
+  .missing-item {
+    background: rgba(91, 155, 213, 0.08);
+    border: 1px solid rgba(91, 155, 213, 0.2);
+  }
+
+  .missing-item .li-icon { color: var(--blue); }
+
+  /* Key terms */
+  .terms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+  }
+
+  .term-chip {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+  }
+
+  .term-chip .term-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  .term-chip .term-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  /* Score badge */
+  .score-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .score-good { background: rgba(92, 184, 138, 0.15); color: var(--green); border: 1px solid rgba(92, 184, 138, 0.3); }
+  .score-warn { background: rgba(232, 201, 109, 0.15); color: var(--accent); border: 1px solid rgba(232, 201, 109, 0.3); }
+  .score-bad { background: rgba(224, 92, 92, 0.15); color: var(--red); border: 1px solid rgba(224, 92, 92, 0.3); }
+
+  .reset-btn {
+    display: block;
+    margin: 24px auto 0;
+    padding: 10px 24px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .reset-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Drop zone */
+  .drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 16px;
+    background: var(--bg);
+    position: relative;
+  }
+
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--accent);
+    background: rgba(232, 201, 109, 0.04);
+  }
+
+  .drop-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .drop-zone-icon { font-size: 28px; margin-bottom: 8px; }
+
+  .drop-zone-text {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .drop-zone-text strong { color: var(--accent); font-weight: 600; }
+
+  .drop-zone-meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+    opacity: 0.6;
+  }
+
+  .file-loaded {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(92, 184, 138, 0.08);
+    border: 1px solid rgba(92, 184, 138, 0.25);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--green);
+    margin-bottom: 12px;
+  }
+
+  .file-loaded button {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0 2px;
+  }
+
+  .file-loaded button:hover { color: var(--red); }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 4px 0 12px;
+    color: var(--muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+
+  .error-msg {
+    display: none;
+    background: rgba(224, 92, 92, 0.1);
+    border: 1px solid rgba(224, 92, 92, 0.3);
+    border-radius: 8px;
+    padding: 14px 18px;
+    color: var(--red);
+    font-size: 14px;
+    margin-top: 12px;
+  }
+
+  .error-msg.visible { display: block; }
+
+  @keyframes fadeDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: none; } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Disclaimer */
+  .disclaimer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 40px;
+    opacity: 0.6;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="logo">
+      <div class="logo-icon">⚖️</div>
+      <div class="logo-text">Lease<span>Guard</span></div>
+    </div>
+    <p>Drop a file or paste your rental/lease agreement and get an instant plain-English breakdown — red flags, missing clauses, and key terms included.</p>
+  </header>
+
+  <div class="input-card" id="inputSection">
+
+    <!-- Drop Zone -->
+    <label class="input-label">Upload your contract</label>
+    <div class="drop-zone" id="dropZone">
+      <input type="file" id="fileInput" accept=".pdf,.txt,.doc,.docx" onchange="handleFileSelect(event)">
+      <div class="drop-zone-icon">📄</div>
+      <div class="drop-zone-text"><strong>Drop a file here</strong> or click to browse</div>
+      <div class="drop-zone-meta">Supports PDF, TXT, DOC, DOCX</div>
+    </div>
+
+    <div class="file-loaded" id="fileLoaded" style="display:none">
+      <span>📎</span>
+      <span id="fileName"></span>
+      <button onclick="clearFile()" title="Remove file">✕</button>
+    </div>
+
+    <div class="divider">or</div>
+
+    <label class="input-label" for="contractText">Paste text manually</label>
+    <textarea id="contractText" placeholder="Paste the full text of your lease or rental agreement here..."></textarea>
+    <div class="error-msg" id="errorMsg"></div>
+    <button class="analyze-btn" id="analyzeBtn" onclick="analyzeContract()">
+      <span>🔍</span> Analyze Contract
+    </button>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Analyzing your lease agreement…</p>
+  </div>
+
+  <div class="results" id="results">
+    <!-- Summary -->
+    <div class="section-title">Overview</div>
+    <div class="result-card" id="summaryCard">
+      <h3>
+        📋 Plain English Summary
+        <span class="score-badge" id="scoreBadge"></span>
+      </h3>
+      <p id="summaryText"></p>
+    </div>
+
+    <!-- Key Terms -->
+    <div class="section-title">Key Terms</div>
+    <div class="result-card">
+      <h3>🔑 Key Terms Extracted</h3>
+      <div class="terms-grid" id="termsGrid"></div>
+    </div>
+
+    <!-- Red Flags -->
+    <div class="section-title">Red Flags</div>
+    <div class="result-card">
+      <h3>🚩 Red Flags</h3>
+      <ul id="flagsList"></ul>
+    </div>
+
+    <!-- Missing Clauses -->
+    <div class="section-title">Missing Clauses</div>
+    <div class="result-card">
+      <h3>⚠️ Missing or Unclear Clauses</h3>
+      <ul id="missingList"></ul>
+    </div>
+
+    <button class="reset-btn" onclick="resetApp()">← Analyze another contract</button>
+  </div>
+
+  <p class="disclaimer">LeaseGuard is not a law firm and does not provide legal advice. Always consult a qualified attorney for legal matters.</p>
+</div>
+
+<script>
+// ── File handling ──────────────────────────────────────────
+const dropZone = document.getElementById('dropZone');
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+});
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) processFile(file);
+}
+
+async function processFile(file) {
+  const errorMsg = document.getElementById('errorMsg');
+  errorMsg.classList.remove('visible');
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  try {
+    let text = '';
+
+    if (ext === 'txt') {
+      text = await file.text();
+    } else if (ext === 'pdf') {
+      text = await extractPdfText(file);
+    } else if (ext === 'doc' || ext === 'docx') {
+      // For doc/docx just read as text (basic extraction)
+      text = await file.text();
+    } else {
+      errorMsg.textContent = 'Unsupported file type. Please use PDF, TXT, DOC, or DOCX.';
+      errorMsg.classList.add('visible');
+      return;
+    }
+
+    if (!text || text.trim().length < 50) {
+      errorMsg.textContent = 'Could not extract enough text from this file. Try pasting the text manually.';
+      errorMsg.classList.add('visible');
+      return;
+    }
+
+    document.getElementById('contractText').value = text.trim();
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileLoaded').style.display = 'flex';
+    dropZone.style.display = 'none';
+
+  } catch (err) {
+    errorMsg.textContent = 'Failed to read this file. Try pasting the text manually.';
+    errorMsg.classList.add('visible');
+  }
+}
+
+async function extractPdfText(file) {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let fullText = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    fullText += content.items.map(item => item.str).join(' ') + '\n';
+  }
+  return fullText;
+}
+
+function clearFile() {
+  document.getElementById('contractText').value = '';
+  document.getElementById('fileLoaded').style.display = 'none';
+  document.getElementById('dropZone').style.display = 'block';
+  document.getElementById('fileInput').value = '';
+}
+
+// ── Analysis ───────────────────────────────────────────────
+async function analyzeContract() {
+  const text = document.getElementById('contractText').value.trim();
+  const errorMsg = document.getElementById('errorMsg');
+  errorMsg.classList.remove('visible');
+
+  if (!text || text.length < 50) {
+    errorMsg.textContent = 'Please upload a file or paste a lease agreement to analyze.';
+    errorMsg.classList.add('visible');
+    return;
+  }
+
+  document.getElementById('inputSection').style.display = 'none';
+  document.getElementById('loading').classList.add('visible');
+  document.getElementById('results').classList.remove('visible');
+
+  const systemPrompt = `You are a rental/lease contract analyst. Analyze the provided lease or rental agreement and return a JSON object with the following structure:
+
+{
+  "summary": "A 3-4 sentence plain English summary of the overall contract.",
+  "score": "good|warn|bad",
+  "scoreLabel": "Tenant-Friendly|Review Carefully|Concerning",
+  "keyTerms": [
+    {"label": "Monthly Rent", "value": "$X"},
+    {"label": "Lease Term", "value": "X months"},
+    {"label": "Security Deposit", "value": "$X"},
+    {"label": "Move-in Date", "value": "..."},
+    {"label": "Late Fee", "value": "..."},
+    {"label": "Pet Policy", "value": "..."}
+  ],
+  "redFlags": [
+    "Description of red flag 1",
+    "Description of red flag 2"
+  ],
+  "missingClauses": [
+    "Description of missing or vague clause 1",
+    "Description of missing or vague clause 2"
+  ]
+}
+
+Be thorough but concise. Red flags are clauses that are unusual, one-sided, or could harm the tenant. Missing clauses are standard protections that should be in every lease but aren't clearly stated. Return ONLY valid JSON, no other text.`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: `Analyze this lease agreement:\n\n${text.slice(0, 12000)}` }]
+      })
+    });
+
+    const data = await response.json();
+    const raw = data.content?.[0]?.text || '';
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(clean);
+    renderResults(result);
+  } catch (err) {
+    document.getElementById('loading').classList.remove('visible');
+    document.getElementById('inputSection').style.display = 'block';
+    errorMsg.textContent = 'Something went wrong analyzing the contract. Please try again.';
+    errorMsg.classList.add('visible');
+  }
+}
+
+function renderResults(data) {
+  document.getElementById('loading').classList.remove('visible');
+
+  document.getElementById('summaryText').textContent = data.summary;
+
+  const badge = document.getElementById('scoreBadge');
+  badge.textContent = data.scoreLabel;
+  badge.className = 'score-badge';
+  if (data.score === 'good') badge.classList.add('score-good');
+  else if (data.score === 'warn') badge.classList.add('score-warn');
+  else badge.classList.add('score-bad');
+
+  const termsGrid = document.getElementById('termsGrid');
+  termsGrid.innerHTML = '';
+  (data.keyTerms || []).forEach(t => {
+    const chip = document.createElement('div');
+    chip.className = 'term-chip';
+    chip.innerHTML = `<div class="term-label">${t.label}</div><div class="term-value">${t.value}</div>`;
+    termsGrid.appendChild(chip);
+  });
+
+  const flagsList = document.getElementById('flagsList');
+  flagsList.innerHTML = '';
+  if (data.redFlags?.length) {
+    data.redFlags.forEach(f => {
+      const li = document.createElement('li');
+      li.className = 'flag-item';
+      li.innerHTML = `<span class="li-icon">⚑</span><span>${f}</span>`;
+      flagsList.appendChild(li);
+    });
+  } else {
+    flagsList.innerHTML = '<li style="color: var(--green)">✓ No significant red flags found.</li>';
+  }
+
+  const missingList = document.getElementById('missingList');
+  missingList.innerHTML = '';
+  if (data.missingClauses?.length) {
+    data.missingClauses.forEach(m => {
+      const li = document.createElement('li');
+      li.className = 'missing-item';
+      li.innerHTML = `<span class="li-icon">○</span><span>${m}</span>`;
+      missingList.appendChild(li);
+    });
+  } else {
+    missingList.innerHTML = '<li style="color: var(--green)">✓ All standard clauses appear to be present.</li>';
+  }
+
+  document.getElementById('results').classList.add('visible');
+}
+
+function resetApp() {
+  document.getElementById('results').classList.remove('visible');
+  document.getElementById('inputSection').style.display = 'block';
+  document.getElementById('contractText').value = '';
+  clearFile();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

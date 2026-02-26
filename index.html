@@ -753,7 +753,18 @@
     <p class="auth-sub" id="authSub">Sign up to save your analyses and manage credits</p>
     <div class="auth-error" id="authError"></div>
     <input class="auth-input" type="email" id="authEmail" placeholder="Email address">
+    <input class="auth-input" type="tel" id="authPhone" placeholder="Phone number (optional)" style="display:none;">
     <input class="auth-input" type="password" id="authPassword" placeholder="Password">
+    <div id="signupExtra" style="display:none;">
+      <input class="auth-input" type="password" id="authPasswordConfirm" placeholder="Confirm password">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.6;">
+        Password must be at least 8 characters, include one capital letter and one symbol (!@#$%^&*).
+      </div>
+      <label style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--muted);cursor:pointer;margin-bottom:16px;">
+        <input type="checkbox" id="emailOptIn" style="margin-top:2px;accent-color:var(--accent);">
+        <span>I agree to receive product updates and tips by email. You can unsubscribe at any time.</span>
+      </label>
+    </div>
     <button class="auth-submit-btn" id="authSubmitBtn" onclick="submitAuth()">Create Account</button>
     <div class="auth-switch" id="authSwitch">Already have an account? <a onclick="toggleAuthMode()">Log in</a></div>
   </div>
@@ -1005,11 +1016,21 @@ function showAuth(mode) {
   document.getElementById('authSubmitBtn').textContent = isLogin ? 'Log In' : 'Create Account';
   document.getElementById('authSwitch').innerHTML = isLogin ? "Don't have an account? <a onclick=\"toggleAuthMode()\">Sign up</a>" : "Already have an account? <a onclick=\"toggleAuthMode()\">Log in</a>";
   document.getElementById('authError').classList.remove('visible');
+  // Show/hide signup-only fields
+  document.getElementById('signupExtra').style.display = isLogin ? 'none' : 'block';
+  document.getElementById('authPhone').style.display = isLogin ? 'none' : 'block';
   document.getElementById('authModal').classList.add('visible');
 }
 
 function toggleAuthMode() {
   showAuth(authMode === 'signup' ? 'login' : 'signup');
+}
+
+function validatePassword(pw) {
+  if (pw.length < 8) return 'Password must be at least 8 characters.';
+  if (!/[A-Z]/.test(pw)) return 'Password must include at least one capital letter.';
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pw)) return 'Password must include at least one symbol (!@#$%^&*).';
+  return null;
 }
 
 async function submitAuth() {
@@ -1025,14 +1046,32 @@ async function submitAuth() {
     return;
   }
 
+  if (authMode === 'signup') {
+    const pwError = validatePassword(password);
+    if (pwError) {
+      errEl.textContent = pwError;
+      errEl.classList.add('visible');
+      return;
+    }
+    const confirm = document.getElementById('authPasswordConfirm').value;
+    if (password !== confirm) {
+      errEl.textContent = 'Passwords do not match.';
+      errEl.classList.add('visible');
+      return;
+    }
+  }
+
   btn.textContent = 'Please wait...';
   btn.disabled = true;
+
+  const phone = authMode === 'signup' ? document.getElementById('authPhone').value.trim() : null;
+  const emailOptIn = authMode === 'signup' ? document.getElementById('emailOptIn').checked : null;
 
   try {
     const res = await fetch('/api/auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: authMode, email, password })
+      body: JSON.stringify({ action: authMode, email, password, phone, emailOptIn })
     });
     const data = await res.json();
 

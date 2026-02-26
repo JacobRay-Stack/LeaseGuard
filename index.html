@@ -427,6 +427,70 @@
   @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+
+  /* Paywall Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.visible { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+  }
+  .modal h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    margin-bottom: 12px;
+  }
+  .modal p { color: var(--muted); font-size: 14px; margin-bottom: 24px; line-height: 1.6; }
+  .modal .price { font-size: 32px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+  .modal .price-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+  .pay-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: #0e0f11;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 10px;
+  }
+  .pay-btn:hover { background: var(--accent2); }
+  .usage-counter {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .usage-dots {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 6px;
+  }
+  .usage-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+  .usage-dot.used { background: var(--accent); }
+
   /* Disclaimer */
   .disclaimer {
     text-align: center;
@@ -468,6 +532,10 @@
 
     <label class="input-label" for="contractText">Paste text manually</label>
     <textarea id="contractText" placeholder="Paste the full text of your contract here..."></textarea>
+    <div class="usage-counter" id="usageCounter">
+      <div class="usage-dots" id="usageDots"></div>
+      <span id="usageText"></span>
+    </div>
     <div class="error-msg" id="errorMsg"></div>
     <button class="analyze-btn" id="analyzeBtn" onclick="analyzeContract()">
       <span>🔍</span> Analyze Contract
@@ -514,11 +582,112 @@
     <button class="reset-btn" onclick="resetApp()">← Analyze another contract</button>
   </div>
 
+
+  <!-- Paywall Modal -->
+  <div class="modal-overlay" id="paywallModal">
+    <div class="modal">
+      <div style="font-size:36px;margin-bottom:12px">🔒</div>
+      <h2>You've used your 3 free analyses</h2>
+      <p>Get 5 more contract analyses for a one-time payment. No subscription, no account required.</p>
+      <div class="price">$4.99</div>
+      <div class="price-sub">5 analyses · one-time payment</div>
+      <button class="pay-btn" onclick="startCheckout()">Pay with Card →</button>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">Secured by Stripe</div>
+    </div>
+  </div>
+
   <p class="disclaimer">AnalyzeThisContract is not a law firm and does not provide legal advice. Always consult a qualified attorney for legal matters.</p>
 </div>
 
 <script>
-// ── File handling ──────────────────────────────────────────
+// ── Usage tracking ─────────────────────────────────────────
+const FREE_LIMIT = 3;
+const PAID_CREDITS = 5;
+
+function getUsage() {
+  try {
+    return JSON.parse(localStorage.getItem('atc_usage') || '{"free":0,"paid":0}');
+  } catch(e) { return {free:0, paid:0}; }
+}
+
+function saveUsage(u) {
+  localStorage.setItem('atc_usage', JSON.stringify(u));
+}
+
+function getRemainingAnalyses() {
+  const u = getUsage();
+  if (u.paid > 0) return { type: 'paid', remaining: u.paid };
+  return { type: 'free', remaining: Math.max(0, FREE_LIMIT - u.free) };
+}
+
+function incrementUsage() {
+  const u = getUsage();
+  if (u.paid > 0) { u.paid--; }
+  else { u.free++; }
+  saveUsage(u);
+}
+
+function updateUsageUI() {
+  const { type, remaining } = getRemainingAnalyses();
+  const u = getUsage();
+  const dots = document.getElementById('usageDots');
+  const text = document.getElementById('usageText');
+  if (!dots) return;
+
+  dots.innerHTML = '';
+  const total = type === 'paid' ? PAID_CREDITS : FREE_LIMIT;
+  const used = total - remaining;
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 'usage-dot' + (i < used ? ' used' : '');
+    dots.appendChild(d);
+  }
+  if (remaining === 0) {
+    text.textContent = 'No analyses remaining';
+    text.style.color = 'var(--red)';
+  } else {
+    text.textContent = `${remaining} free ${remaining === 1 ? 'analysis' : 'analyses'} remaining`;
+    text.style.color = '';
+  }
+}
+
+// Check for successful payment on page load
+window.addEventListener('load', () => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('paid') === 'true') {
+    const u = getUsage();
+    u.paid = (u.paid || 0) + PAID_CREDITS;
+    saveUsage(u);
+    window.history.replaceState({}, '', window.location.pathname);
+    showToast('Payment successful! You have 5 analyses ready.');
+  }
+  updateUsageUI();
+});
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;z-index:200;';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+async function startCheckout() {
+  const btn = document.querySelector('.pay-btn');
+  btn.textContent = 'Redirecting...';
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+    else { btn.textContent = 'Pay with Card →'; btn.disabled = false; }
+  } catch(e) {
+    btn.textContent = 'Pay with Card →';
+    btn.disabled = false;
+  }
+}
+
+// ── File handling ────────────────────────────────────────── ──────────────────────────────────────────
 const dropZone = document.getElementById('dropZone');
 
 dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
@@ -598,6 +767,13 @@ async function analyzeContract() {
   const errorMsg = document.getElementById('errorMsg');
   errorMsg.classList.remove('visible');
 
+  // Check usage limit
+  const { remaining } = getRemainingAnalyses();
+  if (remaining <= 0) {
+    document.getElementById('paywallModal').classList.add('visible');
+    return;
+  }
+
   if (!text || text.length < 50) {
     errorMsg.textContent = 'Please upload a file or paste a lease agreement to analyze.';
     errorMsg.classList.add('visible');
@@ -617,6 +793,8 @@ async function analyzeContract() {
 
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Analysis failed');
+    incrementUsage();
+    updateUsageUI();
     renderResults(result);
   } catch (err) {
     document.getElementById('loading').classList.remove('visible');

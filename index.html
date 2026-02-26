@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LeaseGuard — Rental Contract Analyzer</title>
+<title>AnalyzeThisContract — AI Contract Analyzer</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>if (typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
@@ -442,15 +442,15 @@
   <header>
     <div class="logo">
       <div class="logo-icon">⚖️</div>
-      <div class="logo-text">Lease<span>Guard</span></div>
+      <div class="logo-text">Analyze<span>ThisContract</span></div>
     </div>
-    <p>Drop a file or paste your rental/lease agreement and get an instant plain-English breakdown — red flags, missing clauses, and key terms included.</p>
+    <p>Drop any contract and get an instant plain-English breakdown — red flags, missing clauses, and key terms included.</p>
   </header>
 
   <div class="input-card" id="inputSection">
 
     <!-- Drop Zone -->
-    <label class="input-label">Upload your contract</label>
+    <label class="input-label">Upload your contract (PDF, TXT, DOC, DOCX)</label>
     <div class="drop-zone" id="dropZone">
       <input type="file" id="fileInput" accept=".pdf,.txt,.doc,.docx" onchange="handleFileSelect(event)">
       <div class="drop-zone-icon">📄</div>
@@ -467,7 +467,7 @@
     <div class="divider">or</div>
 
     <label class="input-label" for="contractText">Paste text manually</label>
-    <textarea id="contractText" placeholder="Paste the full text of your lease or rental agreement here..."></textarea>
+    <textarea id="contractText" placeholder="Paste the full text of your contract here..."></textarea>
     <div class="error-msg" id="errorMsg"></div>
     <button class="analyze-btn" id="analyzeBtn" onclick="analyzeContract()">
       <span>🔍</span> Analyze Contract
@@ -476,7 +476,7 @@
 
   <div class="loading" id="loading">
     <div class="spinner"></div>
-    <p>Analyzing your lease agreement…</p>
+    <p>Analyzing your contract…</p>
   </div>
 
   <div class="results" id="results">
@@ -514,7 +514,7 @@
     <button class="reset-btn" onclick="resetApp()">← Analyze another contract</button>
   </div>
 
-  <p class="disclaimer">LeaseGuard is not a law firm and does not provide legal advice. Always consult a qualified attorney for legal matters.</p>
+  <p class="disclaimer">AnalyzeThisContract is not a law firm and does not provide legal advice. Always consult a qualified attorney for legal matters.</p>
 </div>
 
 <script>

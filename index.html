@@ -692,6 +692,14 @@
 
   /* Top nav */
   .top-nav { display: flex; gap: 10px; }
+  .header { position: relative; }
+  .header-nav {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    gap: 10px;
+  }
   .nav-btn {
     padding: 7px 16px;
     border-radius: 7px;
@@ -757,8 +765,7 @@
       <div class="logo-icon">⚖️</div>
       <div class="logo-text">Analyze<span>ThisContract</span></div>
     </div>
-    </div>
-    <p style="order:3;width:100%;text-align:center;">Drop any contract and get an instant plain-English breakdown — red flags, missing clauses, and key terms included.</p>
+    <p>Drop any contract and get an instant plain-English breakdown — red flags, missing clauses, and key terms included.</p>
   </header>
 
   <div class="input-card" id="inputSection">

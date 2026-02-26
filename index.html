@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AnalyzeThisContract — AI Contract Analyzer</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>if (typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
 <style>
@@ -433,30 +433,142 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.85);
     z-index: 100;
     align-items: center;
     justify-content: center;
+    padding: 20px;
   }
   .modal-overlay.visible { display: flex; }
   .modal {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 36px;
-    max-width: 420px;
-    width: 90%;
-    text-align: center;
+    background: #fff;
+    border-radius: 16px;
+    max-width: 500px;
+    width: 100%;
+    overflow: hidden;
     position: relative;
+    font-family: 'Inter', sans-serif;
+    color: #1a1a2e;
   }
-  .modal h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 22px;
-    margin-bottom: 12px;
+  .modal-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 4px;
+    z-index: 10;
   }
-  .modal p { color: var(--muted); font-size: 14px; margin-bottom: 24px; line-height: 1.6; }
-  .modal .price { font-size: 32px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
-  .modal .price-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+  .modal-top-bar {
+    background: #1a1a2e;
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-top-bar h2 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+  }
+  .modal-top-badge {
+    background: #e8c96d;
+    color: #1a1a2e;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .modal-body { padding: 24px 28px; }
+  .modal-comparison {
+    background: #f8f8fa;
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    flex-wrap: wrap;
+  }
+  .modal-comparison .vs-bad { color: #e05c5c; font-weight: 700; }
+  .modal-comparison .vs-sep { color: #aaa; }
+  .modal-comparison .vs-good { color: #2a7d4f; font-weight: 700; }
+  .modal-plans {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .modal-plan {
+    border-radius: 10px;
+    padding: 18px;
+    border: 2px solid #e8e8f0;
+  }
+  .modal-plan.pro { border-color: #1a1a2e; }
+  .modal-plan-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #8a8f9e;
+    margin-bottom: 8px;
+  }
+  .modal-plan.pro .modal-plan-badge { color: #1a1a2e; }
+  .modal-plan .plan-price {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 2px;
+  }
+  .modal-plan .plan-price span { font-size: 12px; font-weight: 400; color: #8a8f9e; }
+  .modal-plan .plan-features {
+    list-style: none;
+    margin: 10px 0 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .modal-plan .plan-features li {
+    font-size: 12px;
+    color: #555;
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+  }
+  .modal-plan .plan-features li::before { content: '✓'; color: #2a7d4f; font-weight: 700; flex-shrink: 0; }
+  .modal-plan .plan-btn {
+    width: 100%;
+    padding: 11px;
+    border: none;
+    border-radius: 7px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .modal-plan .plan-btn.basic { background: #f0f0f5; color: #555; }
+  .modal-plan .plan-btn.basic:hover { background: #e4e4ec; }
+  .modal-plan .plan-btn.pro-btn { background: #1a1a2e; color: #fff; }
+  .modal-plan .plan-btn.pro-btn:hover { background: #2a2a4e; }
+  .modal-trust {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    font-size: 11px;
+    color: #aaa;
+    padding-bottom: 4px;
+  }
   .pay-btn {
     width: 100%;
     padding: 14px;
@@ -587,14 +699,43 @@
   <!-- Paywall Modal -->
   <div class="modal-overlay" id="paywallModal">
     <div class="modal">
-      <button onclick="document.getElementById('paywallModal').classList.remove('visible')" style="position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;">✕</button>
-      <div style="font-size:36px;margin-bottom:12px">⚖️</div>
-      <h2>Your 3 free analyses are up</h2>
-      <p>Lawyers charge $300/hr to review contracts. We charge $4.99 for 5 unlimited AI-powered analyses — red flags, missing clauses, and plain-English summaries included.</p>
-      <div class="price">$4.99</div>
-      <div class="price-sub">5 analyses · one-time · no subscription</div>
-      <button class="pay-btn" onclick="startCheckout()">Unlock 5 Analyses →</button>
-      <div style="font-size:12px;color:var(--muted);margin-top:8px">Secured by Stripe · Instant access after payment</div>
+      <button class="modal-close" onclick="document.getElementById('paywallModal').classList.remove('visible')">✕</button>
+      <div class="modal-top-bar">
+        <h2>Unlock Full Access</h2>
+        <span class="modal-top-badge">Lawyers charge $300/hr</span>
+      </div>
+      <div class="modal-body">
+        <div class="modal-comparison">
+          <span class="vs-bad">Lawyer review: $300–$500</span>
+          <span class="vs-sep">vs</span>
+          <span class="vs-good">AnalyzeThisContract: $4.99</span>
+        </div>
+        <div class="modal-plans">
+          <div class="modal-plan">
+            <div class="modal-plan-badge">Basic</div>
+            <div class="plan-price">$4.99 <span>one-time</span></div>
+            <ul class="plan-features">
+              <li>5 analyses</li>
+              <li>Red flags flagged</li>
+              <li>Key terms extracted</li>
+              <li>Plain English summary</li>
+            </ul>
+            <button class="plan-btn basic" onclick="startCheckout('basic')">Get Basic</button>
+          </div>
+          <div class="modal-plan pro">
+            <div class="modal-plan-badge">Pro — Most Popular</div>
+            <div class="plan-price">$9.99 <span>/mo</span></div>
+            <ul class="plan-features">
+              <li>Unlimited analyses</li>
+              <li>Ask AI questions</li>
+              <li>Negotiation suggestions</li>
+              <li>PDF export & history</li>
+            </ul>
+            <button class="plan-btn pro-btn" onclick="startCheckout('pro')">Start Pro →</button>
+          </div>
+        </div>
+        <div class="modal-trust">🔒 Stripe &nbsp;·&nbsp; ✓ No hidden fees &nbsp;·&nbsp; ↩ Cancel anytime</div>
+      </div>
     </div>
   </div>
 
@@ -658,10 +799,17 @@ window.addEventListener('load', () => {
   const params = new URLSearchParams(window.location.search);
   if (params.get('paid') === 'true') {
     const u = getUsage();
-    u.paid = (u.paid || 0) + PAID_CREDITS;
+    const plan = params.get('plan') || 'basic';
+    if (plan === 'pro') {
+      u.pro = true;
+      u.paid = 9999;
+      showToast('Pro plan activated! You have unlimited analyses.');
+    } else {
+      u.paid = (u.paid || 0) + PAID_CREDITS;
+      showToast('Payment successful! You have 5 analyses ready.');
+    }
     saveUsage(u);
     window.history.replaceState({}, '', window.location.pathname);
-    showToast('Payment successful! You have 5 analyses ready.');
   }
   updateUsageUI();
 });
@@ -674,17 +822,22 @@ function showToast(msg) {
   setTimeout(() => t.remove(), 4000);
 }
 
-async function startCheckout() {
-  const btn = document.querySelector('.pay-btn');
+async function startCheckout(plan) {
+  const btn = event.target;
+  const origText = btn.textContent;
   btn.textContent = 'Redirecting...';
   btn.disabled = true;
   try {
-    const res = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    const res = await fetch('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan: plan || 'basic' })
+    });
     const data = await res.json();
     if (data.url) window.location.href = data.url;
-    else { btn.textContent = 'Pay with Card →'; btn.disabled = false; }
+    else { btn.textContent = origText; btn.disabled = false; }
   } catch(e) {
-    btn.textContent = 'Pay with Card →';
+    btn.textContent = origText;
     btn.disabled = false;
   }
 }

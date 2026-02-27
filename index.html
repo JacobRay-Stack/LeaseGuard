@@ -1654,6 +1654,151 @@ async function submitAuth() {
   }
 }
 
+// ── PASTE THESE FUNCTIONS INTO index.html, REPLACING THE EXISTING VERSIONS ──
+
+// Ensures authToken is valid before any API call.
+// Returns true if we have a good token (or no token = anonymous), false if we
+// had a token but it's dead and refresh also failed.
+async function ensureFreshToken() {
+  if (!authToken) return true; // anonymous — fine
+
+  // Quick check: try to decode the JWT exp claim without a library
+  try {
+    const payload = JSON.parse(atob(authToken.split('.')[1]));
+    const expiresIn = payload.exp - Math.floor(Date.now() / 1000);
+    if (expiresIn > 60) return true; // still has > 1 min — no refresh needed
+  } catch (e) {
+    // Malformed token — fall through to refresh attempt
+  }
+
+  // Token is expired or close to it — try to refresh
+  const refreshed = await refreshAuthToken();
+  if (!refreshed) {
+    // Refresh failed — clear the dead session and go anonymous
+    console.warn('[auth] Token refresh failed — clearing session');
+    clearAuth();
+    await updateNavForUser();
+    return false; // caller should decide whether to show login prompt
+  }
+  return true;
+}
+
+async function analyzeContract() {
+  const text = document.getElementById('contractText').value.trim();
+  const errorMsg = document.getElementById('errorMsg');
+  errorMsg.classList.remove('visible');
+
+  if (!text || text.length < 50) {
+    errorMsg.textContent = 'Please upload a file or paste a lease agreement to analyze.';
+    errorMsg.classList.add('visible');
+    return;
+  }
+
+  // ── Ensure token is fresh BEFORE anything else ──────────────────
+  await ensureFreshToken();
+
+  // ── Check usage / credits ────────────────────────────────────────
+  if (authToken) {
+    try {
+      let res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'getCredits', token: authToken })
+      });
+
+      // Token went bad between the refresh check and now — try once more
+      if (res.status === 401) {
+        const refreshed = await refreshAuthToken();
+        if (!refreshed) {
+          clearAuth();
+          await updateNavForUser();
+          // Fall through as anonymous
+        } else {
+          res = await fetch('/api/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'getCredits', token: authToken })
+          });
+        }
+      }
+
+      if (res.ok) {
+        const credits = await res.json();
+        if (credits.plan !== 'pro' && credits.credits <= 0) {
+          document.getElementById('paywallModal').classList.add('visible');
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('[analyze] Credit pre-check failed, proceeding:', e.message);
+    }
+  } else {
+    // Anonymous path
+    const { remaining } = getRemainingAnalyses();
+    if (remaining <= 0) {
+      document.getElementById('paywallModal').classList.add('visible');
+      return;
+    }
+  }
+
+  document.getElementById('inputSection').style.display = 'none';
+  document.getElementById('loading').classList.add('visible');
+  document.getElementById('results').classList.remove('visible');
+
+  try {
+    const response = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contractText: text, token: authToken || null })
+    });
+
+    const result = await response.json();
+
+    if (response.status === 401) {
+      // Session expired mid-flight
+      document.getElementById('loading').classList.remove('visible');
+      document.getElementById('inputSection').style.display = 'block';
+      clearAuth();
+      await updateNavForUser();
+      showAuth('login');
+      return;
+    }
+
+    if (response.status === 403 && result.code === 'NO_CREDITS') {
+      document.getElementById('loading').classList.remove('visible');
+      document.getElementById('inputSection').style.display = 'block';
+      document.getElementById('paywallModal').classList.add('visible');
+      return;
+    }
+
+    if (!response.ok) throw new Error(result.error || 'Analysis failed');
+
+    if (!authToken) {
+      incrementUsage();
+      updateUsageUI();
+    } else {
+      await updateNavForUser();
+    }
+
+    renderResults(result);
+
+    const subtitle = document.getElementById('headerSubtitle');
+    if (subtitle) subtitle.style.display = 'none';
+
+    if (authToken) {
+      autoSaveAnalysis(result, text);
+    } else {
+      setTimeout(() => showSaveNudge(), 1500);
+    }
+  } catch (err) {
+    document.getElementById('loading').classList.remove('visible');
+    document.getElementById('inputSection').style.display = 'block';
+    errorMsg.textContent = 'Something went wrong analyzing the contract. Please try again.';
+    errorMsg.classList.add('visible');
+    console.error('[analyze] fetch error:', err.message);
+  }
+}
+
 async function updateNavForUser() {
   const nav = document.getElementById('topNav');
   if (!authToken || !currentUser) {
@@ -1667,9 +1812,12 @@ async function updateNavForUser() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'getCredits', token: authToken })
     });
+
     if (res.status === 401) {
       const refreshed = await refreshAuthToken();
       if (!refreshed) {
+        // Hard logout — don't leave a zombie "Pro" session in the nav
+        clearAuth();
         nav.innerHTML = '<button class="nav-btn" onclick="showAuth(\'login\')">Log In</button><button class="nav-btn primary" onclick="showAuth(\'signup\')">Sign Up</button>';
         return;
       }
@@ -1679,27 +1827,30 @@ async function updateNavForUser() {
         body: JSON.stringify({ action: 'getCredits', token: authToken })
       });
     }
+
     const credits = await res.json();
 
-    // Sync localStorage with DB credits to avoid mismatch
     if (credits && !credits.error) {
       const u = getUsage();
       if (credits.plan === 'pro') {
         u.pro = true; u.paid = 9999;
       } else {
-        u.pro = false;
-        u.paid = 0;
+        u.pro = false; u.paid = 0;
         u.free = Math.max(0, 3 - (credits.credits || 0));
       }
       saveUsage(u);
     }
 
-    const label = credits.plan === 'pro' ? '✦ Pro — Unlimited' : `${credits.credits} ${credits.credits === 1 ? 'analysis' : 'analyses'} left`;
+    const label = credits.plan === 'pro'
+      ? '✦ Pro — Unlimited'
+      : `${credits.credits} ${credits.credits === 1 ? 'analysis' : 'analyses'} left`;
     const email = currentUser.email || '';
     const isPaid = credits.plan === 'pro' || credits.plan === 'basic';
     const historyBtn = isPaid ? `<button class="nav-btn history" onclick="openDashboard()">📁 History</button>` : '';
     nav.innerHTML = `<div class="user-nav"><span title="${email}">${email}</span><span class="credit-badge">${label}</span>${historyBtn}<button class="nav-btn" onclick="logout()">Log Out</button></div>`;
-  } catch(e) {
+
+  } catch (e) {
+    // Network error — show what we know but don't clear auth
     nav.innerHTML = `<div class="user-nav"><span>${currentUser.email}</span><button class="nav-btn" onclick="logout()">Log Out</button></div>`;
   }
 }

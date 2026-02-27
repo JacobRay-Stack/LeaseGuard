@@ -82,20 +82,28 @@ async function consumeCredit(userId) {
       null
     );
 
-    // RPC raises an exception → Supabase returns { code, message, ... }
-    if (rpcResult && rpcResult.message === 'NO_CREDITS') {
+    // PGRST202 = function not found (RPC not yet deployed) → use fallback
+    if (rpcResult && rpcResult.code === 'PGRST202') {
+      console.warn('[analyze] decrement_credit RPC not deployed, using fallback');
+      // fall through to legacy path below
+    }
+    // NO_CREDITS raised by the function itself
+    else if (rpcResult && rpcResult.message === 'NO_CREDITS') {
       return { ok: false, reason: 'no_credits' };
     }
-    if (rpcResult && rpcResult.code) {
-      // Unexpected DB error
-      return { ok: false, reason: 'db_error', detail: rpcResult.message };
+    // Any other Supabase/Postgres error code that isn't "function not found"
+    else if (rpcResult && rpcResult.code) {
+      console.warn('[analyze] RPC error, using fallback:', rpcResult.code, rpcResult.message);
+      // fall through to legacy path below
     }
-
-    const row = Array.isArray(rpcResult) ? rpcResult[0] : rpcResult;
-    return { ok: true, plan: row?.plan, credits: row?.credits };
+    // Success
+    else {
+      const row = Array.isArray(rpcResult) ? rpcResult[0] : rpcResult;
+      return { ok: true, plan: row?.plan, credits: row?.credits };
+    }
   } catch (rpcErr) {
-    // RPC not yet deployed — fall through to legacy path
-    console.warn('[analyze] decrement_credit RPC unavailable, using fallback:', rpcErr.message);
+    // Network-level error — fall through to legacy path
+    console.warn('[analyze] decrement_credit RPC threw, using fallback:', rpcErr.message);
   }
 
   // ── Fallback: non-atomic read + write (existing behaviour) ─────────

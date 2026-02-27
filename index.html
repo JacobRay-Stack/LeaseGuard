@@ -1936,7 +1936,29 @@ async function copyResults() {
   setTimeout(() => { btn.innerHTML = '&#128203; Copy to clipboard'; btn.classList.remove('copied'); }, 2500);
 }
 
-function downloadPDF() {
+async function downloadPDF() {
+  // Must be logged in and on a paid plan
+  if (!authToken) {
+    showAuth('signup');
+    return;
+  }
+  try {
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'getCredits', token: authToken })
+    });
+    const credits = await res.json();
+    const isPaid = credits.plan === 'pro' || credits.plan === 'basic';
+    if (!isPaid) {
+      document.getElementById('paywallModal').classList.add('visible');
+      return;
+    }
+  } catch(e) {
+    // If we can't verify, block it
+    document.getElementById('paywallModal').classList.add('visible');
+    return;
+  }
   const el = document.getElementById('printDate');
   if (el) el.textContent = 'Generated: ' + new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   window.print();

@@ -1487,60 +1487,52 @@ function getResultsAsText() {
   const terms = [...document.querySelectorAll('#termsGrid .term-chip')].map(chip => {
     const label = chip.querySelector('.term-label')?.textContent || '';
     const value = chip.querySelector('.term-value')?.textContent || '';
-    return `  ${label}: ${value}`;
-  }).join('
-');
+    return '  ' + label + ': ' + value;
+  }).join('\n');
 
   const flags = [...document.querySelectorAll('#flagsList li')].map(li =>
-    '  • ' + (li.querySelector('span:last-child')?.textContent || li.textContent).trim()
-  ).join('
-');
+    '  \u2022 ' + (li.querySelector('span:last-child')?.textContent || li.textContent).trim()
+  ).join('\n');
 
   const missing = [...document.querySelectorAll('#missingList li')].map(li =>
-    '  • ' + (li.querySelector('span:last-child')?.textContent || li.textContent).trim()
-  ).join('
-');
+    '  \u2022 ' + (li.querySelector('span:last-child')?.textContent || li.textContent).trim()
+  ).join('\n');
 
   const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
   return [
-    '╔══════════════════════════════════════════════╗',
-    '  ANALYZETHISCONTRACT — Contract Analysis Report',
-    `  Generated: ${date}`,
-    '╚══════════════════════════════════════════════╝',
+    '\u2554' + '\u2550'.repeat(46) + '\u2557',
+    '  ANALYZETHISCONTRACT \u2014 Contract Analysis Report',
+    '  Generated: ' + date,
+    '\u255a' + '\u2550'.repeat(46) + '\u255d',
     '',
-    '▌ SUMMARY',
+    '\u258c SUMMARY',
     summary,
-    score ? `Overall assessment: ${score}` : '',
+    score ? 'Overall assessment: ' + score : '',
     '',
-    '▌ KEY TERMS',
+    '\u258c KEY TERMS',
     terms || '  None extracted.',
     '',
-    '▌ RED FLAGS',
+    '\u258c RED FLAGS',
     flags || '  No significant red flags found.',
     '',
-    '▌ MISSING OR UNCLEAR CLAUSES',
+    '\u258c MISSING OR UNCLEAR CLAUSES',
     missing || '  All standard clauses appear to be present.',
     '',
-    '─────────────────────────────────────────────────',
+    '\u2500'.repeat(50),
     'AnalyzeThisContract is not a law firm and does not',
     'provide legal advice. Always consult a qualified attorney.',
-  ].filter(l => l !== null).join('
-');
+  ].join('\n');
 }
 
 async function copyResults() {
   const btn = document.getElementById('copyBtn');
   try {
     await navigator.clipboard.writeText(getResultsAsText());
-    btn.textContent = '✓ Copied!';
+    btn.textContent = '\u2713 Copied!';
     btn.classList.add('copied');
-    setTimeout(() => {
-      btn.innerHTML = '📋 Copy to clipboard';
-      btn.classList.remove('copied');
-    }, 2500);
+    setTimeout(() => { btn.innerHTML = '\ud83d\udccb Copy to clipboard'; btn.classList.remove('copied'); }, 2500);
   } catch(e) {
-    // Fallback for browsers that block clipboard API
     const ta = document.createElement('textarea');
     ta.value = getResultsAsText();
     ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0;';
@@ -1548,17 +1540,13 @@ async function copyResults() {
     ta.select();
     document.execCommand('copy');
     ta.remove();
-    btn.textContent = '✓ Copied!';
+    btn.textContent = '\u2713 Copied!';
     btn.classList.add('copied');
-    setTimeout(() => {
-      btn.innerHTML = '📋 Copy to clipboard';
-      btn.classList.remove('copied');
-    }, 2500);
+    setTimeout(() => { btn.innerHTML = '\ud83d\udccb Copy to clipboard'; btn.classList.remove('copied'); }, 2500);
   }
 }
 
 function downloadPDF() {
-  // Set the print date before opening the dialog
   const dateEl = document.getElementById('printDate');
   if (dateEl) {
     dateEl.textContent = 'Generated: ' + new Date().toLocaleDateString('en-US', {

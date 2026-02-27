@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 80" width="420" height="80">
+  <defs>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0d878"/>
+      <stop offset="100%" stop-color="#b8943e"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1.2" result="cb"/>
+      <feMerge><feMergeNode in="cb"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Shield -->
+  <path d="M4 6 L60 6 L60 48 Q32 70 4 48 Z" fill="rgba(240,216,120,0.05)" stroke="url(#gold)" stroke-width="1.75"/>
+
+  <!-- Chip centered in shield -->
+  <rect x="18" y="16" width="28" height="28" rx="4" fill="none" stroke="url(#gold)" stroke-width="1.5" filter="url(#glow)"/>
+  <!-- Pins top -->
+  <line x1="24" y1="16" x2="24" y2="11" stroke="url(#gold)" stroke-width="1.1" opacity="0.7"/>
+  <line x1="32" y1="16" x2="32" y2="11" stroke="url(#gold)" stroke-width="1.1" opacity="0.7"/>
+  <line x1="40" y1="16" x2="40" y2="11" stroke="url(#gold)" stroke-width="1.1" opacity="0.7"/>
+  <!-- Pins bottom -->
+  <line x1="24" y1="44" x2="24" y2="49" stroke="url(#gold)" stroke-width="1.1" opacity="0.7"/>
+  <line x1="32" y1="44" x2="32" y2="49" stroke="url(#gold)" stroke-width="1.1" opacity="0.7"/>
+  <line x1="40" y1="44" x2="40" y2="49" stroke="url(#gold)" stroke-width="1.1" opacity="0.7"/>
+  <!-- Pins left -->
+  <line x1="18" y1="24" x2="13" y2="24" stroke="url(#gold)" stroke-width="1.1" opacity="0.7"/>
+  <line x1="18" y1="36" x2="13" y2="36" stroke="url(#gold)" stroke-width="1.1" opacity="0.7"/>
+  <!-- Pins right -->
+  <line x1="46" y1="24" x2="51" y2="24" stroke="url(#gold)" stroke-width="1.1" opacity="0.7"/>
+  <line x1="46" y1="36" x2="51" y2="36" stroke="url(#gold)" stroke-width="1.1" opacity="0.7"/>
+  <!-- AI text inside chip -->
+  <text x="32" y="35" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="url(#gold)" text-anchor="middle" filter="url(#glow)">AI</text>
+
+  <!-- Wordmark — both lines same size -->
+  <text x="76" y="34"
+    font-family="Playfair Display, Georgia, serif"
+    font-size="26" font-weight="700"
+    fill="#f0ece3" letter-spacing="-0.3">AnalyzeThis</text>
+  <text x="76" y="62"
+    font-family="Playfair Display, Georgia, serif"
+    font-size="26" font-weight="700"
+    fill="url(#gold)" letter-spacing="-0.3">Contract</text>
+</svg>

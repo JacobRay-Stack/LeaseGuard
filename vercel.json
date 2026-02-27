@@ -2,12 +2,6 @@
   "functions": {
     "api/analyze.js": {
       "maxDuration": 30
-    },
-    "api/analyses.js": {
-      "maxDuration": 15
-    },
-    "api/webhook.js": {
-      "maxDuration": 10
     }
   }
 }

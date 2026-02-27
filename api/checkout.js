@@ -1,6 +1,6 @@
 const https = require('https');
 
-// ── Supabase helper (service key) ─────────────────────────────────────
+// ── Supabase helper (service key) ──────────────────────────────────────
 function supabaseReq(path, method, body, token) {
   return new Promise((resolve, reject) => {
     const useService = !token;
@@ -11,7 +11,7 @@ function supabaseReq(path, method, body, token) {
       'apikey': useService ? process.env.SUPABASE_SERVICE_KEY : process.env.SUPABASE_ANON_KEY,
       'Authorization': `Bearer ${useService ? process.env.SUPABASE_SERVICE_KEY : token}`,
     };
-    if (!isGet) {
+    if (!isGet && data) {
       headers['Content-Type'] = 'application/json';
       headers['Content-Length'] = Buffer.byteLength(data);
     }
@@ -39,32 +39,42 @@ async function getUserFromToken(token) {
   return r;
 }
 
-// ── Handler ───────────────────────────────────────────────────────────
+// ── Handler ────────────────────────────────────────────────────────────
 module.exports = function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  let body = '';
-  let bodySize = 0;
+  // ── FIX #4: Check size BEFORE appending ────────────────────────────
   const MAX_BODY = 10_000;
+  const chunks = [];
+  let bodySize = 0;
+  let aborted = false;
 
   req.on('data', (chunk) => {
     bodySize += chunk.length;
     if (bodySize > MAX_BODY) {
+      aborted = true;
       req.destroy();
-      return res.status(413).json({ error: 'Request too large' });
+      return;
     }
-    body += chunk;
+    chunks.push(chunk); // only push if within limit
   });
 
   req.on('end', async () => {
+    if (aborted) return res.status(413).json({ error: 'Request too large' });
+
+    const body = Buffer.concat(chunks).toString('utf8');
+
+    // ── FIX #5: Validate plan against explicit allowlist ────────────
+    const ALLOWED_PLANS = new Set(['basic', 'pro']);
     let plan = 'basic';
     let clientToken = null;
 
     try {
       const parsed = JSON.parse(body);
-      plan = parsed.plan || 'basic';
+      const rawPlan = parsed.plan;
+      plan = ALLOWED_PLANS.has(rawPlan) ? rawPlan : 'basic';
       clientToken = parsed.token || null;
     } catch (e) {
       return res.status(400).json({ error: 'Invalid JSON' });
@@ -77,17 +87,26 @@ module.exports = function handler(req, res) {
     if (clientToken) {
       const user = await getUserFromToken(clientToken);
       if (user) {
-        userId = user.id;       // Supabase UUID → client_reference_id
-        userEmail = user.email; // Pre-fill Stripe checkout form
+        userId = user.id;
+        userEmail = user.email;
       }
     }
 
     const origin = req.headers.origin || 'https://analyzethiscontract.com';
-    const successUrl = `${origin}?checkout=success&plan=${plan}`;
-    const cancelUrl = `${origin}?checkout=cancelled`;
+
+    // ── Only allow known origins ────────────────────────────────────
+    const ALLOWED_ORIGINS = new Set([
+      'https://analyzethiscontract.com',
+      'https://www.analyzethiscontract.com',
+    ]);
+    const safeOrigin = ALLOWED_ORIGINS.has(origin)
+      ? origin
+      : 'https://analyzethiscontract.com';
+
+    const successUrl = `${safeOrigin}?checkout=success&plan=${plan}`;
+    const cancelUrl = `${safeOrigin}?checkout=cancelled`;
     const isPro = plan === 'pro';
 
-    // Build Stripe checkout session params as URL-encoded form data
     const params = new URLSearchParams({
       'payment_method_types[0]': 'card',
       'line_items[0][price_data][currency]': 'usd',
@@ -102,13 +121,10 @@ module.exports = function handler(req, res) {
       'mode': isPro ? 'subscription' : 'payment',
       'success_url': successUrl,
       'cancel_url': cancelUrl,
-      // CRITICAL: webhook uses this to find the Supabase user without relying on email matching
       ...(userId ? { 'client_reference_id': userId } : {}),
-      // Pre-fill the email field in Stripe Checkout for a smoother UX
       ...(userEmail ? { 'customer_email': userEmail } : {}),
     });
 
-    // One-time payment doesn't use recurring
     if (isPro) {
       params.set('line_items[0][price_data][recurring][interval]', 'month');
     }

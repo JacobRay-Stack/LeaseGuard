@@ -2,28 +2,40 @@ const https = require('https');
 
 function supabaseRequest(path, method, body, token) {
   return new Promise((resolve, reject) => {
-    const data = JSON.stringify(body);
     const isService = !token;
+    const isGet = method === 'GET';
+    // Never send a body on GET requests — Supabase rejects them with 401/400
+    const data = isGet ? null : JSON.stringify(body);
+
+    const headers = {
+      'apikey': isService ? process.env.SUPABASE_SERVICE_KEY : process.env.SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${isService ? process.env.SUPABASE_SERVICE_KEY : token}`,
+    };
+    if (!isGet) {
+      headers['Content-Type'] = 'application/json';
+      headers['Content-Length'] = Buffer.byteLength(data);
+    }
+    // Add Prefer header for PATCH/POST so Supabase doesn't return 400 on empty response
+    if (method === 'PATCH' || method === 'POST') {
+      headers['Prefer'] = 'return=representation';
+    }
+
     const options = {
       hostname: 'gbzyzsxuxwmdlzagkrvt.supabase.co',
       path,
       method,
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': isService ? process.env.SUPABASE_SERVICE_KEY : process.env.SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${isService ? process.env.SUPABASE_SERVICE_KEY : token}`,
-        'Content-Length': Buffer.byteLength(data)
-      }
+      headers
     };
+
     const req = https.request(options, (res) => {
       let d = '';
       res.on('data', c => d += c);
       res.on('end', () => {
-        try { resolve(JSON.parse(d)); } catch(e) { resolve({ error: d }); }
+        try { resolve(d ? JSON.parse(d) : {}); } catch(e) { resolve({ error: d }); }
       });
     });
     req.on('error', reject);
-    req.write(data);
+    if (!isGet) req.write(data);
     req.end();
   });
 }

@@ -41,10 +41,13 @@ Return ONLY a valid JSON object with exactly this structure — no preamble, no 
     { "label": "Term name", "value": "Term value" }
   ],
   "redFlags": [
-    "Specific red flag with explanation of why it is problematic and which law or standard it may violate"
+    "CLAUSE TITLE (Section X): Explanation of why this is problematic and which law or standard it may violate."
   ],
   "missingClauses": [
-    "Specific missing clause with explanation of why it should be included and what risk its absence creates"
+    "CLAUSE NAME: Explanation of why it should be included and what risk its absence creates."
+  ],
+  "negotiationTips": [
+    "NEGOTIATION POINT: Specific, actionable advice on how to negotiate or push back on this clause before signing."
   ]
 }
 
@@ -55,9 +58,11 @@ Scoring guidelines:
 
 keyTerms should include: monthly rent, lease term, security deposit, late fee, notice period, pet policy, utilities, maintenance responsibility, early termination penalty, and any other financially significant terms found.
 
-redFlags should be specific and actionable — cite the problematic clause, explain the risk, and reference applicable law where relevant. Aim for 3-7 red flags.
+redFlags: each item must start with an ALL-CAPS title followed by a colon and explanation. Cite the problematic clause, explain the risk, and reference applicable law. Aim for 3-7 items.
 
-missingClauses should identify protections or disclosures that are standard or legally required for the jurisdiction but absent from this contract. Aim for 3-6 missing clauses.
+missingClauses: each item must start with an ALL-CAPS clause name followed by a colon and explanation. Aim for 3-6 items.
+
+negotiationTips: 3-5 specific, practical tips the tenant can use to negotiate better terms before signing. Each must start with an ALL-CAPS topic followed by a colon. Focus on the most impactful changes they could realistically request.
 
 Be thorough, accurate, and professional. Your analysis may be the only legal review this person gets before signing.`;
 
@@ -89,20 +94,11 @@ Be thorough, accurate, and professional. Your analysis may be the only legal rev
       apiRes.on('end', () => {
         try {
           const parsed = JSON.parse(data);
-          // Surface the full Anthropic error so we can see exactly what went wrong
-          if (parsed.error) return res.status(500).json({
-            error: parsed.error.message || parsed.error.type || 'Anthropic API error',
-            type: parsed.error.type,
-            full: parsed.error
-          });
-          if (!parsed.content || !parsed.content[0]) return res.status(500).json({
-            error: 'Empty response from Anthropic',
-            raw: data.slice(0, 500)
-          });
+          if (parsed.error) return res.status(500).json({ error: parsed.error.message || parsed.error.type, type: parsed.error.type });
           const text = parsed.content[0].text.replace(/```json|```/g, '').trim();
           res.status(200).json(JSON.parse(text));
         } catch(e) {
-          res.status(500).json({ error: 'Parse error: ' + e.message, raw: data.slice(0, 500) });
+          res.status(500).json({ error: 'Parse error', raw: data.slice(0, 500) });
         }
       });
     });

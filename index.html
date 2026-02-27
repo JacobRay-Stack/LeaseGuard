@@ -1101,11 +1101,28 @@ function getStoredAuth() {
   } catch(e) {}
 }
 
-function saveAuth(token, user) {
+async function refreshAuthToken() {
+  const refreshToken = localStorage.getItem('atc_refresh');
+  if (!refreshToken) { clearAuth(); return false; }
+  try {
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'refresh', token: refreshToken })
+    });
+    const data = await res.json();
+    if (data.error || !data.token) { clearAuth(); return false; }
+    saveAuth(data.token, data.user || currentUser, data.refreshToken);
+    return true;
+  } catch(e) { clearAuth(); return false; }
+}
+
+function saveAuth(token, user, refreshToken) {
   authToken = token;
   currentUser = user;
   localStorage.setItem('atc_token', token);
   localStorage.setItem('atc_user', JSON.stringify(user));
+  if (refreshToken) localStorage.setItem('atc_refresh', refreshToken);
 }
 
 function clearAuth() {
@@ -1113,6 +1130,7 @@ function clearAuth() {
   currentUser = null;
   localStorage.removeItem('atc_token');
   localStorage.removeItem('atc_user');
+  localStorage.removeItem('atc_refresh');
 }
 
 function showAuth(mode) {
@@ -1208,7 +1226,7 @@ async function submitAuth() {
       };
       return;
     }
-    saveAuth(data.token, data.user);
+    saveAuth(data.token, data.user, data.refreshToken);
     document.getElementById('authModal').classList.remove('visible');
     await updateNavForUser();
     showToast('Welcome back!');
@@ -1228,11 +1246,26 @@ async function updateNavForUser() {
   }
 
   try {
-    const res = await fetch('/api/auth', {
+    let res = await fetch('/api/auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'getCredits', token: authToken })
     });
+
+    // Token expired — try to refresh silently then retry
+    if (res.status === 401) {
+      const refreshed = await refreshAuthToken();
+      if (!refreshed) {
+        nav.innerHTML = '<button class="nav-btn" onclick="showAuth(\'login\')">Log In</button><button class="nav-btn primary" onclick="showAuth(\'signup\')">Sign Up</button>';
+        return;
+      }
+      res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'getCredits', token: authToken })
+      });
+    }
+
     const credits = await res.json();
 
     // Sync localStorage with DB credits to avoid mismatch

@@ -213,59 +213,113 @@
     margin-bottom: 16px;
   }
 
+  /* ── Result cards ── */
   .result-card h3 {
     font-family: 'Playfair Display', serif;
     font-size: 17px;
     font-weight: 700;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap;
   }
 
-  .result-card p, .result-card li {
+  .result-card p {
     font-size: 14px;
     color: #c8c4bb;
-    line-height: 1.75;
+    line-height: 1.8;
   }
 
   .result-card ul {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-  }
-
-  .result-card li {
-    padding: 10px 14px;
-    border-radius: 6px;
-    display: flex;
     gap: 10px;
-    align-items: flex-start;
   }
 
-  .li-icon { flex-shrink: 0; margin-top: 1px; }
+  /* Summary card tinting by score */
+  .summary-bad { border-left: 4px solid var(--red) !important; }
+  .summary-warn { border-left: 4px solid var(--accent) !important; }
+  .summary-good { border-left: 4px solid var(--green) !important; }
+
+  /* Stats bar */
+  .stats-bar {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .stat-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .stat-chip.red { background: rgba(224,92,92,0.1); border-color: rgba(224,92,92,0.25); color: var(--red); }
+  .stat-chip.blue { background: rgba(91,155,213,0.1); border-color: rgba(91,155,213,0.25); color: var(--blue); }
+  .stat-chip.green { background: rgba(92,184,138,0.1); border-color: rgba(92,184,138,0.25); color: var(--green); }
+
+  /* Structured list items (flags, missing, tips) */
+  .result-card li {
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .item-inner {
+    padding: 12px 16px 12px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .item-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+
+  .item-detail {
+    font-size: 13px;
+    color: #b8b4ab;
+    line-height: 1.7;
+  }
 
   /* Red flags */
   .flag-item {
-    background: rgba(224, 92, 92, 0.08);
+    background: rgba(224, 92, 92, 0.07);
     border: 1px solid rgba(224, 92, 92, 0.2);
+    border-left: 3px solid var(--red);
   }
-
-  .flag-item .li-icon { color: var(--red); }
+  .flag-item .item-title { color: var(--red); }
 
   /* Missing clauses */
   .missing-item {
-    background: rgba(91, 155, 213, 0.08);
+    background: rgba(91, 155, 213, 0.07);
     border: 1px solid rgba(91, 155, 213, 0.2);
+    border-left: 3px solid var(--blue);
   }
+  .missing-item .item-title { color: var(--blue); }
 
-  .missing-item .li-icon { color: var(--blue); }
+  /* Negotiation tips */
+  .tip-item {
+    background: rgba(92, 184, 138, 0.07);
+    border: 1px solid rgba(92, 184, 138, 0.2);
+    border-left: 3px solid var(--green);
+  }
+  .tip-item .item-title { color: var(--green); }
 
   /* Key terms */
   .terms-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
     gap: 10px;
   }
 
@@ -273,21 +327,22 @@
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 10px 14px;
+    padding: 12px 14px;
   }
 
   .term-chip .term-label {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--muted);
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 4px;
+    letter-spacing: 1.2px;
+    margin-bottom: 5px;
   }
 
   .term-chip .term-value {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--accent);
+    line-height: 1.4;
   }
 
   /* Score badge */
@@ -295,10 +350,12 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 4px 12px;
+    padding: 5px 14px;
     border-radius: 20px;
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    margin-left: auto;
   }
 
   .score-good { background: rgba(92, 184, 138, 0.15); color: var(--green); border: 1px solid rgba(92, 184, 138, 0.3); }
@@ -427,7 +484,7 @@
   .export-bar {
     display: flex;
     gap: 10px;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     justify-content: flex-end;
   }
   .export-btn {
@@ -448,45 +505,113 @@
   .export-btn:hover { border-color: var(--accent); color: var(--accent); }
   .export-btn.copied { border-color: var(--green); color: var(--green); }
 
-  /* Print styles for PDF export */
+  /* ── Print / PDF styles ───────────────────────────────────── */
   @media print {
-    body { background: #fff !important; color: #1a1a1a !important; }
+    @page { margin: 14mm 16mm; size: A4; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body { background: #fff !important; color: #1a1a1a !important; font-family: 'Inter', sans-serif !important; font-size: 12px !important; }
+    body::before { display: none !important; }
     .print-only { display: block !important; }
     #inputSection, #loading, .reset-btn, .export-bar,
     header, .modal-overlay, .auth-overlay, .disclaimer,
-    #topNav, .header-top p { display: none !important; }
+    #topNav, .header-top p, .stats-bar { display: none !important; }
     #results { display: block !important; animation: none !important; }
+    .container { padding: 0 !important; max-width: 100% !important; }
+
+    /* Section titles */
+    .section-title {
+      color: #1a1a2e !important;
+      font-size: 9px !important;
+      font-weight: 700 !important;
+      letter-spacing: 2.5px !important;
+      margin: 20px 0 8px !important;
+      text-transform: uppercase !important;
+    }
+    .section-title::after { background: #ddd !important; }
+
+    /* Cards */
     .result-card {
       background: #fff !important;
-      border: 1px solid #ddd !important;
-      border-radius: 8px !important;
+      border: 1px solid #e0e0e8 !important;
+      border-left-width: 1px !important;
+      border-radius: 6px !important;
       page-break-inside: avoid;
-      margin-bottom: 16px !important;
+      margin-bottom: 10px !important;
+      padding: 14px 16px !important;
+      box-shadow: none !important;
     }
-    .result-card h3 { color: #1a1a1a !important; font-size: 15px !important; }
-    .result-card p, .result-card li { color: #333 !important; }
-    .flag-item { background: #fff5f5 !important; border-color: #ffcccc !important; }
-    .missing-item { background: #f0f6ff !important; border-color: #ccdeff !important; }
-    .term-chip { background: #f8f8fa !important; border-color: #ddd !important; }
-    .term-chip .term-value { color: #b07d1a !important; }
-    .score-badge { border: 1px solid #ccc !important; }
-    .score-good { background: #f0fff6 !important; color: #2a7d4f !important; }
-    .score-warn { background: #fffbf0 !important; color: #b07d1a !important; }
-    .score-bad { background: #fff5f5 !important; color: #c0392b !important; }
-    .section-title { color: #666 !important; }
-    .section-title::after { background: #ddd !important; }
+    .result-card h3 {
+      color: #1a1a2e !important;
+      font-size: 12px !important;
+      margin-bottom: 10px !important;
+      padding-bottom: 8px !important;
+      border-bottom: 1px solid #eee !important;
+      font-family: 'Inter', sans-serif !important;
+      font-weight: 700 !important;
+    }
+    .result-card p { color: #333 !important; font-size: 12px !important; line-height: 1.7 !important; }
+
+    /* Score badge */
+    .score-badge { font-size: 9px !important; padding: 3px 10px !important; font-weight: 700 !important; }
+    .score-good { background: #f0fff6 !important; color: #1a6640 !important; border: 1px solid #a8e6c8 !important; }
+    .score-warn { background: #fffbf0 !important; color: #8a5c00 !important; border: 1px solid #f0d080 !important; }
+    .score-bad { background: #fff5f5 !important; color: #c0392b !important; border: 1px solid #ffb3b3 !important; }
+
+    /* Summary card accent */
+    .summary-bad { border-left: 4px solid #e05c5c !important; }
+    .summary-warn { border-left: 4px solid #e8c96d !important; }
+    .summary-good { border-left: 4px solid #5cb88a !important; }
+
+    /* Structured items */
+    .result-card li { border-radius: 5px !important; margin-bottom: 6px !important; page-break-inside: avoid; }
+    .flag-item { background: #fff8f8 !important; border: 1px solid #ffd0d0 !important; border-left: 3px solid #e05c5c !important; }
+    .flag-item .item-title { color: #c0392b !important; }
+    .missing-item { background: #f5f8ff !important; border: 1px solid #c8d8f8 !important; border-left: 3px solid #5b9bd5 !important; }
+    .missing-item .item-title { color: #2a5ca8 !important; }
+    .tip-item { background: #f5fff9 !important; border: 1px solid #b8e8cc !important; border-left: 3px solid #5cb88a !important; }
+    .tip-item .item-title { color: #1a6640 !important; }
+
+    .item-inner { padding: 8px 12px 8px 14px !important; }
+    .item-title { font-size: 9px !important; letter-spacing: 0.8px !important; }
+    .item-detail { font-size: 11px !important; color: #444 !important; line-height: 1.6 !important; }
+
+    /* Terms grid — 3 columns in print */
+    .terms-grid { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; }
+    .term-chip { background: #f8f8fa !important; border: 1px solid #e0e0e8 !important; padding: 7px 10px !important; border-radius: 4px !important; }
+    .term-chip .term-label { color: #888 !important; font-size: 8px !important; margin-bottom: 3px !important; }
+    .term-chip .term-value { color: #8a5c00 !important; font-size: 11px !important; }
+
+    /* Print header */
     .print-header {
       display: flex !important;
-      align-items: center;
-      justify-content: space-between;
-      padding-bottom: 16px;
-      margin-bottom: 24px;
-      border-bottom: 2px solid #eee;
+      align-items: flex-start !important;
+      justify-content: space-between !important;
+      padding: 16px 20px !important;
+      margin-bottom: 18px !important;
+      background: #1a1a2e !important;
+      border-radius: 6px !important;
     }
-    .print-header h1 { font-size: 20px; color: #1a1a1a; font-family: 'Playfair Display', serif; }
-    .print-header p { font-size: 12px; color: #888; }
+    .print-header-left h1 { font-size: 16px !important; color: #fff !important; font-family: 'Playfair Display', serif !important; margin-bottom: 3px !important; font-weight: 700 !important; }
+    .print-header-left p { font-size: 10px !important; color: #9090b0 !important; }
+    .print-header-right { text-align: right !important; }
+    .print-header-right p { font-size: 10px !important; color: #9090b0 !important; line-height: 1.7 !important; }
+
+    /* Footer disclaimer */
+    .print-disclaimer {
+      display: block !important;
+      margin-top: 20px !important;
+      padding: 10px 14px !important;
+      background: #f8f8fa !important;
+      border: 1px solid #e0e0e8 !important;
+      border-radius: 5px !important;
+      font-size: 9px !important;
+      color: #999 !important;
+      text-align: center !important;
+      line-height: 1.6 !important;
+    }
   }
   .print-only { display: none; }
+  .print-disclaimer { display: none; }
 
   @keyframes fadeDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: none; } }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
@@ -903,57 +1028,72 @@
   </div>
 
   <div class="results" id="results">
-    <!-- Print header (only visible when printing) -->
+
+    <!-- Print header — only visible when printing/saving PDF -->
     <div class="print-only print-header">
-      <div>
-        <h1>⚖️ AnalyzeThisContract</h1>
+      <div class="print-header-left">
+        <h1>&#9878;&#65039; AnalyzeThisContract</h1>
         <p>Contract Analysis Report &mdash; analyzethiscontract.com</p>
       </div>
-      <p id="printDate" style="font-size:12px;color:#888;"></p>
+      <div class="print-header-right">
+        <p id="printDate"></p>
+        <p>Not legal advice. Consult a qualified attorney.</p>
+      </div>
     </div>
 
     <!-- Export actions -->
     <div class="export-bar">
-      <button class="export-btn" id="copyBtn" onclick="copyResults()">
-        📋 Copy to clipboard
-      </button>
-      <button class="export-btn" onclick="downloadPDF()">
-        ⬇️ Download PDF
-      </button>
+      <button class="export-btn" id="copyBtn" onclick="copyResults()">&#128203; Copy to clipboard</button>
+      <button class="export-btn" onclick="downloadPDF()">&#8659; Download PDF</button>
     </div>
 
-        <!-- Summary -->
+    <!-- Summary -->
     <div class="section-title">Overview</div>
     <div class="result-card" id="summaryCard">
       <h3>
-        📋 Plain English Summary
+        &#128203; Plain English Summary
         <span class="score-badge" id="scoreBadge"></span>
       </h3>
       <p id="summaryText"></p>
+      <div class="stats-bar" id="statsBar"></div>
     </div>
 
     <!-- Key Terms -->
     <div class="section-title">Key Terms</div>
     <div class="result-card">
-      <h3>🔑 Key Terms Extracted</h3>
+      <h3>&#128273; Key Terms Extracted</h3>
       <div class="terms-grid" id="termsGrid"></div>
     </div>
 
     <!-- Red Flags -->
     <div class="section-title">Red Flags</div>
     <div class="result-card">
-      <h3>🚩 Red Flags</h3>
+      <h3>&#128681; Red Flags</h3>
       <ul id="flagsList"></ul>
     </div>
 
     <!-- Missing Clauses -->
     <div class="section-title">Missing Clauses</div>
     <div class="result-card">
-      <h3>⚠️ Missing or Unclear Clauses</h3>
+      <h3>&#9888;&#65039; Missing or Unclear Clauses</h3>
       <ul id="missingList"></ul>
     </div>
 
-    <button class="reset-btn" onclick="resetApp()">← Analyze another contract</button>
+    <!-- Negotiation Tips -->
+    <div class="section-title">Negotiation Tips</div>
+    <div class="result-card">
+      <h3>&#128172; What to Negotiate Before Signing</h3>
+      <ul id="tipsList"></ul>
+    </div>
+
+    <!-- Print footer -->
+    <div class="print-disclaimer">
+      AnalyzeThisContract is not a law firm and does not provide legal advice.
+      This report is for informational purposes only. Always consult a qualified attorney before signing any contract.
+      &copy; analyzethiscontract.com
+    </div>
+
+    <button class="reset-btn" onclick="resetApp()">&#8592; Analyze another contract</button>
   </div>
 
 
@@ -1074,8 +1214,6 @@ async function startCheckout(plan) {
     const res = await fetch('/api/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // Pass the auth token so the backend can embed the user ID in Stripe metadata,
-      // which lets the webhook credit the right account after payment
       body: JSON.stringify({ plan: plan || 'basic', token: authToken || null })
     });
     const data = await res.json();
@@ -1251,8 +1389,6 @@ async function updateNavForUser() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'getCredits', token: authToken })
     });
-
-    // Token expired — try to refresh silently then retry
     if (res.status === 401) {
       const refreshed = await refreshAuthToken();
       if (!refreshed) {
@@ -1265,7 +1401,6 @@ async function updateNavForUser() {
         body: JSON.stringify({ action: 'getCredits', token: authToken })
       });
     }
-
     const credits = await res.json();
 
     // Sync localStorage with DB credits to avoid mismatch
@@ -1303,15 +1438,12 @@ window.addEventListener('load', async () => {
   const params = new URLSearchParams(window.location.search);
   if (params.get('checkout') === 'success') {
     const plan = params.get('plan') || 'basic';
-    // Credits are applied by the Stripe webhook server-side — just show a toast
-    // and refresh the nav (which re-fetches the real credit balance from Supabase)
     if (plan === 'pro') {
       showToast('Pro plan activated! You have unlimited analyses.');
     } else {
       showToast('Payment successful! Your 5 analyses are ready.');
     }
     window.history.replaceState({}, '', window.location.pathname);
-    // Small delay to give the webhook time to update Supabase before we fetch credits
     await new Promise(r => setTimeout(r, 1500));
     await updateNavForUser();
   }
@@ -1462,9 +1594,20 @@ async function analyzeContract() {
   }
 }
 
+function parseItemTitle(text) {
+  // Extract a bolded title from patterns like "TITLE (Section X): detail" or "TITLE: detail"
+  const m = text.match(/^([A-Z][A-Z\s\-\/&']+?)(?:\s*\([^)]*\))?:\s*(.+)$/s);
+  if (m && m[1].length < 80) return { title: m[1].trim(), detail: m[2].trim() };
+  // Fallback: first sentence as title
+  const dot = text.indexOf('. ');
+  if (dot > 10 && dot < 80) return { title: text.slice(0, dot), detail: text.slice(dot + 2) };
+  return { title: null, detail: text };
+}
+
 function renderResults(data) {
   document.getElementById('loading').classList.remove('visible');
 
+  // ── Summary ──────────────────────────────────────────────
   document.getElementById('summaryText').textContent = data.summary;
 
   const badge = document.getElementById('scoreBadge');
@@ -1474,39 +1617,84 @@ function renderResults(data) {
   else if (data.score === 'warn') badge.classList.add('score-warn');
   else badge.classList.add('score-bad');
 
+  // Tint summary card by score
+  const summaryCard = document.getElementById('summaryCard');
+  summaryCard.classList.remove('summary-good', 'summary-warn', 'summary-bad');
+  summaryCard.classList.add('summary-' + (data.score || 'warn'));
+
+  // Stats bar
+  const statsBar = document.getElementById('statsBar');
+  statsBar.innerHTML = '';
+  const flagCount = data.redFlags?.length || 0;
+  const missingCount = data.missingClauses?.length || 0;
+  const tipCount = data.negotiationTips?.length || 0;
+  if (flagCount) statsBar.innerHTML += '<span class="stat-chip red">' + flagCount + ' red flag' + (flagCount !== 1 ? 's' : '') + '</span>';
+  if (missingCount) statsBar.innerHTML += '<span class="stat-chip blue">' + missingCount + ' missing clause' + (missingCount !== 1 ? 's' : '') + '</span>';
+  if (tipCount) statsBar.innerHTML += '<span class="stat-chip green">' + tipCount + ' negotiation tip' + (tipCount !== 1 ? 's' : '') + '</span>';
+
+  // ── Key Terms ─────────────────────────────────────────────
   const termsGrid = document.getElementById('termsGrid');
   termsGrid.innerHTML = '';
   (data.keyTerms || []).forEach(t => {
     const chip = document.createElement('div');
     chip.className = 'term-chip';
-    chip.innerHTML = `<div class="term-label">${t.label}</div><div class="term-value">${t.value}</div>`;
+    chip.innerHTML = '<div class="term-label">' + t.label + '</div><div class="term-value">' + t.value + '</div>';
     termsGrid.appendChild(chip);
   });
 
+  // ── Red Flags ─────────────────────────────────────────────
   const flagsList = document.getElementById('flagsList');
   flagsList.innerHTML = '';
   if (data.redFlags?.length) {
     data.redFlags.forEach(f => {
+      const { title, detail } = parseItemTitle(f);
       const li = document.createElement('li');
       li.className = 'flag-item';
-      li.innerHTML = `<span class="li-icon">⚑</span><span>${f}</span>`;
+      li.innerHTML = '<div class="item-inner">' +
+        (title ? '<div class="item-title">' + title + '</div>' : '') +
+        '<div class="item-detail">' + detail + '</div>' +
+        '</div>';
       flagsList.appendChild(li);
     });
   } else {
-    flagsList.innerHTML = '<li style="color: var(--green)">✓ No significant red flags found.</li>';
+    flagsList.innerHTML = '<li><div class="item-inner"><div class="item-detail" style="color:var(--green)">&#10003; No significant red flags found.</div></div></li>';
   }
 
+  // ── Missing Clauses ───────────────────────────────────────
   const missingList = document.getElementById('missingList');
   missingList.innerHTML = '';
   if (data.missingClauses?.length) {
     data.missingClauses.forEach(m => {
+      const { title, detail } = parseItemTitle(m);
       const li = document.createElement('li');
       li.className = 'missing-item';
-      li.innerHTML = `<span class="li-icon">○</span><span>${m}</span>`;
+      li.innerHTML = '<div class="item-inner">' +
+        (title ? '<div class="item-title">' + title + '</div>' : '') +
+        '<div class="item-detail">' + detail + '</div>' +
+        '</div>';
       missingList.appendChild(li);
     });
   } else {
-    missingList.innerHTML = '<li style="color: var(--green)">✓ All standard clauses appear to be present.</li>';
+    missingList.innerHTML = '<li><div class="item-inner"><div class="item-detail" style="color:var(--green)">&#10003; All standard clauses appear to be present.</div></div></li>';
+  }
+
+  // ── Negotiation Tips ──────────────────────────────────────
+  const tipsList = document.getElementById('tipsList');
+  tipsList.innerHTML = '';
+  if (data.negotiationTips?.length) {
+    data.negotiationTips.forEach(t => {
+      const { title, detail } = parseItemTitle(t);
+      const li = document.createElement('li');
+      li.className = 'tip-item';
+      li.innerHTML = '<div class="item-inner">' +
+        (title ? '<div class="item-title">' + title + '</div>' : '') +
+        '<div class="item-detail">' + detail + '</div>' +
+        '</div>';
+      tipsList.appendChild(li);
+    });
+  } else {
+    const tipSection = document.getElementById('tipsList').closest('.result-card');
+    if (tipSection) tipSection.style.display = 'none';
   }
 
   document.getElementById('results').classList.add('visible');
@@ -1516,45 +1704,38 @@ function renderResults(data) {
 function getResultsAsText() {
   const summary = document.getElementById('summaryText')?.textContent || '';
   const score = document.getElementById('scoreBadge')?.textContent || '';
-
-  const terms = [...document.querySelectorAll('#termsGrid .term-chip')].map(chip => {
-    const label = chip.querySelector('.term-label')?.textContent || '';
-    const value = chip.querySelector('.term-value')?.textContent || '';
-    return '  ' + label + ': ' + value;
+  const terms = [...document.querySelectorAll('#termsGrid .term-chip')].map(c =>
+    '  ' + (c.querySelector('.term-label')?.textContent || '') + ': ' + (c.querySelector('.term-value')?.textContent || '')
+  ).join('\n');
+  const flags = [...document.querySelectorAll('#flagsList .item-inner')].map(i => {
+    const t = i.querySelector('.item-title')?.textContent || '';
+    const d = i.querySelector('.item-detail')?.textContent || '';
+    return '  \u2022 ' + (t ? t + ': ' + d : d);
   }).join('\n');
-
-  const flags = [...document.querySelectorAll('#flagsList li')].map(li =>
-    '  \u2022 ' + (li.querySelector('span:last-child')?.textContent || li.textContent).trim()
-  ).join('\n');
-
-  const missing = [...document.querySelectorAll('#missingList li')].map(li =>
-    '  \u2022 ' + (li.querySelector('span:last-child')?.textContent || li.textContent).trim()
-  ).join('\n');
-
+  const missing = [...document.querySelectorAll('#missingList .item-inner')].map(i => {
+    const t = i.querySelector('.item-title')?.textContent || '';
+    const d = i.querySelector('.item-detail')?.textContent || '';
+    return '  \u2022 ' + (t ? t + ': ' + d : d);
+  }).join('\n');
+  const tips = [...document.querySelectorAll('#tipsList .item-inner')].map(i => {
+    const t = i.querySelector('.item-title')?.textContent || '';
+    const d = i.querySelector('.item-detail')?.textContent || '';
+    return '  \u2022 ' + (t ? t + ': ' + d : d);
+  }).join('\n');
   const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-
   return [
     '\u2554' + '\u2550'.repeat(46) + '\u2557',
     '  ANALYZETHISCONTRACT \u2014 Contract Analysis Report',
     '  Generated: ' + date,
     '\u255a' + '\u2550'.repeat(46) + '\u255d',
-    '',
-    '\u258c SUMMARY',
-    summary,
-    score ? 'Overall assessment: ' + score : '',
-    '',
-    '\u258c KEY TERMS',
-    terms || '  None extracted.',
-    '',
-    '\u258c RED FLAGS',
-    flags || '  No significant red flags found.',
-    '',
-    '\u258c MISSING OR UNCLEAR CLAUSES',
-    missing || '  All standard clauses appear to be present.',
-    '',
-    '\u2500'.repeat(50),
-    'AnalyzeThisContract is not a law firm and does not',
-    'provide legal advice. Always consult a qualified attorney.',
+    '', '\u258c SUMMARY', summary,
+    score ? 'Assessment: ' + score : '',
+    '', '\u258c KEY TERMS', terms || '  None extracted.',
+    '', '\u258c RED FLAGS', flags || '  No significant red flags found.',
+    '', '\u258c MISSING CLAUSES', missing || '  All standard clauses present.',
+    tips ? ('\n\u258c NEGOTIATION TIPS\n' + tips) : '',
+    '', '\u2500'.repeat(50),
+    'Not legal advice. Consult a qualified attorney.',
   ].join('\n');
 }
 
@@ -1562,30 +1743,20 @@ async function copyResults() {
   const btn = document.getElementById('copyBtn');
   try {
     await navigator.clipboard.writeText(getResultsAsText());
-    btn.textContent = '\u2713 Copied!';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.innerHTML = '\ud83d\udccb Copy to clipboard'; btn.classList.remove('copied'); }, 2500);
   } catch(e) {
     const ta = document.createElement('textarea');
     ta.value = getResultsAsText();
-    ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0;';
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    ta.remove();
-    btn.textContent = '\u2713 Copied!';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.innerHTML = '\ud83d\udccb Copy to clipboard'; btn.classList.remove('copied'); }, 2500);
+    ta.style.cssText = 'position:fixed;opacity:0;';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
   }
+  btn.textContent = '\u2713 Copied!';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.innerHTML = '&#128203; Copy to clipboard'; btn.classList.remove('copied'); }, 2500);
 }
 
 function downloadPDF() {
-  const dateEl = document.getElementById('printDate');
-  if (dateEl) {
-    dateEl.textContent = 'Generated: ' + new Date().toLocaleDateString('en-US', {
-      year: 'numeric', month: 'long', day: 'numeric'
-    });
-  }
+  const el = document.getElementById('printDate');
+  if (el) el.textContent = 'Generated: ' + new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   window.print();
 }
 

@@ -1,5 +1,15 @@
 const https = require('https');
 
+// ── Timeout wrapper ────────────────────────────────────────────────────
+function withTimeout(promise, ms, label) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error(`Timeout: ${label} exceeded ${ms}ms`)), ms)
+    ),
+  ]);
+}
+
 // ── Supabase helper ────────────────────────────────────────────────────
 function supabaseReq(path, method, body, useService, token) {
   return new Promise((resolve, reject) => {
@@ -38,7 +48,10 @@ function supabaseReq(path, method, body, useService, token) {
 // ── Auth helper ────────────────────────────────────────────────────────
 async function getUserFromToken(token) {
   if (!token || typeof token !== 'string') return null;
-  const r = await supabaseReq('/auth/v1/user', 'GET', null, false, token);
+  const r = await withTimeout(
+    supabaseReq('/auth/v1/user', 'GET', null, false, token),
+    5000, 'getUserFromToken'
+  );
   if (!r || r.error || !r.id) return null;
   return r;
 }
@@ -47,35 +60,33 @@ async function getUserFromToken(token) {
 async function consumeCredit(userId) {
   // 1. Try atomic RPC first
   try {
-    const rpcResult = await supabaseReq(
-      '/rest/v1/rpc/decrement_credit',
-      'POST',
-      { p_user_id: userId },
-      true, null
+    const rpcResult = await withTimeout(
+      supabaseReq('/rest/v1/rpc/decrement_credit', 'POST', { p_user_id: userId }, true, null),
+      5000, 'decrement_credit RPC'
     );
-
     if (rpcResult) {
       if (rpcResult.code === 'PGRST202') {
         console.warn('[analyze] RPC not deployed, using fallback');
-        // fall through
       } else if (rpcResult.hint === 'NO_CREDITS' || rpcResult.message === 'NO_CREDITS') {
         return { ok: false, reason: 'no_credits' };
       } else if (rpcResult.code) {
         console.warn('[analyze] RPC error', rpcResult.code, '- using fallback');
-        // fall through
       } else {
         const row = Array.isArray(rpcResult) ? rpcResult[0] : rpcResult;
         return { ok: true, plan: row?.plan, credits: row?.credits };
       }
     }
   } catch (err) {
-    console.warn('[analyze] RPC threw, using fallback:', err.message);
+    console.warn('[analyze] RPC failed/timed out, using fallback:', err.message);
   }
 
   // 2. Fallback: non-atomic read + write
-  const rows = await supabaseReq(
-    `/rest/v1/user_credits?user_id=eq.${userId}&select=plan,credits`,
-    'GET', null, true, null
+  const rows = await withTimeout(
+    supabaseReq(
+      `/rest/v1/user_credits?user_id=eq.${userId}&select=plan,credits`,
+      'GET', null, true, null
+    ),
+    5000, 'get user_credits'
   );
 
   if (!rows || !Array.isArray(rows) || !rows.length) {
@@ -83,15 +94,17 @@ async function consumeCredit(userId) {
   }
 
   const { plan, credits } = rows[0];
-
   if (plan === 'pro') return { ok: true, plan, credits: 9999 };
   if (credits <= 0) return { ok: false, reason: 'no_credits' };
 
-  await supabaseReq(
-    `/rest/v1/user_credits?user_id=eq.${userId}`,
-    'PATCH',
-    { credits: credits - 1, updated_at: new Date().toISOString() },
-    true, null
+  await withTimeout(
+    supabaseReq(
+      `/rest/v1/user_credits?user_id=eq.${userId}`,
+      'PATCH',
+      { credits: credits - 1, updated_at: new Date().toISOString() },
+      true, null
+    ),
+    5000, 'patch user_credits'
   );
 
   return { ok: true, plan, credits: credits - 1 };
@@ -116,18 +129,10 @@ Return ONLY a valid JSON object with exactly this structure — no preamble, no 
   "summary": "2-3 sentence plain English overview of the contract, including jurisdiction, key terms, and overall assessment",
   "score": "good or warn or bad",
   "scoreLabel": "One of: COMPLIANT - Strong tenant protections | REVIEW RECOMMENDED - Some concerns | HIGH RISK - Significant issues found",
-  "keyTerms": [
-    { "label": "Term name", "value": "Term value" }
-  ],
-  "redFlags": [
-    "CLAUSE TITLE (Section X): Explanation of why this is problematic and which law or standard it may violate."
-  ],
-  "missingClauses": [
-    "CLAUSE NAME: Explanation of why it should be included and what risk its absence creates."
-  ],
-  "negotiationTips": [
-    "NEGOTIATION POINT: Specific, actionable advice on how to negotiate or push back on this clause before signing."
-  ]
+  "keyTerms": [{ "label": "Term name", "value": "Term value" }],
+  "redFlags": ["CLAUSE TITLE (Section X): Explanation of why this is problematic and which law or standard it may violate."],
+  "missingClauses": ["CLAUSE NAME: Explanation of why it should be included and what risk its absence creates."],
+  "negotiationTips": ["NEGOTIATION POINT: Specific, actionable advice on how to negotiate or push back on this clause before signing."]
 }
 
 Scoring guidelines:
@@ -136,14 +141,10 @@ Scoring guidelines:
 - bad: Contract has illegal clauses, is heavily one-sided, or is missing critical protections
 
 keyTerms should include: monthly rent, lease term, security deposit, late fee, notice period, pet policy, utilities, maintenance responsibility, early termination penalty, and any other financially significant terms found.
-
-redFlags: each item must start with an ALL-CAPS title followed by a colon and explanation. Cite the problematic clause, explain the risk, and reference applicable law. Aim for 3-7 items.
-
-missingClauses: each item must start with an ALL-CAPS clause name followed by a colon and explanation. Aim for 3-6 items.
-
-negotiationTips: 3-5 specific, practical tips the tenant can use to negotiate better terms before signing. Each must start with an ALL-CAPS topic followed by a colon. Focus on the most impactful changes they could realistically request.
-
-Be thorough, accurate, and professional. Your analysis may be the only legal review this person gets before signing.`;
+redFlags: each item must start with an ALL-CAPS title followed by a colon. Aim for 3-7 items.
+missingClauses: each item must start with an ALL-CAPS clause name followed by a colon. Aim for 3-6 items.
+negotiationTips: 3-5 tips, each starting with an ALL-CAPS topic followed by a colon.
+Be thorough, accurate, and professional.`;
 
 // ── Handler ────────────────────────────────────────────────────────────
 module.exports = function handler(req, res) {
@@ -158,11 +159,7 @@ module.exports = function handler(req, res) {
 
   req.on('data', (chunk) => {
     bodySize += chunk.length;
-    if (bodySize > MAX_BODY) {
-      aborted = true;
-      req.destroy();
-      return;
-    }
+    if (bodySize > MAX_BODY) { aborted = true; req.destroy(); return; }
     chunks.push(chunk);
   });
 
@@ -184,47 +181,55 @@ module.exports = function handler(req, res) {
       return res.status(400).json({ error: 'Contract text too short' });
     }
 
+    // ── DEBUG: log env var presence (remove after confirming) ─────
+    console.log('[analyze] env check — SERVICE_KEY present:', !!process.env.SUPABASE_SERVICE_KEY,
+      '| ANON_KEY present:', !!process.env.SUPABASE_ANON_KEY,
+      '| ANTHROPIC_KEY present:', !!process.env.ANTHROPIC_API_KEY,
+      '| token present:', !!clientToken);
+
     // ── Auth + credit gate ─────────────────────────────────────────
     if (clientToken) {
-      const user = await getUserFromToken(clientToken);
-      if (!user) {
-        return res.status(401).json({ error: 'Invalid or expired session. Please log in again.' });
-      }
-
-      const creditResult = await consumeCredit(user.id);
-
-      if (!creditResult.ok) {
-        if (creditResult.reason === 'no_credits') {
-          return res.status(403).json({
-            error: 'No analyses remaining. Please upgrade your plan.',
-            code: 'NO_CREDITS',
-          });
+      try {
+        const user = await getUserFromToken(clientToken);
+        if (!user) {
+          return res.status(401).json({ error: 'Invalid or expired session. Please log in again.' });
         }
-        if (creditResult.reason === 'no_record') {
-          // Missing row (e.g. OAuth signup skipped row creation) — create and proceed
-          console.warn('[analyze] Missing user_credits row for', user.id, '— creating');
-          await supabaseReq('/rest/v1/user_credits', 'POST', {
-            user_id: user.id,
-            email: user.email || '',
-            plan: 'free',
-            credits: 2,
-          }, true, null);
-        } else {
-          console.error('[analyze] consumeCredit unexpected failure:', creditResult);
-          return res.status(500).json({ error: 'Could not verify account credits. Please try again.' });
+        console.log('[analyze] user resolved:', user.id);
+
+        const creditResult = await consumeCredit(user.id);
+        console.log('[analyze] creditResult:', JSON.stringify(creditResult));
+
+        if (!creditResult.ok) {
+          if (creditResult.reason === 'no_credits') {
+            return res.status(403).json({ error: 'No analyses remaining. Please upgrade your plan.', code: 'NO_CREDITS' });
+          }
+          if (creditResult.reason === 'no_record') {
+            console.warn('[analyze] Missing user_credits row — creating');
+            await withTimeout(
+              supabaseReq('/rest/v1/user_credits', 'POST', {
+                user_id: user.id, email: user.email || '', plan: 'free', credits: 2,
+              }, true, null),
+              5000, 'create user_credits'
+            );
+          } else {
+            console.error('[analyze] consumeCredit unexpected:', creditResult);
+            return res.status(500).json({ error: 'Could not verify account credits.' });
+          }
         }
+      } catch (err) {
+        // Supabase unreachable — log and continue so Anthropic still runs
+        console.error('[analyze] Credit check threw (Supabase down?):', err.message);
       }
     }
 
     // ── Call Anthropic ─────────────────────────────────────────────
+    console.log('[analyze] calling Anthropic...');
+
     const payload = JSON.stringify({
       model: 'claude-haiku-4-5',
       max_tokens: 3000,
       system: SYSTEM_PROMPT,
-      messages: [{
-        role: 'user',
-        content: 'Analyze this lease agreement and return the JSON analysis:\n\n' + contractText.slice(0, 20000),
-      }],
+      messages: [{ role: 'user', content: 'Analyze this lease agreement and return the JSON analysis:\n\n' + contractText.slice(0, 20000) }],
     });
 
     const options = {
@@ -243,14 +248,12 @@ module.exports = function handler(req, res) {
       let data = '';
       apiRes.on('data', (c) => { data += c; });
       apiRes.on('end', () => {
+        console.log('[analyze] Anthropic responded, status:', apiRes.statusCode, 'length:', data.length);
         try {
           const parsed = JSON.parse(data);
           if (parsed.error) {
             console.error('[analyze] Anthropic error:', parsed.error);
-            return res.status(500).json({
-              error: parsed.error.message || parsed.error.type,
-              type: parsed.error.type,
-            });
+            return res.status(500).json({ error: parsed.error.message || parsed.error.type, type: parsed.error.type });
           }
           const text = parsed.content[0].text.replace(/```json|```/g, '').trim();
           res.status(200).json(JSON.parse(text));

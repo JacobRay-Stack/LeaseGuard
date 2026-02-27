@@ -67,7 +67,7 @@ module.exports = async function handler(req, res) {
       if (action === 'login') {
         const result = await supabaseRequest('/auth/v1/token?grant_type=password', 'POST', { email, password });
         if (result.error) return res.status(400).json({ error: result.error.message || result.error });
-        return res.status(200).json({ user: result.user, session: result, token: result.access_token });
+        return res.status(200).json({ user: result.user, session: result, token: result.access_token, refreshToken: result.refresh_token });
       }
 
       if (action === 'getCredits') {
@@ -114,6 +114,21 @@ module.exports = async function handler(req, res) {
           );
         }
         return res.status(200).json({ success: true, credits: cred.plan === 'pro' ? 'unlimited' : cred.credits - 1 });
+      }
+
+      if (action === 'refresh') {
+        if (!token) return res.status(401).json({ error: 'No refresh token' });
+        const result = await supabaseRequest(
+          '/auth/v1/token?grant_type=refresh_token',
+          'POST',
+          { refresh_token: token }
+        );
+        if (result.error) return res.status(401).json({ error: result.error.message || result.error });
+        return res.status(200).json({
+          token: result.access_token,
+          refreshToken: result.refresh_token,
+          user: result.user
+        });
       }
 
       return res.status(400).json({ error: 'Invalid action' });

@@ -236,11 +236,13 @@ module.exports = function handler(req, res) {
       hostname: 'api.anthropic.com',
       path: '/v1/messages',
       method: 'POST',
+      timeout: 25000,
       headers: {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(payload),
         'x-api-key': process.env.ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'messages-2023-12-15',
       },
     };
 
@@ -248,6 +250,7 @@ module.exports = function handler(req, res) {
 
     // Hard 25s timeout — Vercel kills at 30s, so we fail fast with a useful error
     const anthropicTimeout = setTimeout(() => {
+      console.error('[analyze] 25s manual timeout fired');
       if (!responded) {
         responded = true;
         console.error('[analyze] Anthropic timed out after 25s — check API key and billing at console.anthropic.com');
@@ -277,6 +280,11 @@ module.exports = function handler(req, res) {
           res.status(500).json({ error: 'Parse error', raw: data.slice(0, 500) });
         }
       });
+    });
+
+    apiReq.on('timeout', () => {
+      console.error('[analyze] Socket timeout fired (25s)');
+      apiReq.destroy();
     });
 
     apiReq.on('error', (e) => {

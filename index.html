@@ -1123,6 +1123,80 @@
   }
   .save-indicator.visible { opacity: 1; }
 
+  /* ── Custom confirm dialog ── */
+  .confirm-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 300;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(2px);
+  }
+  .confirm-overlay.visible { display: flex; }
+  .confirm-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 28px 24px;
+    max-width: 360px;
+    width: 100%;
+    text-align: center;
+    animation: fadeUp 0.2s ease both;
+  }
+  .confirm-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+  .confirm-box h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .confirm-box p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 22px;
+  }
+  .confirm-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  .confirm-cancel-btn {
+    flex: 1;
+    padding: 11px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .confirm-cancel-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .confirm-ok-btn {
+    flex: 1;
+    padding: 11px;
+    background: var(--red);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .confirm-ok-btn:hover { background: #c94f4f; }
+
 </style>
 </head>
 <body>
@@ -1192,7 +1266,7 @@
       </div>
       <div id="topNav" class="top-nav-right"></div>
     </div>
-    <p>Drop any contract and get an instant plain-English breakdown — red flags, missing clauses, and key terms included.</p>
+    <p id="headerSubtitle">Drop any contract and get an instant plain-English breakdown — red flags, missing clauses, and key terms included.</p>
   </header>
 
   <div class="input-card" id="inputSection">
@@ -1644,14 +1718,21 @@ window.addEventListener('load', async () => {
   const params = new URLSearchParams(window.location.search);
   if (params.get('checkout') === 'success') {
     const plan = params.get('plan') || 'basic';
+    // Note: we show a toast but do NOT update credits from URL params.
+    // Actual plan activation is handled by the Stripe webhook on the server.
     if (plan === 'pro') {
-      showToast('Pro plan activated! You have unlimited analyses.');
+      showToast('Payment received! Pro plan will activate shortly.');
     } else {
-      showToast('Payment successful! Your 5 analyses are ready.');
+      showToast('Payment received! Your analyses will be available shortly.');
     }
     window.history.replaceState({}, '', window.location.pathname);
-    await new Promise(r => setTimeout(r, 1500));
-    await updateNavForUser();
+    // Poll for credit update (webhook may take a few seconds)
+    let attempts = 0;
+    const poll = setInterval(async () => {
+      attempts++;
+      await updateNavForUser();
+      if (attempts >= 6) clearInterval(poll);
+    }, 2000);
   }
   updateUsageUI();
 });
@@ -1772,26 +1853,23 @@ async function analyzeContract() {
     const response = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contractText: text })
+      body: JSON.stringify({ contractText: text, token: authToken || null })
     });
 
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Analysis failed');
-    // Decrement DB credits if logged in
-    if (authToken) {
-      try {
-        await fetch('/api/auth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'decrementCredit', token: authToken })
-        });
-        await updateNavForUser();
-      } catch(e) {}
-    } else {
+    // Credits are now decremented server-side inside /api/analyze before the AI call.
+    // No separate decrement call needed here.
+    if (!authToken) {
       incrementUsage();
       updateUsageUI();
+    } else {
+      await updateNavForUser();
     }
     renderResults(result);
+    // Hide the upload-prompt subtitle — not relevant while viewing results
+    const subtitle = document.getElementById('headerSubtitle');
+    if (subtitle) subtitle.style.display = 'none';
     // Auto-save for paid users (fire and forget)
     if (authToken) {
       autoSaveAnalysis(result, text);
@@ -1999,6 +2077,11 @@ function resetApp() {
   document.getElementById('results').classList.remove('visible');
   document.getElementById('inputSection').style.display = 'block';
   document.getElementById('contractText').value = '';
+  const subtitle = document.getElementById('headerSubtitle');
+  if (subtitle) {
+    subtitle.textContent = 'Drop any contract and get an instant plain-English breakdown — red flags, missing clauses, and key terms included.';
+    subtitle.style.display = '';
+  }
   clearFile();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -2146,6 +2229,12 @@ async function loadSavedAnalysis(id, event) {
     document.getElementById('inputSection').style.display = 'none';
     lastSavedId = id;
     lastSavedName = data.contract_name;
+    // Show the contract name in the header subtitle
+    const subtitle = document.getElementById('headerSubtitle');
+    if (subtitle) {
+      subtitle.textContent = data.contract_name ? `Viewing saved analysis: ${data.contract_name}` : 'Viewing saved analysis';
+      subtitle.style.display = '';
+    }
     renderResults(data.analysisData);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     // Show re-download context
@@ -2156,19 +2245,52 @@ async function loadSavedAnalysis(id, event) {
   }
 }
 
-async function deleteAnalysis(id) {
-  if (!confirm('Delete this analysis? This cannot be undone.')) return;
-  try {
-    await fetch('/api/analyses', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'delete', token: authToken, analysisId: id })
-    });
-    const row = document.getElementById('row-' + id);
-    if (row) { row.style.transition = 'opacity 0.2s'; row.style.opacity = '0'; setTimeout(() => { row.remove(); updateDashboardCount(); }, 220); }
-  } catch(e) {
-    showToast('Failed to delete.');
+// ── Custom confirm dialog ──────────────────────────────────
+function showConfirm({ icon = '🗑️', title, message, okLabel = 'Delete', onConfirm }) {
+  const overlay = document.getElementById('confirmOverlay');
+  document.getElementById('confirmIcon').textContent = icon;
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMessage').textContent = message;
+  document.getElementById('confirmOkBtn').textContent = okLabel;
+  overlay.classList.add('visible');
+
+  const okBtn = document.getElementById('confirmOkBtn');
+  const cancelBtn = document.getElementById('confirmCancelBtn');
+
+  function close() {
+    overlay.classList.remove('visible');
+    okBtn.removeEventListener('click', handleOk);
+    cancelBtn.removeEventListener('click', close);
+    overlay.removeEventListener('click', handleOverlay);
   }
+  function handleOk() { close(); onConfirm(); }
+  function handleOverlay(e) { if (e.target === overlay) close(); }
+
+  okBtn.addEventListener('click', handleOk);
+  cancelBtn.addEventListener('click', close);
+  overlay.addEventListener('click', handleOverlay);
+}
+
+async function deleteAnalysis(id) {
+  showConfirm({
+    icon: '🗑️',
+    title: 'Delete this analysis?',
+    message: 'This cannot be undone.',
+    okLabel: 'Delete',
+    onConfirm: async () => {
+      try {
+        await fetch('/api/analyses', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'delete', token: authToken, analysisId: id })
+        });
+        const row = document.getElementById('row-' + id);
+        if (row) { row.style.transition = 'opacity 0.2s'; row.style.opacity = '0'; setTimeout(() => { row.remove(); updateDashboardCount(); }, 220); }
+      } catch(e) {
+        showToast('Failed to delete.');
+      }
+    }
+  });
 }
 
 function updateDashboardCount() {
@@ -2216,6 +2338,19 @@ function startRename(id) {
 }
 
 </script>
+
+<!-- Custom Confirm Dialog -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-icon" id="confirmIcon">🗑️</div>
+    <h3 id="confirmTitle">Delete this analysis?</h3>
+    <p id="confirmMessage">This cannot be undone.</p>
+    <div class="confirm-actions">
+      <button class="confirm-cancel-btn" id="confirmCancelBtn">Cancel</button>
+      <button class="confirm-ok-btn" id="confirmOkBtn">Delete</button>
+    </div>
+  </div>
+</div>
 
 <!-- Dashboard overlay (click to close) -->
 <div class="dashboard-overlay" id="dashboardOverlay" onclick="closeDashboard()"></div>

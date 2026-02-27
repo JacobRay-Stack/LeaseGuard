@@ -62,7 +62,7 @@ missingClauses should identify protections or disclosures that are standard or l
 Be thorough, accurate, and professional. Your analysis may be the only legal review this person gets before signing.`;
 
     const payload = JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
+      model: 'claude-haiku-4-5',
       max_tokens: 3000,
       system: systemPrompt,
       messages: [{
@@ -89,11 +89,20 @@ Be thorough, accurate, and professional. Your analysis may be the only legal rev
       apiRes.on('end', () => {
         try {
           const parsed = JSON.parse(data);
-          if (parsed.error) return res.status(500).json({ error: parsed.error.message });
+          // Surface the full Anthropic error so we can see exactly what went wrong
+          if (parsed.error) return res.status(500).json({
+            error: parsed.error.message || parsed.error.type || 'Anthropic API error',
+            type: parsed.error.type,
+            full: parsed.error
+          });
+          if (!parsed.content || !parsed.content[0]) return res.status(500).json({
+            error: 'Empty response from Anthropic',
+            raw: data.slice(0, 500)
+          });
           const text = parsed.content[0].text.replace(/```json|```/g, '').trim();
           res.status(200).json(JSON.parse(text));
         } catch(e) {
-          res.status(500).json({ error: 'Parse error', raw: data.slice(0, 500) });
+          res.status(500).json({ error: 'Parse error: ' + e.message, raw: data.slice(0, 500) });
         }
       });
     });

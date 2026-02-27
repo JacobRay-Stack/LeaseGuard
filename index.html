@@ -1838,6 +1838,7 @@ async function updateNavForUser() {
 function logout() {
   clearAuth();
   updateNavForUser();
+  resetApp();
   showToast('Logged out.');
 }
 

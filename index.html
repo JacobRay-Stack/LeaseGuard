@@ -423,6 +423,71 @@
 
   .error-msg.visible { display: block; }
 
+  /* Export buttons */
+  .export-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    justify-content: flex-end;
+  }
+  .export-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+  }
+  .export-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .export-btn.copied { border-color: var(--green); color: var(--green); }
+
+  /* Print styles for PDF export */
+  @media print {
+    body { background: #fff !important; color: #1a1a1a !important; }
+    .print-only { display: block !important; }
+    #inputSection, #loading, .reset-btn, .export-bar,
+    header, .modal-overlay, .auth-overlay, .disclaimer,
+    #topNav, .header-top p { display: none !important; }
+    #results { display: block !important; animation: none !important; }
+    .result-card {
+      background: #fff !important;
+      border: 1px solid #ddd !important;
+      border-radius: 8px !important;
+      page-break-inside: avoid;
+      margin-bottom: 16px !important;
+    }
+    .result-card h3 { color: #1a1a1a !important; font-size: 15px !important; }
+    .result-card p, .result-card li { color: #333 !important; }
+    .flag-item { background: #fff5f5 !important; border-color: #ffcccc !important; }
+    .missing-item { background: #f0f6ff !important; border-color: #ccdeff !important; }
+    .term-chip { background: #f8f8fa !important; border-color: #ddd !important; }
+    .term-chip .term-value { color: #b07d1a !important; }
+    .score-badge { border: 1px solid #ccc !important; }
+    .score-good { background: #f0fff6 !important; color: #2a7d4f !important; }
+    .score-warn { background: #fffbf0 !important; color: #b07d1a !important; }
+    .score-bad { background: #fff5f5 !important; color: #c0392b !important; }
+    .section-title { color: #666 !important; }
+    .section-title::after { background: #ddd !important; }
+    .print-header {
+      display: flex !important;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      border-bottom: 2px solid #eee;
+    }
+    .print-header h1 { font-size: 20px; color: #1a1a1a; font-family: 'Playfair Display', serif; }
+    .print-header p { font-size: 12px; color: #888; }
+  }
+  .print-only { display: none; }
+
   @keyframes fadeDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: none; } }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -838,7 +903,26 @@
   </div>
 
   <div class="results" id="results">
-    <!-- Summary -->
+    <!-- Print header (only visible when printing) -->
+    <div class="print-only print-header">
+      <div>
+        <h1>⚖️ AnalyzeThisContract</h1>
+        <p>Contract Analysis Report &mdash; analyzethiscontract.com</p>
+      </div>
+      <p id="printDate" style="font-size:12px;color:#888;"></p>
+    </div>
+
+    <!-- Export actions -->
+    <div class="export-bar">
+      <button class="export-btn" id="copyBtn" onclick="copyResults()">
+        📋 Copy to clipboard
+      </button>
+      <button class="export-btn" onclick="downloadPDF()">
+        ⬇️ Download PDF
+      </button>
+    </div>
+
+        <!-- Summary -->
     <div class="section-title">Overview</div>
     <div class="result-card" id="summaryCard">
       <h3>
@@ -990,7 +1074,9 @@ async function startCheckout(plan) {
     const res = await fetch('/api/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan: plan || 'basic' })
+      // Pass the auth token so the backend can embed the user ID in Stripe metadata,
+      // which lets the webhook credit the right account after payment
+      body: JSON.stringify({ plan: plan || 'basic', token: authToken || null })
     });
     const data = await res.json();
     if (data.url) window.location.href = data.url;
@@ -1182,18 +1268,19 @@ window.addEventListener('load', async () => {
   await updateNavForUser();
 
   const params = new URLSearchParams(window.location.search);
-  if (params.get('paid') === 'true') {
+  if (params.get('checkout') === 'success') {
     const plan = params.get('plan') || 'basic';
-    const u = getUsage();
+    // Credits are applied by the Stripe webhook server-side — just show a toast
+    // and refresh the nav (which re-fetches the real credit balance from Supabase)
     if (plan === 'pro') {
-      u.pro = true; u.paid = 9999;
       showToast('Pro plan activated! You have unlimited analyses.');
     } else {
-      u.paid = (u.paid || 0) + PAID_CREDITS;
-      showToast('Payment successful! You have 5 analyses ready.');
+      showToast('Payment successful! Your 5 analyses are ready.');
     }
-    saveUsage(u);
     window.history.replaceState({}, '', window.location.pathname);
+    // Small delay to give the webhook time to update Supabase before we fetch credits
+    await new Promise(r => setTimeout(r, 1500));
+    await updateNavForUser();
   }
   updateUsageUI();
 });
@@ -1390,6 +1477,95 @@ function renderResults(data) {
   }
 
   document.getElementById('results').classList.add('visible');
+}
+
+// ── Export functions ──────────────────────────────────────
+function getResultsAsText() {
+  const summary = document.getElementById('summaryText')?.textContent || '';
+  const score = document.getElementById('scoreBadge')?.textContent || '';
+
+  const terms = [...document.querySelectorAll('#termsGrid .term-chip')].map(chip => {
+    const label = chip.querySelector('.term-label')?.textContent || '';
+    const value = chip.querySelector('.term-value')?.textContent || '';
+    return `  ${label}: ${value}`;
+  }).join('
+');
+
+  const flags = [...document.querySelectorAll('#flagsList li')].map(li =>
+    '  • ' + (li.querySelector('span:last-child')?.textContent || li.textContent).trim()
+  ).join('
+');
+
+  const missing = [...document.querySelectorAll('#missingList li')].map(li =>
+    '  • ' + (li.querySelector('span:last-child')?.textContent || li.textContent).trim()
+  ).join('
+');
+
+  const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  return [
+    '╔══════════════════════════════════════════════╗',
+    '  ANALYZETHISCONTRACT — Contract Analysis Report',
+    `  Generated: ${date}`,
+    '╚══════════════════════════════════════════════╝',
+    '',
+    '▌ SUMMARY',
+    summary,
+    score ? `Overall assessment: ${score}` : '',
+    '',
+    '▌ KEY TERMS',
+    terms || '  None extracted.',
+    '',
+    '▌ RED FLAGS',
+    flags || '  No significant red flags found.',
+    '',
+    '▌ MISSING OR UNCLEAR CLAUSES',
+    missing || '  All standard clauses appear to be present.',
+    '',
+    '─────────────────────────────────────────────────',
+    'AnalyzeThisContract is not a law firm and does not',
+    'provide legal advice. Always consult a qualified attorney.',
+  ].filter(l => l !== null).join('
+');
+}
+
+async function copyResults() {
+  const btn = document.getElementById('copyBtn');
+  try {
+    await navigator.clipboard.writeText(getResultsAsText());
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.innerHTML = '📋 Copy to clipboard';
+      btn.classList.remove('copied');
+    }, 2500);
+  } catch(e) {
+    // Fallback for browsers that block clipboard API
+    const ta = document.createElement('textarea');
+    ta.value = getResultsAsText();
+    ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0;';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.innerHTML = '📋 Copy to clipboard';
+      btn.classList.remove('copied');
+    }, 2500);
+  }
+}
+
+function downloadPDF() {
+  // Set the print date before opening the dialog
+  const dateEl = document.getElementById('printDate');
+  if (dateEl) {
+    dateEl.textContent = 'Generated: ' + new Date().toLocaleDateString('en-US', {
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
+  }
+  window.print();
 }
 
 function resetApp() {

@@ -1,6 +1,6 @@
 const https = require('https');
 
-// ── Shared helpers ─────────────────────────────────────────────────────
+// ── Supabase helper ────────────────────────────────────────────────────
 function supabaseReq(path, method, body, useService, token) {
   return new Promise((resolve, reject) => {
     const isGet = method === 'GET';
@@ -35,9 +35,7 @@ function supabaseReq(path, method, body, useService, token) {
   });
 }
 
-/**
- * Validate token and return the Supabase user, or null if invalid.
- */
+// ── Auth helper ────────────────────────────────────────────────────────
 async function getUserFromToken(token) {
   if (!token || typeof token !== 'string') return null;
   const r = await supabaseReq('/auth/v1/user', 'GET', null, false, token);
@@ -45,87 +43,49 @@ async function getUserFromToken(token) {
   return r;
 }
 
-/**
- * Atomically decrement credits for non-pro users using a Postgres RPC.
- *
- * The RPC `decrement_credit` must exist in Supabase:
- *
- *   CREATE OR REPLACE FUNCTION decrement_credit(p_user_id uuid)
- *   RETURNS TABLE(plan text, credits int) LANGUAGE plpgsql AS $$
- *   BEGIN
- *     UPDATE user_credits
- *        SET credits    = credits - 1,
- *            updated_at = now()
- *      WHERE user_id = p_user_id
- *        AND plan    != 'pro'
- *        AND credits  > 0;
- *     IF NOT FOUND THEN
- *       RAISE EXCEPTION 'NO_CREDITS';
- *     END IF;
- *     RETURN QUERY
- *       SELECT plan, credits FROM user_credits WHERE user_id = p_user_id;
- *   END $$;
- *
- * Returns { plan, credits } on success, or throws with message 'NO_CREDITS'.
- *
- * Falls back to the two-step read+write path if the RPC is not yet deployed,
- * so existing environments continue to work while you roll out the migration.
- */
+// ── Credit consumption ─────────────────────────────────────────────────
 async function consumeCredit(userId) {
-  // ── Preferred: atomic RPC ──────────────────────────────────────────
+  // 1. Try atomic RPC first
   try {
     const rpcResult = await supabaseReq(
       '/rest/v1/rpc/decrement_credit',
       'POST',
       { p_user_id: userId },
-      true, // service key
-      null
+      true, null
     );
 
-    // PGRST202 = function not found (RPC not yet deployed) → use fallback
-    if (rpcResult && rpcResult.code === 'PGRST202') {
-      console.warn('[analyze] decrement_credit RPC not deployed, using fallback');
-      // fall through to legacy path below
+    if (rpcResult) {
+      if (rpcResult.code === 'PGRST202') {
+        console.warn('[analyze] RPC not deployed, using fallback');
+        // fall through
+      } else if (rpcResult.hint === 'NO_CREDITS' || rpcResult.message === 'NO_CREDITS') {
+        return { ok: false, reason: 'no_credits' };
+      } else if (rpcResult.code) {
+        console.warn('[analyze] RPC error', rpcResult.code, '- using fallback');
+        // fall through
+      } else {
+        const row = Array.isArray(rpcResult) ? rpcResult[0] : rpcResult;
+        return { ok: true, plan: row?.plan, credits: row?.credits };
+      }
     }
-    // NO_CREDITS raised by the function itself
-    else if (rpcResult && rpcResult.message === 'NO_CREDITS') {
-      return { ok: false, reason: 'no_credits' };
-    }
-    // Any other Supabase/Postgres error code that isn't "function not found"
-    else if (rpcResult && rpcResult.code) {
-      console.warn('[analyze] RPC error, using fallback:', rpcResult.code, rpcResult.message);
-      // fall through to legacy path below
-    }
-    // Success
-    else {
-      const row = Array.isArray(rpcResult) ? rpcResult[0] : rpcResult;
-      return { ok: true, plan: row?.plan, credits: row?.credits };
-    }
-  } catch (rpcErr) {
-    // Network-level error — fall through to legacy path
-    console.warn('[analyze] decrement_credit RPC threw, using fallback:', rpcErr.message);
+  } catch (err) {
+    console.warn('[analyze] RPC threw, using fallback:', err.message);
   }
 
-  // ── Fallback: non-atomic read + write (existing behaviour) ─────────
-  // NOTE: replace this block with a hard error once the RPC is deployed.
+  // 2. Fallback: non-atomic read + write
   const rows = await supabaseReq(
     `/rest/v1/user_credits?user_id=eq.${userId}&select=plan,credits`,
     'GET', null, true, null
   );
 
-  if (!Array.isArray(rows) || !rows.length) {
+  if (!rows || !Array.isArray(rows) || !rows.length) {
     return { ok: false, reason: 'no_record' };
   }
 
   const { plan, credits } = rows[0];
 
-  if (plan === 'pro') {
-    return { ok: true, plan, credits: 9999 };
-  }
-
-  if (credits <= 0) {
-    return { ok: false, reason: 'no_credits' };
-  }
+  if (plan === 'pro') return { ok: true, plan, credits: 9999 };
+  if (credits <= 0) return { ok: false, reason: 'no_credits' };
 
   await supabaseReq(
     `/rest/v1/user_credits?user_id=eq.${userId}`,
@@ -137,7 +97,7 @@ async function consumeCredit(userId) {
   return { ok: true, plan, credits: credits - 1 };
 }
 
-// ── System prompt (unchanged) ──────────────────────────────────────────
+// ── System prompt ──────────────────────────────────────────────────────
 const SYSTEM_PROMPT = `You are an expert contract analyst specializing in residential and commercial lease agreements. You have deep knowledge of landlord-tenant law across all U.S. states and Canadian provinces, including jurisdiction-specific statutes, tenant rights, and standard industry practices.
 
 Your job is to analyze lease agreements thoroughly and objectively, identifying both landlord-favorable and tenant-favorable terms, legal compliance issues, missing standard protections, and unusual or potentially problematic clauses.
@@ -191,29 +151,29 @@ module.exports = function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  let body = '';
+  const MAX_BODY = 100_000;
+  const chunks = [];
   let bodySize = 0;
-  const MAX_BODY = 100_000; // 100 KB — contracts can be long
+  let aborted = false;
 
   req.on('data', (chunk) => {
     bodySize += chunk.length;
     if (bodySize > MAX_BODY) {
+      aborted = true;
       req.destroy();
       return;
     }
-    body += chunk;
+    chunks.push(chunk);
   });
 
   req.on('end', async () => {
-    if (bodySize > MAX_BODY) {
-      return res.status(413).json({ error: 'Request too large' });
-    }
+    if (aborted) return res.status(413).json({ error: 'Request too large' });
 
     let contractText = '';
     let clientToken = null;
 
     try {
-      const parsed = JSON.parse(body);
+      const parsed = JSON.parse(Buffer.concat(chunks).toString('utf8'));
       contractText = parsed.contractText || '';
       clientToken = parsed.token || null;
     } catch (e) {
@@ -224,28 +184,14 @@ module.exports = function handler(req, res) {
       return res.status(400).json({ error: 'Contract text too short' });
     }
 
-    // ── Step 1: Authenticate ─────────────────────────────────────────
-    if (!clientToken) {
-      // Unauthenticated users are handled purely client-side (localStorage counter).
-      // To close this gap entirely you would require auth for all calls, but for
-      // now we mirror the original design and allow anonymous analysis while the
-      // frontend enforces the free limit.
-      //
-      // If you want to enforce server-side for anonymous users too, return 401 here:
-      //   return res.status(401).json({ error: 'Authentication required' });
-    }
-
-    let userId = null;
-
+    // ── Auth + credit gate ─────────────────────────────────────────
     if (clientToken) {
       const user = await getUserFromToken(clientToken);
       if (!user) {
         return res.status(401).json({ error: 'Invalid or expired session. Please log in again.' });
       }
-      userId = user.id;
 
-      // ── Step 2: Consume a credit (atomic where possible) ───────────
-      const creditResult = await consumeCredit(userId);
+      const creditResult = await consumeCredit(user.id);
 
       if (!creditResult.ok) {
         if (creditResult.reason === 'no_credits') {
@@ -254,11 +200,23 @@ module.exports = function handler(req, res) {
             code: 'NO_CREDITS',
           });
         }
-        return res.status(500).json({ error: 'Could not verify account credits. Please try again.' });
+        if (creditResult.reason === 'no_record') {
+          // Missing row (e.g. OAuth signup skipped row creation) — create and proceed
+          console.warn('[analyze] Missing user_credits row for', user.id, '— creating');
+          await supabaseReq('/rest/v1/user_credits', 'POST', {
+            user_id: user.id,
+            email: user.email || '',
+            plan: 'free',
+            credits: 2,
+          }, true, null);
+        } else {
+          console.error('[analyze] consumeCredit unexpected failure:', creditResult);
+          return res.status(500).json({ error: 'Could not verify account credits. Please try again.' });
+        }
       }
     }
 
-    // ── Step 3: Call Anthropic ───────────────────────────────────────
+    // ── Call Anthropic ─────────────────────────────────────────────
     const payload = JSON.stringify({
       model: 'claude-haiku-4-5',
       max_tokens: 3000,
@@ -288,6 +246,7 @@ module.exports = function handler(req, res) {
         try {
           const parsed = JSON.parse(data);
           if (parsed.error) {
+            console.error('[analyze] Anthropic error:', parsed.error);
             return res.status(500).json({
               error: parsed.error.message || parsed.error.type,
               type: parsed.error.type,
@@ -296,12 +255,17 @@ module.exports = function handler(req, res) {
           const text = parsed.content[0].text.replace(/```json|```/g, '').trim();
           res.status(200).json(JSON.parse(text));
         } catch (e) {
+          console.error('[analyze] Parse error:', e.message, '| raw:', data.slice(0, 300));
           res.status(500).json({ error: 'Parse error', raw: data.slice(0, 500) });
         }
       });
     });
 
-    apiReq.on('error', (e) => res.status(500).json({ error: e.message }));
+    apiReq.on('error', (e) => {
+      console.error('[analyze] Anthropic request error:', e.message);
+      res.status(500).json({ error: e.message });
+    });
+
     apiReq.write(payload);
     apiReq.end();
   });

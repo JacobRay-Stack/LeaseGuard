@@ -1683,10 +1683,34 @@ async function ensureFreshToken() {
   return true;
 }
 
+// ── Analysis ───────────────────────────────────────────────
 async function analyzeContract() {
   const text = document.getElementById('contractText').value.trim();
   const errorMsg = document.getElementById('errorMsg');
+  const btn = document.getElementById('analyzeBtn');
   errorMsg.classList.remove('visible');
+
+  // Check usage limit (client-side pre-check for UX only — server enforces)
+  if (authToken) {
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'getCredits', token: authToken })
+      });
+      const credits = await res.json();
+      if (credits.plan !== 'pro' && credits.credits <= 0) {
+        document.getElementById('paywallModal').classList.add('visible');
+        return;
+      }
+    } catch(e) {}
+  } else {
+    const { remaining } = getRemainingAnalyses();
+    if (remaining <= 0) {
+      document.getElementById('paywallModal').classList.add('visible');
+      return;
+    }
+  }
 
   if (!text || text.length < 50) {
     errorMsg.textContent = 'Please upload a file or paste a lease agreement to analyze.';
@@ -1694,52 +1718,9 @@ async function analyzeContract() {
     return;
   }
 
-  // ── Ensure token is fresh BEFORE anything else ──────────────────
-  await ensureFreshToken();
-
-  // ── Check usage / credits ────────────────────────────────────────
-  if (authToken) {
-    try {
-      let res = await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'getCredits', token: authToken })
-      });
-
-      // Token went bad between the refresh check and now — try once more
-      if (res.status === 401) {
-        const refreshed = await refreshAuthToken();
-        if (!refreshed) {
-          clearAuth();
-          await updateNavForUser();
-          // Fall through as anonymous
-        } else {
-          res = await fetch('/api/auth', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'getCredits', token: authToken })
-          });
-        }
-      }
-
-      if (res.ok) {
-        const credits = await res.json();
-        if (credits.plan !== 'pro' && credits.credits <= 0) {
-          document.getElementById('paywallModal').classList.add('visible');
-          return;
-        }
-      }
-    } catch (e) {
-      console.warn('[analyze] Credit pre-check failed, proceeding:', e.message);
-    }
-  } else {
-    // Anonymous path
-    const { remaining } = getRemainingAnalyses();
-    if (remaining <= 0) {
-      document.getElementById('paywallModal').classList.add('visible');
-      return;
-    }
-  }
+  // Disable button to prevent double-submit
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳</span> Analyzing…';
 
   document.getElementById('inputSection').style.display = 'none';
   document.getElementById('loading').classList.add('visible');
@@ -1754,25 +1735,19 @@ async function analyzeContract() {
 
     const result = await response.json();
 
-    if (response.status === 401) {
-      // Session expired mid-flight
-      document.getElementById('loading').classList.remove('visible');
-      document.getElementById('inputSection').style.display = 'block';
-      clearAuth();
-      await updateNavForUser();
-      showAuth('login');
-      return;
-    }
-
     if (response.status === 403 && result.code === 'NO_CREDITS') {
+      // Server confirmed no credits — show paywall
       document.getElementById('loading').classList.remove('visible');
       document.getElementById('inputSection').style.display = 'block';
       document.getElementById('paywallModal').classList.add('visible');
+      btn.disabled = false;
+      btn.innerHTML = '<span>🔍</span> Analyze Contract';
       return;
     }
 
     if (!response.ok) throw new Error(result.error || 'Analysis failed');
 
+    // Update local usage counter (anonymous users only — logged-in users rely on server)
     if (!authToken) {
       incrementUsage();
       updateUsageUI();
@@ -1782,9 +1757,11 @@ async function analyzeContract() {
 
     renderResults(result);
 
+    // Hide the upload-prompt subtitle
     const subtitle = document.getElementById('headerSubtitle');
     if (subtitle) subtitle.style.display = 'none';
 
+    // Auto-save for paid users (fire and forget)
     if (authToken) {
       autoSaveAnalysis(result, text);
     } else {
@@ -1795,7 +1772,10 @@ async function analyzeContract() {
     document.getElementById('inputSection').style.display = 'block';
     errorMsg.textContent = 'Something went wrong analyzing the contract. Please try again.';
     errorMsg.classList.add('visible');
-    console.error('[analyze] fetch error:', err.message);
+  } finally {
+    // Always re-enable the button
+    btn.disabled = false;
+    btn.innerHTML = '<span>🔍</span> Analyze Contract';
   }
 }
 

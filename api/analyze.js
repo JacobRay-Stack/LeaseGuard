@@ -92,18 +92,24 @@ Be thorough, accurate, and professional. Your analysis may be the only legal rev
       let data = '';
       apiRes.on('data', c => { data += c; });
       apiRes.on('end', () => {
+        console.log('[analyze] Anthropic status:', apiRes.statusCode, '| body:', data.slice(0, 600));
         try {
           const parsed = JSON.parse(data);
-          if (parsed.error) return res.status(500).json({ error: parsed.error.message || parsed.error.type, type: parsed.error.type });
+          if (parsed.error) {
+            console.error('[analyze] Anthropic error object:', JSON.stringify(parsed.error));
+            return res.status(500).json({ error: parsed.error.message || parsed.error.type, type: parsed.error.type });
+          }
           const text = parsed.content[0].text.replace(/```json|```/g, '').trim();
           res.status(200).json(JSON.parse(text));
         } catch(e) {
+          console.error('[analyze] parse error:', e.message, '| raw:', data.slice(0, 500));
           res.status(500).json({ error: 'Parse error', raw: data.slice(0, 500) });
         }
       });
     });
 
     apiReq.on('error', (e) => {
+      console.error('[analyze] request error:', e.message);
       res.status(500).json({ error: e.message });
     });
 

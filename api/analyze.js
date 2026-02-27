@@ -31,7 +31,7 @@ When analyzing a lease, you must:
 5. Extract all key financial and legal terms
 6. Assign an overall score based on legal compliance and fairness
 
-Return ONLY a valid JSON object with exactly this structure — no preamble, no explanation, no markdown:
+Return ONLY a valid JSON object with exactly this structure — no preamble, no explanation, no markdown, no code fences:
 
 {
   "summary": "2-3 sentence plain English overview of the contract, including jurisdiction, key terms, and overall assessment",
@@ -68,7 +68,7 @@ Be thorough, accurate, and professional. Your analysis may be the only legal rev
 
     const payload = JSON.stringify({
       model: 'claude-haiku-4-5',
-      max_tokens: 3000,
+      max_tokens: 4096,
       system: systemPrompt,
       messages: [{
         role: 'user',
@@ -95,21 +95,17 @@ Be thorough, accurate, and professional. Your analysis may be the only legal rev
         try {
           const parsed = JSON.parse(data);
           if (parsed.error) {
-            return res.status(500).json({
-              error: parsed.error.message || parsed.error.type,
-              type: parsed.error.type,
-              _debug: parsed.error
-            });
+            return res.status(500).json({ error: parsed.error.message || parsed.error.type, type: parsed.error.type });
           }
-          const text = parsed.content[0].text.replace(/```json|```/g, '').trim();
+          // Strip markdown code fences if present, then parse
+          const text = parsed.content[0].text
+            .replace(/^```json\s*/i, '')
+            .replace(/^```\s*/i, '')
+            .replace(/\s*```$/i, '')
+            .trim();
           res.status(200).json(JSON.parse(text));
         } catch(e) {
-          // Return the raw Anthropic response so we can see what went wrong
-          return res.status(500).json({
-            error: 'Parse error: ' + e.message,
-            _anthropic_status: apiRes.statusCode,
-            _anthropic_raw: data.slice(0, 1000)
-          });
+          res.status(500).json({ error: 'Parse error: ' + e.message, raw: data.slice(0, 500) });
         }
       });
     });

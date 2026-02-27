@@ -244,15 +244,30 @@ module.exports = function handler(req, res) {
       },
     };
 
+    let responded = false;
+
+    // Hard 25s timeout — Vercel kills at 30s, so we fail fast with a useful error
+    const anthropicTimeout = setTimeout(() => {
+      if (!responded) {
+        responded = true;
+        console.error('[analyze] Anthropic timed out after 25s — check API key and billing at console.anthropic.com');
+        apiReq.destroy();
+        res.status(504).json({ error: 'Analysis timed out. Please check your Anthropic API key is valid and has credits.' });
+      }
+    }, 25000);
+
     const apiReq = https.request(options, (apiRes) => {
       let data = '';
       apiRes.on('data', (c) => { data += c; });
       apiRes.on('end', () => {
-        console.log('[analyze] Anthropic responded, status:', apiRes.statusCode, 'length:', data.length);
+        if (responded) return;
+        responded = true;
+        clearTimeout(anthropicTimeout);
+        console.log('[analyze] Anthropic responded, status:', apiRes.statusCode, 'length:', data.length, 'preview:', data.slice(0, 120));
         try {
           const parsed = JSON.parse(data);
           if (parsed.error) {
-            console.error('[analyze] Anthropic error:', parsed.error);
+            console.error('[analyze] Anthropic error:', JSON.stringify(parsed.error));
             return res.status(500).json({ error: parsed.error.message || parsed.error.type, type: parsed.error.type });
           }
           const text = parsed.content[0].text.replace(/```json|```/g, '').trim();
@@ -265,6 +280,9 @@ module.exports = function handler(req, res) {
     });
 
     apiReq.on('error', (e) => {
+      if (responded) return;
+      responded = true;
+      clearTimeout(anthropicTimeout);
       console.error('[analyze] Anthropic request error:', e.message);
       res.status(500).json({ error: e.message });
     });

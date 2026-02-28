@@ -1,5 +1,6 @@
 const https = require('https');
 const crypto = require('crypto');
+const { paymentConfirmationEmail, cancellationEmail } = require('./email');
 
 // ── Supabase helper ────────────────────────────────────────────────────
 function supabaseReq(path, method, body) {
@@ -62,7 +63,6 @@ function verifyStripeSignature(rawBody, sigHeader, secret) {
   const expectedBuf = Buffer.from(expected, 'hex');
 
   return signatures.some((sig) => {
-    // Guard against malformed hex strings throwing in timingSafeEqual
     if (!/^[0-9a-f]+$/i.test(sig) || sig.length !== expected.length) return false;
     try {
       return crypto.timingSafeEqual(Buffer.from(sig, 'hex'), expectedBuf);
@@ -93,20 +93,10 @@ function stripeGet(path) {
   });
 }
 
-// ── FIX #3: Paginated user lookup by email ─────────────────────────────
-//
-// The original code called the admin list endpoint with a filter param and
-// matched client-side. If the target user wasn't on page 1 the lookup
-// silently failed. We now page through all results until we find an exact
-// email match, or exhaust the result set.
-//
-// The email value is taken directly from the Stripe event (already signed),
-// but we still sanitise it to avoid accidentally constructing invalid URLs.
-//
+// ── Paginated user lookup by email ─────────────────────────────────────
 async function findUserByEmail(email) {
   if (!email || typeof email !== 'string') return null;
 
-  // Sanitise: only pass the encoded email, nothing else
   const safeEmail = encodeURIComponent(email.trim().toLowerCase());
   const PAGE_SIZE = 50;
   let page = 1;
@@ -118,17 +108,10 @@ async function findUserByEmail(email) {
     );
 
     const users = result.users || (Array.isArray(result) ? result : []);
-
-    // Exact match only — never a prefix/partial match
     const match = users.find((u) => u.email && u.email.toLowerCase() === email.trim().toLowerCase());
     if (match) return match;
-
-    // Stop when we receive fewer results than requested (last page)
     if (users.length < PAGE_SIZE) return null;
-
     page++;
-
-    // Safety cap — avoid infinite loops on unexpected API responses
     if (page > 20) {
       console.error('[webhook] findUserByEmail: exceeded 20 pages, aborting');
       return null;
@@ -169,18 +152,7 @@ async function upsertCredits(userId, email, patch) {
   }
 }
 
-// ── Idempotency: track processed event IDs in Supabase ────────────────
-//
-// A simple `processed_webhook_events` table is recommended:
-//
-//   CREATE TABLE processed_webhook_events (
-//     event_id text PRIMARY KEY,
-//     processed_at timestamptz DEFAULT now()
-//   );
-//
-// If you haven't created it yet the check below will just throw and we
-// fall through — so existing environments continue to work.
-//
+// ── Idempotency ────────────────────────────────────────────────────────
 async function markEventProcessed(eventId) {
   return supabaseReq(
     '/rest/v1/processed_webhook_events',
@@ -197,7 +169,7 @@ async function isEventAlreadyProcessed(eventId) {
     );
     return Array.isArray(rows) && rows.length > 0;
   } catch {
-    return false; // table doesn't exist yet — safe to proceed
+    return false;
   }
 }
 
@@ -216,21 +188,34 @@ async function handleCheckoutCompleted(session) {
     return;
   }
 
+  const recipientEmail = user.email || email;
+
   if (mode === 'payment') {
-    await upsertCredits(user.id, user.email, {
+    await upsertCredits(user.id, recipientEmail, {
       plan: 'basic',
       credits: 5,
       stripe_customer_id: session.customer,
     });
-    console.log(`[webhook] Basic plan activated for ${user.email}`);
+    console.log(`[webhook] Basic plan activated for ${recipientEmail}`);
+
+    // Send payment confirmation email (non-blocking)
+    paymentConfirmationEmail(recipientEmail, 'basic').catch((err) =>
+      console.error('[webhook] Payment confirmation email failed:', err.message)
+    );
+
   } else if (mode === 'subscription') {
-    await upsertCredits(user.id, user.email, {
+    await upsertCredits(user.id, recipientEmail, {
       plan: 'pro',
       credits: 9999,
       stripe_customer_id: session.customer,
       stripe_subscription_id: session.subscription,
     });
-    console.log(`[webhook] Pro plan activated for ${user.email}`);
+    console.log(`[webhook] Pro plan activated for ${recipientEmail}`);
+
+    // Send pro confirmation email (non-blocking)
+    paymentConfirmationEmail(recipientEmail, 'pro').catch((err) =>
+      console.error('[webhook] Pro confirmation email failed:', err.message)
+    );
   }
 }
 
@@ -247,6 +232,11 @@ async function handleSubscriptionDeleted(subscription) {
   const { user_id, email } = rows[0];
   await upsertCredits(user_id, email, { plan: 'free', credits: 0, stripe_subscription_id: null });
   console.log(`[webhook] Pro cancelled — reverted to free for ${email}`);
+
+  // Send cancellation email (non-blocking)
+  cancellationEmail(email).catch((err) =>
+    console.error('[webhook] Cancellation email failed:', err.message)
+  );
 }
 
 async function handleSubscriptionUpdated(subscription) {
@@ -262,9 +252,20 @@ async function handleSubscriptionUpdated(subscription) {
   if (status === 'active' && plan !== 'pro') {
     await upsertCredits(user_id, email, { plan: 'pro', credits: 9999, stripe_subscription_id: subscription.id });
     console.log(`[webhook] Pro reactivated for ${email}`);
+
+    // Send reactivation email (non-blocking)
+    paymentConfirmationEmail(email, 'pro').catch((err) =>
+      console.error('[webhook] Reactivation email failed:', err.message)
+    );
+
   } else if (['past_due', 'unpaid', 'canceled'].includes(status) && plan === 'pro') {
     await upsertCredits(user_id, email, { plan: 'free', credits: 0 });
     console.log(`[webhook] Pro suspended (${status}) for ${email}`);
+
+    // Send suspension email (non-blocking)
+    cancellationEmail(email).catch((err) =>
+      console.error('[webhook] Suspension email failed:', err.message)
+    );
   }
 }
 
@@ -274,7 +275,6 @@ module.exports = function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // ── FIX #4: Check size BEFORE appending ────────────────────────────
   const MAX_BODY = 65_536;
   const chunks = [];
   let bodySize = 0;
@@ -306,7 +306,6 @@ module.exports = function handler(req, res) {
     try {
       verified = verifyStripeSignature(rawBody, sigHeader, secret);
     } catch (e) {
-      // Do NOT log the sigHeader value — it may contain sensitive material
       console.error('[webhook] Signature verification threw:', e.message);
     }
 
@@ -322,14 +321,6 @@ module.exports = function handler(req, res) {
       return res.status(400).json({ error: 'Invalid JSON' });
     }
 
-    // ── FIX #6: Process BEFORE sending 200, use idempotency guard ────
-    //
-    // The original code sent 200 immediately then processed. If the handler
-    // crashed, Stripe would not retry (already got 200) → lost activation.
-    //
-    // Now we process first, send 200 only on success. If we take > 30s
-    // Stripe will retry, so idempotency is critical to prevent double-grants.
-    //
     const eventId = event.id;
 
     try {
@@ -363,18 +354,15 @@ module.exports = function handler(req, res) {
           console.log(`[webhook] Unhandled event type: ${event.type}`);
       }
 
-      // Mark as processed only after successful handling
       try {
         await markEventProcessed(eventId);
       } catch (e) {
         console.warn('[webhook] Could not mark event processed (non-fatal):', e.message);
       }
 
-      // ── Only send 200 after successful processing ─────────────────
       return res.status(200).json({ received: true });
 
     } catch (e) {
-      // Return 500 so Stripe retries — idempotency guard prevents double-grants
       console.error(`[webhook] Handler error for ${event.type}:`, e.message);
       return res.status(500).json({ error: 'Handler failed' });
     }

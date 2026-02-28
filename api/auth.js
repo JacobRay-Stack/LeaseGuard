@@ -1,4 +1,5 @@
 const https = require('https');
+const { welcomeEmail, lastCreditEmail } = require('./email');
 
 function supabaseRequest(path, method, body, token) {
   return new Promise((resolve, reject) => {
@@ -65,6 +66,7 @@ module.exports = async function handler(req, res) {
         Buffer.concat(chunks).toString('utf8')
       );
 
+      // ── SIGNUP ───────────────────────────────────────────────────────
       if (action === 'signup') {
         const result = await supabaseRequest('/auth/v1/signup', 'POST', { email, password });
         if (result.error) return res.status(400).json({ error: result.error.message || result.error });
@@ -75,16 +77,24 @@ module.exports = async function handler(req, res) {
             'POST',
             { user_id: result.user.id, email, plan: 'free', credits: 3, phone: phone || null, email_opt_in: emailOptIn || false }
           );
+
+          // ── Send welcome email (non-blocking — never fails the signup) ──
+          welcomeEmail(email).catch((err) =>
+            console.error('[auth] Welcome email failed for', email, err.message)
+          );
         }
+
         return res.status(200).json({ user: result.user, session: result.session });
       }
 
+      // ── LOGIN ────────────────────────────────────────────────────────
       if (action === 'login') {
         const result = await supabaseRequest('/auth/v1/token?grant_type=password', 'POST', { email, password });
         if (result.error) return res.status(400).json({ error: result.error.message || result.error });
         return res.status(200).json({ user: result.user, session: result, token: result.access_token, refreshToken: result.refresh_token });
       }
 
+      // ── GET CREDITS ──────────────────────────────────────────────────
       if (action === 'getCredits') {
         if (!token) return res.status(401).json({ error: 'Not authenticated' });
 
@@ -105,9 +115,10 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ plan: 'free', credits: 3 });
       }
 
+      // ── DECREMENT CREDIT (backwards-compat no-op) ────────────────────
+      // Credit decrement is now handled server-side in analyze.js.
+      // Kept so old clients don't break.
       if (action === 'decrementCredit') {
-        // Kept for backwards compatibility — credit decrement is now handled
-        // server-side in analyze.js so this is effectively a no-op.
         if (!token) return res.status(401).json({ error: 'Not authenticated' });
         const userRes = await supabaseRequest('/auth/v1/user', 'GET', {}, token);
         if (!userRes.id) return res.status(401).json({ error: 'Invalid token' });
@@ -119,9 +130,18 @@ module.exports = async function handler(req, res) {
         if (!Array.isArray(credRes) || credRes.length === 0) return res.status(400).json({ error: 'No credits found' });
 
         const cred = credRes[0];
+
+        // ── If this was their last free credit, send an upgrade nudge ──
+        if (cred.plan === 'free' && cred.credits === 0) {
+          lastCreditEmail(userRes.email || email).catch((err) =>
+            console.error('[auth] Last-credit email failed:', err.message)
+          );
+        }
+
         return res.status(200).json({ success: true, credits: cred.plan === 'pro' ? 'unlimited' : cred.credits });
       }
 
+      // ── REFRESH TOKEN ────────────────────────────────────────────────
       if (action === 'refresh') {
         if (!token) return res.status(401).json({ error: 'No refresh token' });
         const result = await supabaseRequest(

@@ -75,7 +75,7 @@ module.exports = async function handler(req, res) {
           await supabaseRequest(
             '/rest/v1/user_credits',
             'POST',
-            { user_id: result.user.id, email, plan: 'free', credits: 3, phone: phone || null, email_opt_in: emailOptIn || false }
+            { user_id: result.user.id, email, plan: 'free', credits: 5, phone: phone || null, email_opt_in: emailOptIn || false }
           );
 
           // ── Send welcome email (non-blocking — never fails the signup) ──
@@ -110,9 +110,9 @@ module.exports = async function handler(req, res) {
         }
         // Create if doesn't exist
         await supabaseRequest('/rest/v1/user_credits', 'POST',
-          { user_id: userRes.id, email: userRes.email, plan: 'free', credits: 3 }
+          { user_id: userRes.id, email: userRes.email, plan: 'free', credits: 5 }
         );
-        return res.status(200).json({ plan: 'free', credits: 3 });
+        return res.status(200).json({ plan: 'free', credits: 5 });
       }
 
       // ── DECREMENT CREDIT (backwards-compat no-op) ────────────────────

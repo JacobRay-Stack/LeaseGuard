@@ -126,11 +126,11 @@ Scoring guidelines:
 
 keyTerms should include: monthly rent, lease term, security deposit, late fee, notice period, pet policy, utilities, maintenance responsibility, early termination penalty, and any other financially significant terms found.
 
-redFlags: each item must start with an ALL-CAPS title followed by a colon and explanation. Cite the problematic clause, explain the risk, and reference applicable law. Aim for 3-7 items.
+redFlags: each item must start with an ALL-CAPS title followed by a colon and explanation. Cite the problematic clause, explain the risk, and reference applicable law. Include every red flag you find — do not omit any. Minimum 3, no artificial maximum.
 
-missingClauses: each item must start with an ALL-CAPS clause name followed by a colon and explanation. Aim for 3-6 items.
+missingClauses: each item must start with an ALL-CAPS clause name followed by a colon and explanation. Include every missing clause that would meaningfully protect the tenant. Minimum 2, no artificial maximum.
 
-negotiationTips: 3-5 specific, practical tips the tenant can use to negotiate better terms before signing. Each must start with an ALL-CAPS topic followed by a colon. Focus on the most impactful changes they could realistically request.
+negotiationTips: exactly 4 specific, practical tips the tenant can use to negotiate better terms before signing. Each must start with an ALL-CAPS topic followed by a colon. Focus on the most impactful changes they could realistically request.
 
 Be thorough, accurate, and professional. Your analysis may be the only legal review this person gets before signing.`;
 
@@ -220,6 +220,7 @@ module.exports = function handler(req, res) {
     const payload = JSON.stringify({
       model: 'claude-haiku-4-5',
       max_tokens: 4096,
+      temperature: 0,
       system: SYSTEM_PROMPT,
       messages: [{
         role: 'user',

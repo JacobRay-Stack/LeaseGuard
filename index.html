@@ -901,37 +901,28 @@
     <div class="modal">
       <button class="modal-close" onclick="document.getElementById('paywallModal').classList.remove('visible')">✕</button>
       <div class="modal-top-bar">
-        <h2>Unlock Full Access</h2>
+        <h2>You've Used Your Free Analyses</h2>
         <span class="modal-top-badge">Lawyers charge $300/hr</span>
       </div>
       <div class="modal-body">
         <div class="modal-comparison">
           <span class="vs-bad">Lawyer review: $300–$500</span>
           <span class="vs-sep">vs</span>
-          <span class="vs-good">AnalyzeThisContract: $4.99</span>
+          <span class="vs-good">AnalyzeThisContract Pro: $12.99/mo</span>
         </div>
-        <div class="modal-plans">
-          <div class="modal-plan">
-            <div class="modal-plan-badge">Basic</div>
-            <div class="plan-price">$4.99 <span>one-time</span></div>
-            <ul class="plan-features">
-              <li>5 analyses</li>
-              <li>Red flags flagged</li>
-              <li>Key terms extracted</li>
-              <li>Plain English summary</li>
-            </ul>
-            <button class="plan-btn basic" onclick="startCheckout('basic')">Get Basic</button>
-          </div>
-          <div class="modal-plan pro">
-            <div class="modal-plan-badge">Pro — Most Popular</div>
-            <div class="plan-price">$9.99 <span>/mo</span></div>
-            <ul class="plan-features">
+        <div class="modal-plans" style="grid-template-columns:1fr;">
+          <div class="modal-plan pro" style="border-color:#e8c96d;background:linear-gradient(135deg,rgba(232,201,109,0.07),rgba(232,201,109,0.01));">
+            <div class="modal-plan-badge" style="color:#e8c96d;">Pro Plan</div>
+            <div class="plan-price" style="font-size:34px;">$12.99 <span style="font-size:13px;color:#8a8f9e;">/month &nbsp;·&nbsp; cancel anytime</span></div>
+            <ul class="plan-features" style="margin:14px 0 18px;display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;">
               <li>Unlimited analyses</li>
-              <li>Ask AI questions</li>
-              <li>Negotiation suggestions</li>
-              <li>PDF export & history</li>
+              <li>Red flags identified</li>
+              <li>Missing clause alerts</li>
+              <li>Negotiation tips</li>
+              <li>Saved history</li>
+              <li>PDF export</li>
             </ul>
-            <button class="plan-btn pro-btn" onclick="startCheckout('pro')">Start Pro →</button>
+            <button class="plan-btn pro-btn" style="font-size:15px;padding:14px;" onclick="startCheckout('pro')">Start Pro — $12.99/mo →</button>
           </div>
         </div>
         <div class="modal-trust">🔒 Stripe &nbsp;·&nbsp; ✓ No hidden fees &nbsp;·&nbsp; ↩ Cancel anytime</div>
@@ -943,8 +934,7 @@
 </div>
 
 <script>
-const FREE_LIMIT = 3;
-const PAID_CREDITS = 5;
+const FREE_LIMIT = 5;
 
 function getUsage() {
   try { return JSON.parse(localStorage.getItem('atc_usage') || '{"free":0,"paid":0}'); }
@@ -962,14 +952,13 @@ function incrementUsage() {
   saveUsage(u);
 }
 function updateUsageUI() {
-  const { type, remaining } = getRemainingAnalyses();
+  const { remaining } = getRemainingAnalyses();
   const dots = document.getElementById('usageDots');
   const text = document.getElementById('usageText');
   if (!dots) return;
   dots.innerHTML = '';
-  const total = type === 'paid' ? PAID_CREDITS : FREE_LIMIT;
-  const used = total - remaining;
-  for (let i = 0; i < total; i++) {
+  const used = FREE_LIMIT - remaining;
+  for (let i = 0; i < FREE_LIMIT; i++) {
     const d = document.createElement('div');
     d.className = 'usage-dot' + (i < used ? ' used' : '');
     dots.appendChild(d);
@@ -1193,12 +1182,12 @@ async function updateNavForUser() {
     if (credits && !credits.error) {
       const u = getUsage();
       if (credits.plan === 'pro') { u.pro = true; u.paid = 9999; }
-      else { u.pro = false; u.paid = 0; u.free = Math.max(0, 3 - (credits.credits || 0)); }
+      else { u.pro = false; u.paid = 0; u.free = Math.max(0, 5 - (credits.credits || 0)); }
       saveUsage(u);
     }
     const label = credits.plan === 'pro' ? '✦ Pro — Unlimited' : `${credits.credits} ${credits.credits === 1 ? 'analysis' : 'analyses'} left`;
     const email = currentUser.email || '';
-    const isPaid = credits.plan === 'pro' || credits.plan === 'basic';
+    const isPaid = credits.plan === 'pro';
     const historyBtn = isPaid ? `<button class="nav-btn history" onclick="openDashboard()">📁 History</button>` : '';
     nav.innerHTML = `<div class="user-nav"><span title="${email}">${email}</span><span class="credit-badge">${label}</span>${historyBtn}<button class="nav-btn" onclick="logout()">Log Out</button></div>`;
   } catch(e) {
@@ -1214,7 +1203,7 @@ window.addEventListener('load', async () => {
   const params = new URLSearchParams(window.location.search);
   if (params.get('checkout') === 'success') {
     const plan = params.get('plan') || 'basic';
-    showToast(plan === 'pro' ? 'Payment received! Pro plan will activate shortly.' : 'Payment received! Your analyses will be available shortly.');
+    showToast(plan === 'pro' ? '🎉 Pro plan activated! Unlimited analyses are ready.' : 'Payment received! Your analyses will be available shortly.');
     window.history.replaceState({}, '', window.location.pathname);
     let attempts = 0;
     const poll = setInterval(async () => { attempts++; await updateNavForUser(); if (attempts >= 6) clearInterval(poll); }, 2000);

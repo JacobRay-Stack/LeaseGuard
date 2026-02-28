@@ -126,11 +126,11 @@ Scoring guidelines:
 
 keyTerms should include: monthly rent, lease term, security deposit, late fee, notice period, pet policy, utilities, maintenance responsibility, early termination penalty, and any other financially significant terms found.
 
-redFlags: each item must start with an ALL-CAPS title followed by a colon and explanation. Cite the problematic clause, explain the risk, and reference applicable law. Include every red flag you find — do not omit any. Minimum 3, no artificial maximum.
+redFlags: each item must start with an ALL-CAPS title followed by a colon and explanation. Cite the problematic clause, explain the risk, and reference applicable law. Aim for 3-7 items.
 
-missingClauses: each item must start with an ALL-CAPS clause name followed by a colon and explanation. Include every missing clause that would meaningfully protect the tenant. Minimum 2, no artificial maximum.
+missingClauses: each item must start with an ALL-CAPS clause name followed by a colon and explanation. Aim for 3-6 items.
 
-negotiationTips: exactly 4 specific, practical tips the tenant can use to negotiate better terms before signing. Each must start with an ALL-CAPS topic followed by a colon. Focus on the most impactful changes they could realistically request.
+negotiationTips: 3-5 specific, practical tips the tenant can use to negotiate better terms before signing. Each must start with an ALL-CAPS topic followed by a colon. Focus on the most impactful changes they could realistically request.
 
 Be thorough, accurate, and professional. Your analysis may be the only legal review this person gets before signing.`;
 
@@ -216,15 +216,18 @@ module.exports = function handler(req, res) {
       }
     }
 
-    // ── Call Anthropic ─────────────────────────────────────────────────
+    // ── Call Anthropic ────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    // Trim to 18000 chars — leaves plenty of output budget within 8192 tokens
+    const trimmedContract = contractText.trim().slice(0, 18000);
+
     const payload = JSON.stringify({
       model: 'claude-haiku-4-5',
-      max_tokens: 4096,
+      max_tokens: 8192,
       temperature: 0,
       system: SYSTEM_PROMPT,
       messages: [{
         role: 'user',
-        content: 'Analyze this lease agreement and return the JSON analysis:\n\n' + contractText.slice(0, 20000),
+        content: 'Analyze this lease agreement and return the JSON analysis:\n\n' + trimmedContract,
       }],
     });
 
@@ -246,6 +249,7 @@ module.exports = function handler(req, res) {
       apiRes.on('end', () => {
         try {
           const parsed = JSON.parse(data);
+
           if (parsed.error) {
             console.error('[analyze] Anthropic error:', parsed.error);
             return res.status(500).json({
@@ -253,16 +257,35 @@ module.exports = function handler(req, res) {
               type: parsed.error.type,
             });
           }
+
+          // Detect truncation — stop_reason=max_tokens means JSON was cut off mid-stream
+          if (parsed.stop_reason === 'max_tokens') {
+            console.error('[analyze] Response truncated — contract too long');
+            return res.status(500).json({
+              error: 'This contract is too long to analyze in one pass. Please paste only the main body of the lease (remove signature pages, addenda, and exhibits) and try again.',
+              code: 'RESPONSE_TRUNCATED',
+            });
+          }
+
           // Strip markdown code fences if model wraps output despite instructions
-          const text = parsed.content[0].text
+          const text = (parsed.content[0].text || '')
             .replace(/^```json\s*/i, '')
             .replace(/^```\s*/i, '')
             .replace(/\s*```$/i, '')
             .trim();
+
+          if (!text) {
+            console.error('[analyze] Empty response from model');
+            return res.status(500).json({ error: 'Empty response from AI. Please try again.' });
+          }
+
           res.status(200).json(JSON.parse(text));
         } catch (e) {
           console.error('[analyze] Parse error:', e.message);
-          res.status(500).json({ error: 'Parse error: ' + e.message });
+          res.status(500).json({
+            error: 'The AI returned an unexpected response format. Please try again.',
+            code: 'PARSE_ERROR',
+          });
         }
       });
     });

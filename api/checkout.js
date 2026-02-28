@@ -64,12 +64,14 @@ module.exports = function handler(req, res) {
 
     try {
       const parsed = JSON.parse(body);
-      // Only allow known plans — anything else defaults to basic
-      plan = ['basic', 'pro'].includes(parsed.plan) ? parsed.plan : 'basic';
+      // Only pro plan exists now — anything else is rejected
+      plan = parsed.plan === 'pro' ? 'pro' : null;
       clientToken = parsed.token || null;
     } catch (e) {
       return res.status(400).json({ error: 'Invalid JSON' });
     }
+
+    if (!plan) return res.status(400).json({ error: 'Invalid plan' });
 
     let userId = null;
     let userEmail = null;
@@ -83,31 +85,23 @@ module.exports = function handler(req, res) {
     }
 
     const origin = req.headers.origin || 'https://analyzethiscontract.com';
-    const successUrl = `${origin}?checkout=success&plan=${plan}`;
+    const successUrl = `${origin}?checkout=success&plan=pro`;
     const cancelUrl = `${origin}?checkout=cancelled`;
-    const isPro = plan === 'pro';
 
     const params = new URLSearchParams({
       'payment_method_types[0]': 'card',
       'line_items[0][price_data][currency]': 'usd',
-      'line_items[0][price_data][product_data][name]': isPro
-        ? 'AnalyzeThisContract Pro'
-        : 'AnalyzeThisContract Basic',
-      'line_items[0][price_data][product_data][description]': isPro
-        ? 'Unlimited contract analyses per month'
-        : '5 contract analyses',
-      'line_items[0][price_data][unit_amount]': isPro ? '999' : '499',
+      'line_items[0][price_data][product_data][name]': 'AnalyzeThisContract Pro',
+      'line_items[0][price_data][product_data][description]': 'Unlimited contract analyses per month, plus saved history and PDF export',
+      'line_items[0][price_data][unit_amount]': '1299',
+      'line_items[0][price_data][recurring][interval]': 'month',
       'line_items[0][quantity]': '1',
-      'mode': isPro ? 'subscription' : 'payment',
+      'mode': 'subscription',
       'success_url': successUrl,
       'cancel_url': cancelUrl,
       ...(userId ? { 'client_reference_id': userId } : {}),
       ...(userEmail ? { 'customer_email': userEmail } : {}),
     });
-
-    if (isPro) {
-      params.set('line_items[0][price_data][recurring][interval]', 'month');
-    }
 
     const paramStr = params.toString();
 

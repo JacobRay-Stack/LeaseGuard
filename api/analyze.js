@@ -87,52 +87,50 @@ async function consumeCredit(userId) {
 }
 
 // ── System prompt ──────────────────────────────────────────────────────
-const SYSTEM_PROMPT = `You are an expert contract analyst specializing in residential and commercial lease agreements. You have deep knowledge of landlord-tenant law across all U.S. states and Canadian provinces, including jurisdiction-specific statutes, tenant rights, and standard industry practices.
+const SYSTEM_PROMPT = `You are a careful, plain-English lease agreement reviewer. Your job is to read contracts and help tenants understand what they are agreeing to — flagging terms that are unusual, one-sided, or worth questioning before signing.
 
-Your job is to analyze lease agreements thoroughly and objectively, identifying both landlord-favorable and tenant-favorable terms, legal compliance issues, missing standard protections, and unusual or potentially problematic clauses.
+CRITICAL RULES — follow these without exception:
+1. NEVER cite specific statute numbers, section codes, or case law. You do not have reliable legal knowledge and citing statutes you are uncertain about causes real harm to real people.
+2. NEVER state that a clause "violates" or "is illegal" under any specific law. Instead use language like: "this is unusual," "this is worth questioning," "landlords typically cannot do this," "this is more one-sided than standard leases," "a lawyer should review this."
+3. NEVER make definitive legal conclusions. Your role is to flag, not adjudicate.
+4. DO be specific about what the clause actually says and why it is unusual or risky in plain English.
+5. DO compare to what is standard or common in most leases so the user understands what "normal" looks like.
+6. DO recommend consulting a local attorney or tenant rights organization for any clause that raises serious concern.
 
-When analyzing a lease, you must:
-1. Identify the jurisdiction from the contract and apply the correct local laws
-2. Flag any clauses that violate applicable landlord-tenant statutes
-3. Note missing clauses that are standard for the jurisdiction
-4. Highlight terms that are unusually one-sided in either direction
-5. Extract all key financial and legal terms
-6. Assign an overall score based on legal compliance and fairness
+Your analysis must be genuinely useful — not vague or overly hedged. Flag real issues clearly. Explain the practical risk in plain English. Help the user know what questions to ask.
 
 Return ONLY a valid JSON object with exactly this structure — no preamble, no explanation, no markdown, no code fences:
 
 {
-  "summary": "2-3 sentence plain English overview of the contract, including jurisdiction, key terms, and overall assessment",
+  "summary": "2-3 sentence plain English overview of the contract. Include the rent amount, lease term, location if visible, and your overall impression of whether this is a standard lease or one that warrants careful review.",
   "score": "good or warn or bad",
-  "scoreLabel": "One of: COMPLIANT - Strong tenant protections | REVIEW RECOMMENDED - Some concerns | HIGH RISK - Significant issues found",
+  "scoreLabel": "One of: LOOKS STANDARD - Review before signing | WORTH REVIEWING - Some unusual terms | REVIEW CAREFULLY - Several one-sided clauses",
   "keyTerms": [
     { "label": "Term name", "value": "Term value" }
   ],
   "redFlags": [
-    "CLAUSE TITLE (Section X): Explanation of why this is problematic and which law or standard it may violate."
+    "CLAUSE TITLE: What this clause says in plain English, why it is unusual or one-sided compared to a standard lease, and what practical risk it creates for the tenant. Do not cite statute numbers. End with: Recommend asking a lawyer about this before signing."
   ],
   "missingClauses": [
-    "CLAUSE NAME: Explanation of why it should be included and what risk its absence creates."
+    "CLAUSE NAME: What this clause would normally cover and what risk its absence creates for the tenant in plain English."
   ],
   "negotiationTips": [
-    "NEGOTIATION POINT: Specific, actionable advice on how to negotiate or push back on this clause before signing."
+    "NEGOTIATION POINT: Specific, practical advice on what to ask the landlord to change and how to word the request. Focus on realistic changes a tenant could actually negotiate."
   ]
 }
 
-Scoring guidelines:
-- good: Contract is legally compliant, reasonably balanced, no major issues
-- warn: Contract has 1-3 moderate concerns or missing standard protections
-- bad: Contract has illegal clauses, is heavily one-sided, or is missing critical protections
+Scoring guidelines — score based on how unusual and one-sided the lease is, not on legal conclusions:
+- good: Lease looks fairly standard with no major unusual terms. Still recommend reading carefully before signing.
+- warn: Lease has 1-3 terms that are more one-sided or unusual than typical. Worth negotiating or getting a second opinion on.
+- bad: Lease has several terms that are significantly more one-sided than standard leases, or terms that are highly unusual and create serious financial risk.
 
-keyTerms should include: monthly rent, lease term, security deposit, late fee, notice period, pet policy, utilities, maintenance responsibility, early termination penalty, and any other financially significant terms found.
+keyTerms must include every financially significant term found: monthly rent, lease term, security deposit, late fee, notice period, pet policy, utilities, maintenance responsibility, early termination terms, and any other dollar amounts or deadlines in the lease.
 
-redFlags: each item must start with an ALL-CAPS title followed by a colon and explanation. Cite the problematic clause, explain the risk, and reference applicable law. Aim for 3-7 items.
+redFlags: Flag every clause that is more one-sided, unusual, or risky than what appears in standard leases. Explain clearly in plain English what the clause does and why it matters. Never cite statute numbers. Never say "violates [law]." Do say "unusual," "more restrictive than most leases," "worth asking a lawyer about." Include every flag you find — do not omit any.
 
-missingClauses: each item must start with an ALL-CAPS clause name followed by a colon and explanation. Aim for 3-6 items.
+missingClauses: Flag protections that are absent but commonly appear in standard leases for the tenant's benefit. Explain what the missing clause would have covered and what the tenant is exposed to without it.
 
-negotiationTips: 3-5 specific, practical tips the tenant can use to negotiate better terms before signing. Each must start with an ALL-CAPS topic followed by a colon. Focus on the most impactful changes they could realistically request.
-
-Be thorough, accurate, and professional. Your analysis may be the only legal review this person gets before signing.`;
+negotiationTips: exactly 4 practical tips. Each must be specific to this lease — not generic advice. Tell the tenant exactly what to ask for and how.`;
 
 // ── Handler ────────────────────────────────────────────────────────────
 module.exports = function handler(req, res) {
@@ -216,18 +214,14 @@ module.exports = function handler(req, res) {
       }
     }
 
-    // ── Call Anthropic ────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-    // Trim to 18000 chars — leaves plenty of output budget within 8192 tokens
-    const trimmedContract = contractText.trim().slice(0, 18000);
-
+    // ── Call Anthropic ─────────────────────────────────────────────────
     const payload = JSON.stringify({
       model: 'claude-haiku-4-5',
-      max_tokens: 8192,
-      temperature: 0,
+      max_tokens: 4096,
       system: SYSTEM_PROMPT,
       messages: [{
         role: 'user',
-        content: 'Analyze this lease agreement and return the JSON analysis:\n\n' + trimmedContract,
+        content: 'Analyze this lease agreement and return the JSON analysis:\n\n' + contractText.slice(0, 20000),
       }],
     });
 
@@ -249,7 +243,6 @@ module.exports = function handler(req, res) {
       apiRes.on('end', () => {
         try {
           const parsed = JSON.parse(data);
-
           if (parsed.error) {
             console.error('[analyze] Anthropic error:', parsed.error);
             return res.status(500).json({
@@ -257,35 +250,16 @@ module.exports = function handler(req, res) {
               type: parsed.error.type,
             });
           }
-
-          // Detect truncation — stop_reason=max_tokens means JSON was cut off mid-stream
-          if (parsed.stop_reason === 'max_tokens') {
-            console.error('[analyze] Response truncated — contract too long');
-            return res.status(500).json({
-              error: 'This contract is too long to analyze in one pass. Please paste only the main body of the lease (remove signature pages, addenda, and exhibits) and try again.',
-              code: 'RESPONSE_TRUNCATED',
-            });
-          }
-
           // Strip markdown code fences if model wraps output despite instructions
-          const text = (parsed.content[0].text || '')
+          const text = parsed.content[0].text
             .replace(/^```json\s*/i, '')
             .replace(/^```\s*/i, '')
             .replace(/\s*```$/i, '')
             .trim();
-
-          if (!text) {
-            console.error('[analyze] Empty response from model');
-            return res.status(500).json({ error: 'Empty response from AI. Please try again.' });
-          }
-
           res.status(200).json(JSON.parse(text));
         } catch (e) {
           console.error('[analyze] Parse error:', e.message);
-          res.status(500).json({
-            error: 'The AI returned an unexpected response format. Please try again.',
-            code: 'PARSE_ERROR',
-          });
+          res.status(500).json({ error: 'Parse error: ' + e.message });
         }
       });
     });

@@ -956,6 +956,48 @@
     </div>
   </div>
 
+  <!-- Guest Limit Modal -->
+  <div class="modal-overlay" id="guestLimitModal">
+    <div class="modal" style="max-width:560px;">
+      <button class="modal-close" onclick="document.getElementById('guestLimitModal').classList.remove('visible')">✕</button>
+      <div class="modal-top-bar">
+        <h2>You've Used Your 3 Free Previews</h2>
+        <span class="modal-top-badge">No credit card needed</span>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:14px;color:#555;margin:0 0 20px;line-height:1.6;">You've seen what AnalyzeThisContract can do. Create a free account to keep going — it takes 30 seconds.</p>
+        <div class="modal-plans" style="grid-template-columns:1fr 1fr;">
+          <!-- Free Plan -->
+          <div class="modal-plan">
+            <div class="modal-plan-badge">Free Account</div>
+            <div class="plan-price" style="font-size:26px;">$0 <span>forever</span></div>
+            <ul class="plan-features">
+              <li>5 contract analyses</li>
+              <li>Red flags &amp; key terms</li>
+              <li>Missing clause alerts</li>
+              <li>Negotiation tips</li>
+            </ul>
+            <button class="plan-btn basic" onclick="document.getElementById('guestLimitModal').classList.remove('visible'); showAuth('signup');">Create Free Account →</button>
+          </div>
+          <!-- Pro Plan -->
+          <div class="modal-plan pro" style="border-color:#e8c96d;background:linear-gradient(135deg,rgba(232,201,109,0.07),rgba(232,201,109,0.01));">
+            <div class="modal-plan-badge" style="color:#e8c96d;">Pro Plan</div>
+            <div class="plan-price" style="font-size:26px;">$12.99 <span>/month</span></div>
+            <ul class="plan-features">
+              <li>Unlimited analyses</li>
+              <li>Red flags &amp; key terms</li>
+              <li>Missing clause alerts</li>
+              <li>Saved history</li>
+              <li>PDF export</li>
+            </ul>
+            <button class="plan-btn pro-btn" onclick="startCheckout('pro')">Start Pro →</button>
+          </div>
+        </div>
+        <div class="modal-trust">🔒 Stripe &nbsp;·&nbsp; ✓ No hidden fees &nbsp;·&nbsp; ↩ Cancel anytime</div>
+      </div>
+    </div>
+  </div>
+
   <p class="disclaimer">AnalyzeThisContract is not a law firm and does not provide legal advice. Always consult a qualified attorney for legal matters. &nbsp;·&nbsp; <a href="/services.html" style="color:var(--muted);text-decoration:none;opacity:1;">Services &amp; Pricing</a></p>
 </div>
 
@@ -1172,6 +1214,13 @@ async function analyzeContract() {
       document.getElementById('loading').classList.remove('visible');
       document.getElementById('inputSection').style.display = 'block';
       document.getElementById('paywallModal').classList.add('visible');
+      btn.disabled = false; btn.innerHTML = '<span>🔍</span> Analyze Contract';
+      return;
+    }
+    if (response.status === 403 && result.code === 'GUEST_LIMIT') {
+      document.getElementById('loading').classList.remove('visible');
+      document.getElementById('inputSection').style.display = 'block';
+      document.getElementById('guestLimitModal').classList.add('visible');
       btn.disabled = false; btn.innerHTML = '<span>🔍</span> Analyze Contract';
       return;
     }

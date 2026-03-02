@@ -1,5 +1,6 @@
 const https = require('https');
 const { rateLimit } = require('./rateLimit');
+const { lastCreditEmail } = require('./email');
 
 // ── Timeout wrapper ────────────────────────────────────────────────────
 function withTimeout(promise, ms, label) {
@@ -210,19 +211,16 @@ module.exports = function handler(req, res) {
           console.error('[analyze] consumeCredit unexpected failure:', creditResult);
           return res.status(500).json({ error: 'Could not verify account credits. Please try again.' });
         }
+        // ── Last-credit email: fire when user just used their final credit ──
+        if (creditResult.ok && creditResult.plan !== 'pro' && creditResult.credits === 0) {
+          lastCreditEmail(user.email).catch((err) =>
+            console.error('[analyze] Last-credit email failed:', err.message)
+          );
+        }
       } catch (err) {
         // Fail closed — don't allow free analyses if Supabase is unreachable
         console.error('[analyze] Credit check failed:', err.message);
         return res.status(503).json({ error: 'Service temporarily unavailable. Please try again in a moment.' });
-      }
-    } else {
-      // ── Guest (unauthenticated) IP limit: 3 analyses per 24 hours ─────
-      const guestRl = rateLimit(req, { windowMs: 24 * 60 * 60_000, max: 3, label: 'guest_analyze' });
-      if (!guestRl.ok) {
-        return res.status(403).json({
-          error: 'Guest limit reached. Create a free account for 5 analyses — no credit card required.',
-          code: 'GUEST_LIMIT',
-        });
       }
     } else {
       // ── Guest (unauthenticated) IP limit: 3 analyses per 24 hours ─────

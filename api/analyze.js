@@ -224,7 +224,7 @@ module.exports = function handler(req, res) {
       system: SYSTEM_PROMPT,
       messages: [{
         role: 'user',
-        content: 'Analyze this lease agreement and return the JSON analysis:\n\n' + contractText.slice(0, 20000),
+        content: 'Analyze this lease agreement and return the JSON analysis:\n\n' + contractText.slice(0, 12000),
       }],
     });
 
@@ -254,12 +254,43 @@ module.exports = function handler(req, res) {
             });
           }
           // Strip markdown code fences if model wraps output despite instructions
-          const text = parsed.content[0].text
+          let text = parsed.content[0].text
             .replace(/^```json\s*/i, '')
             .replace(/^```\s*/i, '')
             .replace(/\s*```$/i, '')
             .trim();
-          res.status(200).json(JSON.parse(text));
+
+          // If JSON is truncated, attempt to salvage it by closing open structures
+          let result;
+          try {
+            result = JSON.parse(text);
+          } catch(parseErr) {
+            // Truncated — close any open array/object and retry
+            const repaired = text
+              .replace(/,\s*$/, '')           // trailing comma
+              .replace(/"[^"]*$/, '"...')      // unclosed string
+              + ']}]}';                        // close array + object
+            try {
+              result = JSON.parse(repaired);
+            } catch(e2) {
+              // Still broken — try a more aggressive repair by finding last complete item
+              const lastBrace = text.lastIndexOf('"}');
+              const lastBracket = text.lastIndexOf('"]');
+              const cutAt = Math.max(lastBrace, lastBracket);
+              if (cutAt > 100) {
+                try {
+                  result = JSON.parse(text.slice(0, cutAt + 2) + ']}]}');
+                } catch(e3) {
+                  console.error('[analyze] Parse error after repair attempts:', parseErr.message);
+                  return res.status(500).json({ error: 'Could not parse AI response. Please try again.' });
+                }
+              } else {
+                console.error('[analyze] Parse error:', parseErr.message);
+                return res.status(500).json({ error: 'Could not parse AI response. Please try again.' });
+              }
+            }
+          }
+          res.status(200).json(result);
         } catch (e) {
           console.error('[analyze] Parse error:', e.message);
           res.status(500).json({ error: 'Parse error: ' + e.message });

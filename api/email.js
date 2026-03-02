@@ -72,8 +72,8 @@ function welcomeEmail(to) {
               You're in. Let's protect you. ⚖️
             </h1>
             <p style="margin:0 0 20px;font-size:15px;color:#9090b0;line-height:1.7;">
-              You now have <strong style="color:#e8c96d;">3 free contract analyses</strong> ready to use. 
-              Drop any lease or contract and get an instant plain-English breakdown — 
+              You now have <strong style="color:#e8c96d;">5 free contract analyses</strong> ready to use.
+              Drop any lease or contract and get an instant plain-English breakdown —
               red flags, missing clauses, and negotiation tips included.
             </p>
             <!-- CTA -->
@@ -104,7 +104,7 @@ function welcomeEmail(to) {
         <tr>
           <td style="padding:20px 40px;border-top:1px solid rgba(255,255,255,0.08);">
             <p style="margin:0;font-size:12px;color:#555577;line-height:1.6;">
-              AnalyzeThisContract is not a law firm and does not provide legal advice. 
+              AnalyzeThisContract is not a law firm and does not provide legal advice.
               Always consult a qualified attorney for legal matters.<br><br>
               <a href="${SITE_URL}" style="color:#555577;">${SITE_URL}</a>
             </p>
@@ -124,7 +124,7 @@ function paymentConfirmationEmail(to, plan) {
     to,
     subject: isPro
       ? '✅ Pro plan activated — unlimited analyses ready'
-      : '✅ Payment confirmed — your 5 analyses are ready',
+      : '✅ Payment confirmed — your analyses are ready',
     html: `
 <!DOCTYPE html>
 <html>
@@ -149,7 +149,7 @@ function paymentConfirmationEmail(to, plan) {
             <p style="margin:0 0 24px;font-size:15px;color:#9090b0;line-height:1.7;">
               ${isPro
                 ? 'You now have <strong style="color:#e8c96d;">unlimited contract analyses</strong> every month, plus PDF export, analysis history, and priority support.'
-                : 'You now have <strong style="color:#e8c96d;">5 contract analyses</strong> ready to use. They never expire.'}
+                : 'You now have <strong style="color:#e8c96d;">analyses</strong> ready to use.'}
             </p>
             <table cellpadding="0" cellspacing="0" style="margin:0 0 28px;">
               <tr>
@@ -271,25 +271,19 @@ function lastCreditEmail(to) {
           <td style="padding:32px 40px;">
             <p style="margin:0 0 8px;font-size:32px;">⚠️</p>
             <h1 style="margin:0 0 12px;font-size:22px;font-weight:700;color:#f0ece3;line-height:1.3;">
-              You've used all 3 free analyses
+              You've used all 5 free analyses
             </h1>
             <p style="margin:0 0 20px;font-size:15px;color:#9090b0;line-height:1.7;">
               Don't stop now — upgrade to keep protecting yourself from bad contracts.
             </p>
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
               <tr>
-                <td width="48%" style="padding:16px;background:rgba(255,255,255,0.04);border-radius:8px;border:1px solid rgba(255,255,255,0.07);vertical-align:top;">
-                  <p style="margin:0 0 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#9090b0;">Basic</p>
-                  <p style="margin:0 0 10px;font-size:22px;font-weight:700;color:#f0ece3;">$4.99 <span style="font-size:13px;font-weight:400;color:#9090b0;">one-time</span></p>
-                  <p style="margin:4px 0;font-size:13px;color:#9090b0;">✓ 5 analyses</p>
-                  <p style="margin:4px 0;font-size:13px;color:#9090b0;">✓ Never expire</p>
-                </td>
-                <td width="4%"></td>
-                <td width="48%" style="padding:16px;background:rgba(232,201,109,0.08);border-radius:8px;border:1px solid rgba(232,201,109,0.25);vertical-align:top;">
-                  <p style="margin:0 0 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#e8c96d;">Pro — Best Value</p>
-                  <p style="margin:0 0 10px;font-size:22px;font-weight:700;color:#f0ece3;">$9.99 <span style="font-size:13px;font-weight:400;color:#9090b0;">/mo</span></p>
-                  <p style="margin:4px 0;font-size:13px;color:#9090b0;">✓ Unlimited</p>
-                  <p style="margin:4px 0;font-size:13px;color:#9090b0;">✓ History + PDF</p>
+                <td style="padding:16px;background:rgba(232,201,109,0.08);border-radius:8px;border:1px solid rgba(232,201,109,0.25);vertical-align:top;">
+                  <p style="margin:0 0 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#e8c96d;">Pro — Unlimited</p>
+                  <p style="margin:0 0 10px;font-size:22px;font-weight:700;color:#f0ece3;">$12.99 <span style="font-size:13px;font-weight:400;color:#9090b0;">/month &nbsp;·&nbsp; cancel anytime</span></p>
+                  <p style="margin:4px 0;font-size:13px;color:#9090b0;">✓ Unlimited analyses every month</p>
+                  <p style="margin:4px 0;font-size:13px;color:#9090b0;">✓ Saved history + PDF export</p>
+                  <p style="margin:4px 0;font-size:13px;color:#9090b0;">✓ Red flags, missing clauses & negotiation tips</p>
                 </td>
               </tr>
             </table>
@@ -297,7 +291,7 @@ function lastCreditEmail(to) {
               <tr>
                 <td style="background:#e8c96d;border-radius:8px;">
                   <a href="${SITE_URL}" style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:700;color:#1a1a2e;text-decoration:none;">
-                    Upgrade Now →
+                    Upgrade to Pro →
                   </a>
                 </td>
               </tr>

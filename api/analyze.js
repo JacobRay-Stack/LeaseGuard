@@ -1,4 +1,5 @@
 const https = require('https');
+const { rateLimit } = require('./rateLimit');
 
 // ── Timeout wrapper ────────────────────────────────────────────────────
 function withTimeout(promise, ms, label) {

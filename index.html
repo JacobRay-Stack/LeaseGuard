@@ -548,6 +548,8 @@
     .print-header-right { text-align: right !important; }
     .print-header-right p { font-size: 10px !important; color: #9090b0 !important; line-height: 1.7 !important; }
     .print-disclaimer { display: block !important; margin-top: 20px !important; padding: 10px 14px !important; background: #f8f8fa !important; border: 1px solid #e0e0e8 !important; border-radius: 5px !important; font-size: 9px !important; color: #999 !important; text-align: center !important; line-height: 1.6 !important; }
+    .ai-disclaimer { display: block !important; background: #f5f8ff !important; border: 1px solid #c8d8f8 !important; border-radius: 6px !important; padding: 10px 14px !important; margin-bottom: 14px !important; font-size: 10px !important; color: #444 !important; line-height: 1.6 !important; }
+    .ai-disclaimer strong { color: #1a1a2e !important; }
   }
   .print-only { display: none; }
   .print-disclaimer { display: none; }
@@ -691,7 +693,6 @@
   .user-nav { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
   .credit-badge { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 12px; color: var(--accent); font-weight: 600; }
   .disclaimer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 40px; opacity: 0.6; }
-  /* ── AI Accuracy Disclaimer Banner ── */
   .ai-disclaimer {
     display: flex;
     align-items: flex-start;
@@ -705,11 +706,7 @@
     line-height: 1.6;
     color: var(--muted);
   }
-  .ai-disclaimer-icon {
-    font-size: 16px;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
+  .ai-disclaimer-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
   .ai-disclaimer strong { color: var(--text); font-weight: 600; }
   .ai-disclaimer a { color: var(--accent); text-decoration: none; }
   .ai-disclaimer a:hover { text-decoration: underline; }
@@ -828,12 +825,12 @@
   </header>
 
   <div class="input-card" id="inputSection">
-    <label class="input-label">Upload your contract (PDF, TXT, DOC, DOCX)</label>
+    <label class="input-label">Upload your contract (PDF, TXT, DOCX)</label>
     <div class="drop-zone" id="dropZone">
       <input type="file" id="fileInput" accept=".pdf,.txt,.docx" onchange="handleFileSelect(event)">
       <div class="drop-zone-icon">📄</div>
       <div class="drop-zone-text"><strong>Drop a file here</strong> or click to browse</div>
-      <div class="drop-zone-meta">Supports PDF, TXT, DOC, DOCX</div>
+      <div class="drop-zone-meta">Supports PDF, TXT, DOCX &mdash; paste .doc text manually</div>
     </div>
 
     <div class="file-loaded" id="fileLoaded" style="display:none">
@@ -973,11 +970,11 @@ function saveUsage(u) { localStorage.setItem('atc_usage', JSON.stringify(u)); }
 function getRemainingAnalyses() {
   const u = getUsage();
   if (u.paid > 0) return { type: 'paid', remaining: u.paid };
-  return { type: 'free', remaining: Math.max(0, FREE_LIMIT - u.free) };
+  return { type: 'free', remaining: Math.max(0, FREE_LIMIT - (u.free || 0)) };
 }
 function incrementUsage() {
   const u = getUsage();
-  if (u.paid > 0) { u.paid--; } else { u.free++; }
+  if (u.paid > 0) { u.paid--; } else { u.free = (u.free || 0) + 1; }
   saveUsage(u);
 }
 function updateUsageUI() {
@@ -998,7 +995,7 @@ function updateUsageUI() {
 
 function showToast(msg) {
   const t = document.createElement('div');
-  t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;z-index:200;';
+  t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;z-index:9999;';
   t.textContent = msg;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 4000);
@@ -1013,7 +1010,7 @@ async function startCheckout(plan) {
     const res = await fetch('/api/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan: plan || 'basic', token: authToken || null })
+      body: JSON.stringify({ plan: plan || 'pro', token: authToken || null })
     });
     const data = await res.json();
     if (data.url) window.location.href = data.url;
@@ -1161,7 +1158,7 @@ async function analyzeContract() {
     if (remaining <= 0) { document.getElementById('paywallModal').classList.add('visible'); return; }
   }
 
-  if (!text || text.length < 50) { errorMsg.textContent = 'Please upload a file or paste a lease agreement to analyze.'; errorMsg.classList.add('visible'); return; }
+  if (!text || text.length < 50) { errorMsg.textContent = 'Please upload a file or paste a contract to analyze.'; errorMsg.classList.add('visible'); return; }
 
   btn.disabled = true; btn.innerHTML = '<span>⏳</span> Analyzing…';
   document.getElementById('inputSection').style.display = 'none';
@@ -1231,7 +1228,7 @@ window.addEventListener('load', async () => {
   await updateNavForUser();
   const params = new URLSearchParams(window.location.search);
   if (params.get('checkout') === 'success') {
-    const plan = params.get('plan') || 'basic';
+    const plan = params.get('plan') || 'pro';
     showToast(plan === 'pro' ? '🎉 Pro plan activated! Unlimited analyses are ready.' : 'Payment received! Your analyses will be available shortly.');
     window.history.replaceState({}, '', window.location.pathname);
     let attempts = 0;
@@ -1243,9 +1240,17 @@ window.addEventListener('load', async () => {
 const dropZone = document.getElementById('dropZone');
 dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); const file = e.dataTransfer.files[0]; if (file) processFile(file); });
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+});
 
-function handleFileSelect(e) { const file = e.target.files[0]; if (file) processFile(file); }
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) processFile(file);
+}
 
 async function processFile(file) {
   const errorMsg = document.getElementById('errorMsg');
@@ -1262,7 +1267,6 @@ async function processFile(file) {
       text = await extractPdfText(file);
 
     } else if (ext === 'docx') {
-      // Load mammoth.js from CDN on demand
       if (typeof mammoth === 'undefined') {
         await new Promise((resolve, reject) => {
           const s = document.createElement('script');
@@ -1275,13 +1279,11 @@ async function processFile(file) {
       const arrayBuffer = await file.arrayBuffer();
       const result = await mammoth.extractRawText({ arrayBuffer });
       text = result.value || '';
-      // Warn user if mammoth flagged conversion issues
       if (result.messages && result.messages.length > 0) {
         console.warn('[docx] Mammoth warnings:', result.messages);
       }
 
     } else if (ext === 'doc') {
-      // True .doc (Word 97-2003) binary format cannot be parsed client-side reliably.
       errorMsg.textContent = '.doc files cannot be read directly. Please open the file in Word or Google Docs, then copy and paste the text into the box below.';
       errorMsg.classList.add('visible');
       return;
@@ -1292,7 +1294,6 @@ async function processFile(file) {
       return;
     }
 
-    // Normalize whitespace — mammoth can produce lots of blank lines
     text = text.replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
 
     if (!text || text.length < 50) {
@@ -1312,15 +1313,6 @@ async function processFile(file) {
     errorMsg.classList.add('visible');
   }
 }
-```
-
-Also update the drop zone label copy from:
-```
-Supports PDF, TXT, DOC, DOCX
-```
-to:
-```
-Supports PDF, TXT, DOCX (paste .doc text manually)
 
 async function extractPdfText(file) {
   const arrayBuffer = await file.arrayBuffer();
@@ -1432,7 +1424,7 @@ async function downloadPDF() {
   try {
     const res = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'getCredits', token: authToken }) });
     const credits = await res.json();
-    if (credits.plan !== 'pro' && credits.plan !== 'basic') { document.getElementById('paywallModal').classList.add('visible'); return; }
+    if (credits.plan !== 'pro') { document.getElementById('paywallModal').classList.add('visible'); return; }
   } catch(e) { document.getElementById('paywallModal').classList.add('visible'); return; }
   const el = document.getElementById('printDate');
   if (el) el.textContent = 'Generated: ' + new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -1499,7 +1491,7 @@ async function loadDashboard() {
   try {
     const res = await fetch('/api/analyses', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'list', token: authToken }) });
     const data = await res.json();
-    if (data.locked) { body.innerHTML = '<div class="dashboard-empty"><div class="empty-icon">🔒</div><p>Upgrade to a paid plan to save and revisit your analyses.</p></div>'; countEl.textContent = ''; return; }
+    if (data.locked) { body.innerHTML = '<div class="dashboard-empty"><div class="empty-icon">🔒</div><p>Upgrade to Pro to save and revisit your analyses.</p></div>'; countEl.textContent = ''; return; }
     const analyses = data.analyses || [];
     countEl.textContent = analyses.length ? analyses.length + ' saved' : '';
     if (!analyses.length) { body.innerHTML = '<div class="dashboard-empty"><div class="empty-icon">📄</div><p>No saved analyses yet.<br>Run your first contract analysis to get started.</p></div>'; return; }
@@ -1527,7 +1519,7 @@ async function loadSavedAnalysis(id, event) {
     document.getElementById('inputSection').style.display = 'none';
     lastSavedId = id; lastSavedName = data.contract_name;
     const subtitle = document.getElementById('headerSubtitle');
-    if (subtitle) { subtitle.textContent = data.contract_name ? `Viewing saved analysis: ${data.contract_name}` : 'Viewing saved analysis'; subtitle.style.display = ''; }
+    if (subtitle) { subtitle.textContent = data.contract_name ? `Viewing: ${data.contract_name}` : 'Viewing saved analysis'; subtitle.style.display = ''; }
     renderResults(data.analysisData);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     showSaveBadge('Loaded: ' + (data.contract_name || 'Analysis'));
@@ -1569,19 +1561,54 @@ function updateDashboardCount() {
 function startRename(id) {
   const nameEl = document.getElementById('name-' + id);
   if (!nameEl) return;
-  const current = nameEl.textContent;
-  nameEl.contentEditable = 'true'; nameEl.classList.add('editing'); nameEl.focus();
-  const range = document.createRange(); range.selectNodeContents(nameEl); window.getSelection().removeAllRanges(); window.getSelection().addRange(range);
+  const previous = nameEl.textContent;
+  nameEl.contentEditable = 'true';
+  nameEl.classList.add('editing');
+  nameEl.focus();
+  const range = document.createRange();
+  range.selectNodeContents(nameEl);
+  window.getSelection().removeAllRanges();
+  window.getSelection().addRange(range);
+
   async function finishRename() {
-    nameEl.contentEditable = 'false'; nameEl.classList.remove('editing');
-    const newName = nameEl.textContent.trim() || current; nameEl.textContent = newName;
-    try { await fetch('/api/analyses', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'rename', token: authToken, analysisId: id, newName }) }); } catch(e) {}
+    nameEl.contentEditable = 'false';
+    nameEl.classList.remove('editing');
+    const newName = nameEl.textContent.trim();
+    if (!newName || newName === previous) {
+      nameEl.textContent = previous;
+      return;
+    }
+    try {
+      const res = await fetch('/api/analyses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'rename', token: authToken, analysisId: id, newName }),
+      });
+      if (!res.ok) throw new Error('Server error');
+    } catch(e) {
+      nameEl.textContent = previous;
+      showToast('⚠️ Rename failed — please try again.');
+    }
   }
+
   nameEl.addEventListener('keydown', function handler(e) {
-    if (e.key === 'Enter') { e.preventDefault(); nameEl.removeEventListener('keydown', handler); finishRename(); }
-    if (e.key === 'Escape') { nameEl.textContent = current; nameEl.contentEditable = 'false'; nameEl.classList.remove('editing'); nameEl.removeEventListener('keydown', handler); }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      nameEl.removeEventListener('keydown', handler);
+      finishRename();
+    }
+    if (e.key === 'Escape') {
+      nameEl.textContent = previous;
+      nameEl.contentEditable = 'false';
+      nameEl.classList.remove('editing');
+      nameEl.removeEventListener('keydown', handler);
+    }
   });
-  nameEl.addEventListener('blur', function handler() { nameEl.removeEventListener('blur', handler); finishRename(); }, { once: true });
+
+  nameEl.addEventListener('blur', function handler() {
+    nameEl.removeEventListener('blur', handler);
+    finishRename();
+  }, { once: true });
 }
 </script>
 

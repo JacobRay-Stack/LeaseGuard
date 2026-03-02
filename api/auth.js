@@ -71,12 +71,15 @@ function supabaseRequest(path, method, body, token) {
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
+  // ── Rate limiting: 20 auth attempts per IP per minute ─────────────  // ADD THIS
+  const rl = rateLimit(req, { windowMs: 60_000, max: 20, label: 'auth' });  // ADD THIS
+  if (!rl.ok) return res.status(429).json({ error: rl.error });  // ADD THIS
+
   // ── Body size limit ────────────────────────────────────────────────
   const MAX_BODY = 10_000;
   const chunks = [];
   let bodySize = 0;
   let aborted = false;
-
   req.on('data', chunk => {
     bodySize += chunk.length;
     if (bodySize > MAX_BODY) {
@@ -86,10 +89,8 @@ module.exports = async function handler(req, res) {
     }
     chunks.push(chunk);
   });
-
   req.on('end', async () => {
     if (aborted) return res.status(413).json({ error: 'Request too large' });
-
     try {
       const { action, email, password, token, phone, emailOptIn } = JSON.parse(
         Buffer.concat(chunks).toString('utf8')

@@ -156,7 +156,9 @@ module.exports = function handler(req, res) {
 
   req.on('end', async () => {
     if (aborted) return res.status(413).json({ error: 'Request too large' });
-
+// ── Rate limiting: 30 analyze calls per IP per 10 minutes ─────────
+    const rl = rateLimit(req, { windowMs: 10 * 60_000, max: 30, label: 'analyze' });
+    if (!rl.ok) return res.status(429).json({ error: rl.error });
     let contractText = '';
     let clientToken = null;
 

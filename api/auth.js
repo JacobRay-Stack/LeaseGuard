@@ -1,6 +1,34 @@
 const https = require('https');
 const { welcomeEmail, lastCreditEmail } = require('./email');
 
+// ── Safe error messages — never leak raw Supabase internals ───────────
+function safeAuthError(err) {
+  if (!err) return 'Something went wrong. Please try again.';
+  const msg = typeof err === 'string' ? err : (err.message || err.msg || JSON.stringify(err));
+  const lower = msg.toLowerCase();
+
+  if (lower.includes('invalid login credentials') || lower.includes('invalid email or password'))
+    return 'Incorrect email or password.';
+  if (lower.includes('email not confirmed') || lower.includes('email_not_confirmed'))
+    return 'Please confirm your email address before logging in. Check your inbox for the confirmation link.';
+  if (lower.includes('user already registered') || lower.includes('already been registered'))
+    return 'An account with this email already exists. Try logging in instead.';
+  if (lower.includes('password should be at least') || lower.includes('weak_password'))
+    return 'Password is too weak. Please choose a stronger password.';
+  if (lower.includes('rate limit') || lower.includes('too many requests'))
+    return 'Too many attempts. Please wait a moment and try again.';
+  if (lower.includes('invalid email') || lower.includes('unable to validate email'))
+    return 'Please enter a valid email address.';
+  if (lower.includes('signup is disabled'))
+    return 'New signups are temporarily disabled. Please try again later.';
+  if (lower.includes('refresh_token_not_found') || lower.includes('token has expired'))
+    return 'Your session has expired. Please log in again.';
+
+  // Fallback — never return the raw message
+  console.error('[auth] Unmapped Supabase error (not sent to client):', msg);
+  return 'Something went wrong. Please try again.';
+}
+
 function supabaseRequest(path, method, body, token) {
   return new Promise((resolve, reject) => {
     const isService = !token;
@@ -69,7 +97,7 @@ module.exports = async function handler(req, res) {
       // ── SIGNUP ───────────────────────────────────────────────────────
       if (action === 'signup') {
         const result = await supabaseRequest('/auth/v1/signup', 'POST', { email, password });
-        if (result.error) return res.status(400).json({ error: result.error.message || result.error });
+        if (result.error) return res.status(400).json({ error: safeAuthError(result.error) });
 
         if (result.user) {
           await supabaseRequest(
@@ -78,7 +106,6 @@ module.exports = async function handler(req, res) {
             { user_id: result.user.id, email, plan: 'free', credits: 5, phone: phone || null, email_opt_in: emailOptIn || false }
           );
 
-          // ── Send welcome email (non-blocking — never fails the signup) ──
           welcomeEmail(email).catch((err) =>
             console.error('[auth] Welcome email failed for', email, err.message)
           );
@@ -90,7 +117,7 @@ module.exports = async function handler(req, res) {
       // ── LOGIN ────────────────────────────────────────────────────────
       if (action === 'login') {
         const result = await supabaseRequest('/auth/v1/token?grant_type=password', 'POST', { email, password });
-        if (result.error) return res.status(400).json({ error: result.error.message || result.error });
+        if (result.error) return res.status(400).json({ error: safeAuthError(result.error) });
         return res.status(200).json({ user: result.user, session: result, token: result.access_token, refreshToken: result.refresh_token });
       }
 
@@ -99,7 +126,7 @@ module.exports = async function handler(req, res) {
         if (!token) return res.status(401).json({ error: 'Not authenticated' });
 
         const userRes = await supabaseRequest('/auth/v1/user', 'GET', {}, token);
-        if (userRes.error || !userRes.id) return res.status(401).json({ error: 'Invalid token' });
+        if (userRes.error || !userRes.id) return res.status(401).json({ error: 'Session expired. Please log in again.' });
 
         const credRes = await supabaseRequest(
           `/rest/v1/user_credits?user_id=eq.${userRes.id}&select=*`,
@@ -121,7 +148,7 @@ module.exports = async function handler(req, res) {
       if (action === 'decrementCredit') {
         if (!token) return res.status(401).json({ error: 'Not authenticated' });
         const userRes = await supabaseRequest('/auth/v1/user', 'GET', {}, token);
-        if (!userRes.id) return res.status(401).json({ error: 'Invalid token' });
+        if (!userRes.id) return res.status(401).json({ error: 'Session expired. Please log in again.' });
 
         const credRes = await supabaseRequest(
           `/rest/v1/user_credits?user_id=eq.${userRes.id}&select=*`,
@@ -131,7 +158,6 @@ module.exports = async function handler(req, res) {
 
         const cred = credRes[0];
 
-        // ── If this was their last free credit, send an upgrade nudge ──
         if (cred.plan === 'free' && cred.credits === 0) {
           lastCreditEmail(userRes.email || email).catch((err) =>
             console.error('[auth] Last-credit email failed:', err.message)
@@ -149,7 +175,7 @@ module.exports = async function handler(req, res) {
           'POST',
           { refresh_token: token }
         );
-        if (result.error) return res.status(401).json({ error: result.error.message || result.error });
+        if (result.error) return res.status(401).json({ error: safeAuthError(result.error) });
         return res.status(200).json({
           token: result.access_token,
           refreshToken: result.refresh_token,
@@ -159,7 +185,8 @@ module.exports = async function handler(req, res) {
 
       return res.status(400).json({ error: 'Invalid action' });
     } catch(e) {
-      return res.status(500).json({ error: e.message });
+      console.error('[auth] Unhandled exception:', e.message);
+      return res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 };

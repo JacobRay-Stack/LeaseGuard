@@ -1,5 +1,5 @@
 const https = require('https');
-const { welcomeEmail, lastCreditEmail } = require('./email');
+const { welcomeEmail } = require('./email');
 const { rateLimit } = require('./rateLimit');
 
 // ── Safe error messages — never leak raw Supabase internals ───────────
@@ -144,29 +144,9 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ plan: 'free', credits: 5 });
       }
 
-      // ── DECREMENT CREDIT (backwards-compat no-op) ────────────────────
-      // Credit decrement is now handled server-side in analyze.js.
-      // Kept so old clients don't break.
+      // ── DECREMENT CREDIT (no-op — handled server-side in analyze.js) ──
       if (action === 'decrementCredit') {
-        if (!token) return res.status(401).json({ error: 'Not authenticated' });
-        const userRes = await supabaseRequest('/auth/v1/user', 'GET', {}, token);
-        if (!userRes.id) return res.status(401).json({ error: 'Session expired. Please log in again.' });
-
-        const credRes = await supabaseRequest(
-          `/rest/v1/user_credits?user_id=eq.${userRes.id}&select=*`,
-          'GET', {}, token
-        );
-        if (!Array.isArray(credRes) || credRes.length === 0) return res.status(400).json({ error: 'No credits found' });
-
-        const cred = credRes[0];
-
-        if (cred.plan === 'free' && cred.credits === 0) {
-          lastCreditEmail(userRes.email || email).catch((err) =>
-            console.error('[auth] Last-credit email failed:', err.message)
-          );
-        }
-
-        return res.status(200).json({ success: true, credits: cred.plan === 'pro' ? 'unlimited' : cred.credits });
+        return res.status(200).json({ success: true });
       }
 
       // ── REFRESH TOKEN ────────────────────────────────────────────────

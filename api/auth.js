@@ -1,5 +1,6 @@
 const https = require('https');
 const { welcomeEmail, lastCreditEmail } = require('./email');
+const { rateLimit } = require('./rateLimit');
 
 // ── Safe error messages — never leak raw Supabase internals ───────────
 function safeAuthError(err) {

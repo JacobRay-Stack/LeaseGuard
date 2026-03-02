@@ -1251,19 +1251,76 @@ async function processFile(file) {
   const errorMsg = document.getElementById('errorMsg');
   errorMsg.classList.remove('visible');
   const ext = file.name.split('.').pop().toLowerCase();
+
   try {
     let text = '';
-    if (ext === 'txt') { text = await file.text(); }
-    else if (ext === 'pdf') { text = await extractPdfText(file); }
-    else if (ext === 'doc' || ext === 'docx') { text = await file.text(); }
-    else { errorMsg.textContent = 'Unsupported file type. Please use PDF, TXT, DOC, or DOCX.'; errorMsg.classList.add('visible'); return; }
-    if (!text || text.trim().length < 50) { errorMsg.textContent = 'Could not extract enough text from this file. Try pasting the text manually.'; errorMsg.classList.add('visible'); return; }
-    document.getElementById('contractText').value = text.trim();
+
+    if (ext === 'txt') {
+      text = await file.text();
+
+    } else if (ext === 'pdf') {
+      text = await extractPdfText(file);
+
+    } else if (ext === 'docx') {
+      // Load mammoth.js from CDN on demand
+      if (typeof mammoth === 'undefined') {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
+          s.onload = resolve;
+          s.onerror = () => reject(new Error('Failed to load DOCX parser'));
+          document.head.appendChild(s);
+        });
+      }
+      const arrayBuffer = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({ arrayBuffer });
+      text = result.value || '';
+      // Warn user if mammoth flagged conversion issues
+      if (result.messages && result.messages.length > 0) {
+        console.warn('[docx] Mammoth warnings:', result.messages);
+      }
+
+    } else if (ext === 'doc') {
+      // True .doc (Word 97-2003) binary format cannot be parsed client-side reliably.
+      errorMsg.textContent = '.doc files cannot be read directly. Please open the file in Word or Google Docs, then copy and paste the text into the box below.';
+      errorMsg.classList.add('visible');
+      return;
+
+    } else {
+      errorMsg.textContent = 'Unsupported file type. Please use PDF, TXT, or DOCX.';
+      errorMsg.classList.add('visible');
+      return;
+    }
+
+    // Normalize whitespace — mammoth can produce lots of blank lines
+    text = text.replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+
+    if (!text || text.length < 50) {
+      errorMsg.textContent = 'Could not extract enough text from this file. Try pasting the text manually.';
+      errorMsg.classList.add('visible');
+      return;
+    }
+
+    document.getElementById('contractText').value = text;
     document.getElementById('fileName').textContent = file.name;
     document.getElementById('fileLoaded').style.display = 'flex';
     dropZone.style.display = 'none';
-  } catch(err) { errorMsg.textContent = 'Failed to read this file. Try pasting the text manually.'; errorMsg.classList.add('visible'); }
+
+  } catch(err) {
+    console.error('[processFile] Error:', err);
+    errorMsg.textContent = 'Failed to read this file. Try pasting the text manually.';
+    errorMsg.classList.add('visible');
+  }
 }
+```
+
+Also update the drop zone label copy from:
+```
+Supports PDF, TXT, DOC, DOCX
+```
+to:
+```
+Supports PDF, TXT, DOCX (paste .doc text manually)
 
 async function extractPdfText(file) {
   const arrayBuffer = await file.arrayBuffer();

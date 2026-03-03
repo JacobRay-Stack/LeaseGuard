@@ -2058,12 +2058,7 @@ async function processFile(file) {
       errorMsg.classList.add('visible');
       return;
     }
-    text = text.replace(/\r\
-/g, '\
-').replace(/\
-{3,}/g, '\
-\
-').trim();
+    text = text.replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
     if (!text || text.length < 50) {
       errorMsg.textContent = 'Could not extract enough text from this file. Try pasting the text manually.';
       errorMsg.classList.add('visible');
@@ -2087,8 +2082,7 @@ async function extractPdfText(file) {
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
-    fullText += content.items.map(item => item.str).join(' ') + '\
-';
+    fullText += content.items.map(item => item.str).join(' ') + '\n';
   }
   return fullText;
 }
@@ -2178,19 +2172,12 @@ function renderResults(data) {
 function getResultsAsText() {
   const summary = document.getElementById('summaryText')?.textContent || '';
   const score = document.getElementById('scoreBadge')?.textContent || '';
-  const terms = [...document.querySelectorAll('#termsGrid .term-chip')].map(c => '  ' + (c.querySelector('.term-label')?.textContent || '') + ': ' + (c.querySelector('.term-value')?.textContent || '')).join('\
-');
-  const flags = [...document.querySelectorAll('#flagsList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\
-');
-  const missing = [...document.querySelectorAll('#missingList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\
-');
-  const tips = [...document.querySelectorAll('#tipsList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\
-');
+  const terms = [...document.querySelectorAll('#termsGrid .term-chip')].map(c => '  ' + (c.querySelector('.term-label')?.textContent || '') + ': ' + (c.querySelector('.term-value')?.textContent || '')).join('\n');
+  const flags = [...document.querySelectorAll('#flagsList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\n');
+  const missing = [...document.querySelectorAll('#missingList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\n');
+  const tips = [...document.querySelectorAll('#tipsList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\n');
   const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  return ['╔' + '═'.repeat(46) + '╗', '  ANALYZETHISCONTRACT — Contract Analysis Report', '  Generated: ' + date, '╚' + '═'.repeat(46) + '╝', '', '▌ SUMMARY', summary, score ? 'Assessment: ' + score : '', '', '▌ KEY TERMS', terms || '  None extracted.', '', '▌ RED FLAGS', flags || '  No significant red flags found.', '', '▌ MISSING CLAUSES', missing || '  All standard clauses present.', tips ? ('\
-▌ NEGOTIATION TIPS\
-' + tips) : '', '', '─'.repeat(50), 'Not legal advice. Consult a qualified attorney.'].join('\
-');
+  return ['╔' + '═'.repeat(46) + '╗', '  ANALYZETHISCONTRACT — Contract Analysis Report', '  Generated: ' + date, '╚' + '═'.repeat(46) + '╝', '', '▌ SUMMARY', summary, score ? 'Assessment: ' + score : '', '', '▌ KEY TERMS', terms || '  None extracted.', '', '▌ RED FLAGS', flags || '  No significant red flags found.', '', '▌ MISSING CLAUSES', missing || '  All standard clauses present.', tips ? ('\n▌ NEGOTIATION TIPS\n' + tips) : '', '', '─'.repeat(50), 'Not legal advice. Consult a qualified attorney.'].join('\n');
 }
 
 async function copyResults() {

@@ -2058,12 +2058,7 @@ async function processFile(file) {
       errorMsg.classList.add('visible');
       return;
     }
-    text = text.replace(/\r\
-/g, '\
-').replace(/\
-{3,}/g, '\
-\
-').trim();
+    text = text.replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
     if (!text || text.length < 50) {
       errorMsg.textContent = 'Could not extract enough text from this file. Try pasting the text manually.';
       errorMsg.classList.add('visible');

@@ -24,63 +24,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>if (typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
-  function showUpgradeBar() {
-  const bar = document.getElementById('upgradeBar');
-  if (!bar || sessionStorage.getItem('atc_bar_dismissed')) return;
-  bar.classList.remove('visible');
-  void bar.offsetWidth;
-  bar.classList.add('visible');
-  document.body.classList.add('has-bar');
-}
 
-function dismissUpgradeBar() {
-  document.getElementById('upgradeBar').classList.remove('visible');
-  document.body.classList.remove('has-bar');
-  sessionStorage.setItem('atc_bar_dismissed', '1');
-}
-/* ── Sticky upgrade bar ─────────────────────────── */
-#upgradeBar {
-  display: none;
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  z-index: 90;
-  padding: 12px 24px;
-  background: rgba(6,8,16,0.92);
-  backdrop-filter: blur(24px);
-  border-top: 1px solid rgba(0,200,255,0.12);
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
-  flex-wrap: wrap;
-}
-#upgradeBar::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(0,200,255,0.5), rgba(191,0,255,0.4), transparent);
-}
-#upgradeBar.visible { display: flex; animation: slideUp 0.4s cubic-bezier(.4,0,.2,1) both; }
-@keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-.ub-text { font-size: 13px; color: rgba(232,240,255,0.7); }
-.ub-text strong { color: var(--text); font-weight: 600; }
-.ub-sep { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; }
-.ub-feats { display: flex; gap: 14px; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
-.ub-feat::before { content: '✓ '; color: var(--teal); font-weight: 700; }
-.ub-btn {
-  padding: 9px 22px; border-radius: 10px;
-  background: rgba(0,200,255,0.12); border: 1px solid rgba(0,200,255,0.4);
-  color: var(--cyan); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700;
-  cursor: pointer; white-space: nowrap; transition: all 0.2s; flex-shrink: 0;
-}
-.ub-btn:hover { background: rgba(0,200,255,0.22); box-shadow: 0 0 28px rgba(0,200,255,0.2); transform: translateY(-1px); }
-.ub-x { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: color 0.2s; }
-.ub-x:hover { color: var(--text); }
-body.has-bar .container { padding-bottom: 140px; }
-.nav-btn.upgrade { background: rgba(191,0,255,0.1); color: #d580ff; border-color: rgba(191,0,255,0.35); animation: pb 3s ease-in-out infinite; }
-.nav-btn.upgrade:hover { background: rgba(191,0,255,0.2); box-shadow: 0 0 20px rgba(191,0,255,0.2); }
-@keyframes pb { 0%,100% { box-shadow: 0 0 0 0 rgba(191,0,255,0); } 50% { box-shadow: 0 0 0 3px rgba(191,0,255,0.15); } }
-@media (max-width: 600px) { .ub-feats, .ub-sep { display: none; } #upgradeBar { padding: 10px 14px; gap: 10px; } }
-@media print { #upgradeBar { display: none !important; } }
 <style>
   /* ── Design tokens ─────────────────────────────────────────────────── */
   :root {
@@ -1150,10 +1094,15 @@ body.has-bar .container { padding-bottom: 140px; }
   .tips-blur-bg {
     position: absolute;
     inset: 0;
-    backdrop-filter: blur(7px);
-    -webkit-backdrop-filter: blur(7px);
-    background: rgba(6,8,16,0.6);
+    background: rgba(6, 8, 16, 0.82);
     border-radius: var(--radius);
+  }
+
+  /* Blur list items directly — cross-browser reliable */
+  #tipsCard.gated #tipsList {
+    filter: blur(5px);
+    user-select: none;
+    pointer-events: none;
   }
 
   .tips-upsell {
@@ -1513,20 +1462,38 @@ body.has-bar .container { padding-bottom: 140px; }
   @keyframes fadeDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: none; } }
   @keyframes fadeUp   { from { opacity: 0; transform: translateY(16px);  } to { opacity: 1; transform: none; } }
   @keyframes spin     { to { transform: rotate(360deg); } }
+
+  #upgradeBar {
+    display:none; position:fixed; bottom:0; left:0; right:0; z-index:90;
+    padding:13px 24px; background:rgba(6,8,16,0.93);
+    backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+    border-top:1px solid rgba(0,200,255,0.12);
+    align-items:center; justify-content:center; gap:18px; flex-wrap:wrap;
+  }
+  #upgradeBar::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:1px;
+    background:linear-gradient(90deg,transparent,rgba(0,200,255,0.5),rgba(191,0,255,0.4),transparent);
+  }
+  #upgradeBar.visible{display:flex;animation:slideUp 0.4s cubic-bezier(.4,0,.2,1) both}
+  @keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+  .ub-text{font-size:13px;color:rgba(232,240,255,0.72);line-height:1.4}
+  .ub-text strong{color:var(--text);font-weight:600}
+  .ub-sep{width:1px;height:20px;background:var(--border);flex-shrink:0}
+  .ub-feats{display:flex;align-items:center;gap:14px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+  .ub-feat{display:flex;align-items:center;gap:4px}
+  .ub-feat::before{content:'✓ ';color:var(--teal);font-weight:700;font-size:11px}
+  .ub-btn{padding:9px 22px;border-radius:10px;background:rgba(0,200,255,0.12);border:1px solid rgba(0,200,255,0.4);color:var(--cyan);font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0}
+  .ub-btn:hover{background:rgba(0,200,255,0.22);box-shadow:0 0 28px rgba(0,200,255,0.2);transform:translateY(-1px)}
+  .ub-x{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:2px 6px;border-radius:4px;transition:color .2s;flex-shrink:0;line-height:1}
+  .ub-x:hover{color:var(--text)}
+  body.has-bar{padding-bottom:72px}
+  .nav-btn.upgrade{background:rgba(191,0,255,0.1);color:#d580ff;border-color:rgba(191,0,255,0.35);display:inline-flex;align-items:center;gap:6px;animation:pb 3s ease-in-out infinite}
+  .nav-btn.upgrade:hover{background:rgba(191,0,255,0.2);box-shadow:0 0 20px rgba(191,0,255,0.2)}
+  @keyframes pb{0%,100%{box-shadow:0 0 0 0 rgba(191,0,255,0)}50%{box-shadow:0 0 0 3px rgba(191,0,255,0.15)}}
+  @media(max-width:600px){.ub-feats,.ub-sep{display:none}#upgradeBar{padding:10px 14px;gap:10px}}
+  @media print{#upgradeBar{display:none!important}}
 </style>
 </head>
-  <div id="upgradeBar">
-  <div class="ub-text"><strong>Upgrade to Pro</strong> — Unlimited analyses, negotiation tips &amp; saved history</div>
-  <div class="ub-sep"></div>
-  <div class="ub-feats">
-    <span class="ub-feat">Unlimited analyses</span>
-    <span class="ub-feat">Negotiation tips</span>
-    <span class="ub-feat">Saved history</span>
-    <span class="ub-feat">PDF export</span>
-  </div>
-  <button class="ub-btn" onclick="startCheckout('pro')">Go Pro — $12.99/mo</button>
-  <button class="ub-x" onclick="dismissUpgradeBar()" title="Dismiss">✕</button>
-</div>
 <body>
 
 <!-- ── Auth Modal ─────────────────────────────────────────────────────── -->
@@ -1582,13 +1549,13 @@ body.has-bar .container { padding-bottom: 140px; }
 
     <div class="drop-zone" id="dropZone">
       <input type="file" id="fileInput" accept=".pdf,.txt,.docx" onchange="handleFileSelect(event)">
-      <div class="drop-zone-ring">📄</div>
+      <div class="drop-zone-ring"></div>
       <div class="drop-zone-text"><strong>Drop a file here</strong> or click to browse</div>
       <div class="drop-zone-meta">Supports PDF, TXT, DOCX &mdash; paste .doc text manually</div>
     </div>
 
     <div class="file-loaded" id="fileLoaded" style="display:none">
-      <span>📎</span>
+      <span></span>
       <span id="fileName"></span>
       <button onclick="clearFile()" title="Remove file">✕</button>
     </div>
@@ -1606,7 +1573,7 @@ body.has-bar .container { padding-bottom: 140px; }
     <div class="error-msg" id="errorMsg"></div>
 
     <button class="analyze-btn" id="analyzeBtn" onclick="analyzeContract()">
-      <span>🔍</span> Analyze Contract
+      <span></span> Analyze Contract
     </button>
   </div>
 
@@ -1631,12 +1598,12 @@ body.has-bar .container { padding-bottom: 140px; }
     </div>
 
     <div class="export-bar">
-      <button class="export-btn" id="copyBtn" onclick="copyResults()">📋 Copy to clipboard</button>
+      <button class="export-btn" id="copyBtn" onclick="copyResults()"> Copy to clipboard</button>
       <button class="export-btn" onclick="downloadPDF()">⬇ Download PDF</button>
     </div>
 
     <div class="ai-disclaimer">
-      <div class="ai-disclaimer-icon">🤖</div>
+      <div class="ai-disclaimer-icon"></div>
       <div>
         <strong>AI-assisted review — not legal advice.</strong> This analysis identifies clauses that appear unusual or one-sided compared to standard leases. It does not determine whether any clause is legally enforceable in your jurisdiction. For any clause that concerns you, <strong>consult a local tenant rights organization or attorney</strong> before signing.
       </div>
@@ -1644,20 +1611,20 @@ body.has-bar .container { padding-bottom: 140px; }
 
     <div class="section-title">Overview</div>
     <div class="glass result-card" id="summaryCard">
-      <h3>📋 Plain English Summary<span class="score-badge" id="scoreBadge"></span></h3>
+      <h3> Plain English Summary<span class="score-badge" id="scoreBadge"></span></h3>
       <p id="summaryText"></p>
       <div class="stats-bar" id="statsBar"></div>
     </div>
 
     <div class="section-title">Key Terms</div>
     <div class="glass result-card">
-      <h3>🔑 Key Terms Extracted</h3>
+      <h3> Key Terms Extracted</h3>
       <div class="terms-grid" id="termsGrid"></div>
     </div>
 
     <div class="section-title">Red Flags</div>
     <div class="glass result-card">
-      <h3>🚩 Red Flags</h3>
+      <h3> Red Flags</h3>
       <ul id="flagsList"></ul>
     </div>
 
@@ -1669,12 +1636,12 @@ body.has-bar .container { padding-bottom: 140px; }
 
     <div class="section-title">Negotiation Tips</div>
     <div class="glass result-card tips-gate-card" id="tipsCard" style="position:relative;overflow:hidden;">
-      <h3>💬 What to Negotiate Before Signing</h3>
+      <h3> What to Negotiate Before Signing</h3>
       <ul id="tipsList"></ul>
       <div class="tips-blur-overlay" id="tipsBlurOverlay">
         <div class="tips-blur-bg"></div>
         <div class="tips-upsell">
-          <div class="tips-upsell-icon">🔒</div>
+          <div class="tips-upsell-icon"></div>
           <div class="tips-upsell-headline">Negotiation tips are a Pro feature</div>
           <div class="tips-upsell-sub">Know exactly what to push back on — and how to word it. Upgrade to unlock all 4 tips for this contract.</div>
           <button class="tips-upsell-btn" onclick="startCheckout('pro')">Unlock Pro — $12.99/mo →</button>
@@ -1719,7 +1686,7 @@ body.has-bar .container { padding-bottom: 140px; }
           </ul>
           <button class="plan-btn" onclick="startCheckout('pro')">Start Pro — $12.99/mo →</button>
         </div>
-        <div class="modal-trust">🔒 Stripe &nbsp;·&nbsp; ✓ No hidden fees &nbsp;·&nbsp; ↩ Cancel anytime</div>
+        <div class="modal-trust"> Stripe &nbsp;·&nbsp; ✓ No hidden fees &nbsp;·&nbsp; ↩ Cancel anytime</div>
       </div>
     </div>
   </div>
@@ -1730,7 +1697,7 @@ body.has-bar .container { padding-bottom: 140px; }
 <!-- ── Custom Confirm Dialog ──────────────────────────────────────────── -->
 <div class="confirm-overlay" id="confirmOverlay">
   <div class="confirm-box">
-    <div class="confirm-icon" id="confirmIcon">🗑️</div>
+    <div class="confirm-icon" id="confirmIcon">️</div>
     <h3 id="confirmTitle">Delete this analysis?</h3>
     <p id="confirmMessage">This cannot be undone.</p>
     <div class="confirm-actions">
@@ -1746,7 +1713,7 @@ body.has-bar .container { padding-bottom: 140px; }
 <!-- ── Dashboard panel ───────────────────────────────────────────────── -->
 <div class="dashboard-panel" id="dashboardPanel">
   <div class="dashboard-header">
-    <h2>📁 My Analyses</h2>
+    <h2> My Analyses</h2>
     <div style="display:flex;align-items:center;gap:10px;">
       <span style="font-size:12px;color:var(--muted);" id="dashboardCount"></span>
       <button class="dashboard-close" onclick="closeDashboard()">✕</button>
@@ -1971,7 +1938,7 @@ async function analyzeContract() {
       document.getElementById('loading').classList.remove('visible');
       document.getElementById('inputSection').style.display = 'block';
       document.getElementById('paywallModal').classList.add('visible');
-      btn.disabled = false; btn.innerHTML = '<span>🔍</span> Analyze Contract';
+      btn.disabled = false; btn.innerHTML = '<span></span> Analyze Contract';
       return;
     }
     if (!response.ok) throw new Error(result.error || 'Analysis failed');
@@ -1986,21 +1953,22 @@ async function analyzeContract() {
     errorMsg.textContent = 'Something went wrong analyzing the contract. Please try again.';
     errorMsg.classList.add('visible');
   } finally {
-    btn.disabled = false; btn.innerHTML = '<span>🔍</span> Analyze Contract';
+    btn.disabled = false; btn.innerHTML = '<span></span> Analyze Contract';
   }
 }
 
 async function updateNavForUser() {
   const nav = document.getElementById('topNav');
   if (!authToken || !currentUser) {
-    nav.innerHTML = '<button class="nav-btn" onclick="showAuth(\'login\')">Log In</button><button class="nav-btn primary" onclick="showAuth(\'signup\')">Sign Up</button>';
+    nav.innerHTML = '<button class="nav-btn" onclick="showAuth(\'login\')">Log In</button><button class="nav-btn upgrade" onclick="startCheckout(\'pro\')">&#11014; Upgrade</button><button class="nav-btn primary" onclick="showAuth(\'signup\')">Sign Up</button>';
+    showUpgradeBar();
     return;
   }
   try {
     let res = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'getCredits', token: authToken }) });
     if (res.status === 401) {
       const refreshed = await refreshAuthToken();
-      if (!refreshed) { clearAuth(); nav.innerHTML = '<button class="nav-btn" onclick="showAuth(\'login\')">Log In</button><button class="nav-btn primary" onclick="showAuth(\'signup\')">Sign Up</button>'; return; }
+      if (!refreshed) { clearAuth(); nav.innerHTML = '<button class="nav-btn" onclick="showAuth(\'login\')">Log In</button><button class="nav-btn upgrade" onclick="startCheckout(\'pro\')">&#11014; Upgrade</button><button class="nav-btn primary" onclick="showAuth(\'signup\')">Sign Up</button>'; showUpgradeBar(); return; }
       res = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'getCredits', token: authToken }) });
     }
     const credits = await res.json();
@@ -2013,9 +1981,10 @@ async function updateNavForUser() {
     const label = credits.plan === 'pro' ? '✦ Pro — Unlimited' : `${credits.credits} ${credits.credits === 1 ? 'analysis' : 'analyses'} left`;
     const email = currentUser.email || '';
     const isPaid = credits.plan === 'pro';
-    const historyBtn = isPaid ? `<button class="nav-btn history" onclick="openDashboard()">📁 History</button>` : '';
-const upgradeBtn = !isPaid ? `<button class="nav-btn upgrade" onclick="startCheckout('pro')">⬆ Upgrade</button>` : '';
-nav.innerHTML = `<div class="user-nav"><span title="${email}">${email}</span><span class="credit-badge">${label}</span>${upgradeBtn}${historyBtn}<button class="nav-btn" onclick="logout()">Log Out</button></div>`;
+    const historyBtn = isPaid ? `<button class="nav-btn history" onclick="openDashboard()"> History</button>` : '';
+    const upgradeBtn = !isPaid ? `<button class="nav-btn upgrade" onclick="startCheckout('pro')">&#11014; Upgrade</button>` : '';
+    nav.innerHTML = `<div class="user-nav"><span title="${email}">${email}</span><span class="credit-badge">${label}</span>${upgradeBtn}${historyBtn}<button class="nav-btn" onclick="logout()">Log Out</button></div>`;
+    if (!isPaid) { showUpgradeBar(); } else { hideUpgradeBar(); }
   } catch(e) {
     nav.innerHTML = `<div class="user-nav"><span>${currentUser.email}</span><button class="nav-btn" onclick="logout()">Log Out</button></div>`;
   }
@@ -2023,13 +1992,18 @@ nav.innerHTML = `<div class="user-nav"><span title="${email}">${email}</span><sp
 
 function logout() { clearAuth(); updateNavForUser(); resetApp(); showToast('Logged out.'); }
 
+
+function showUpgradeBar(){if(sessionStorage.getItem('atc_bar_dismissed'))return;const bar=document.getElementById('upgradeBar');if(!bar)return;bar.classList.remove('visible');void bar.offsetWidth;bar.classList.add('visible');document.body.classList.add('has-bar');}
+function hideUpgradeBar(){const bar=document.getElementById('upgradeBar');if(bar)bar.classList.remove('visible');document.body.classList.remove('has-bar');}
+function dismissUpgradeBar(){hideUpgradeBar();sessionStorage.setItem('atc_bar_dismissed','1');}
+
 window.addEventListener('load', async () => {
   getStoredAuth();
   await updateNavForUser();
   const params = new URLSearchParams(window.location.search);
   if (params.get('checkout') === 'success') {
     const plan = params.get('plan') || 'pro';
-    showToast(plan === 'pro' ? '🎉 Pro plan activated! Unlimited analyses are ready.' : 'Payment received! Your analyses will be available shortly.');
+    showToast(plan === 'pro' ? ' Pro plan activated! Unlimited analyses are ready.' : 'Payment received! Your analyses will be available shortly.');
     window.history.replaceState({}, '', window.location.pathname);
     let attempts = 0;
     const poll = setInterval(async () => { attempts++; await updateNavForUser(); if (attempts >= 6) clearInterval(poll); }, 2000);
@@ -2084,7 +2058,12 @@ async function processFile(file) {
       errorMsg.classList.add('visible');
       return;
     }
-    text = text.replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    text = text.replace(/\r\
+/g, '\
+').replace(/\
+{3,}/g, '\
+\
+').trim();
     if (!text || text.length < 50) {
       errorMsg.textContent = 'Could not extract enough text from this file. Try pasting the text manually.';
       errorMsg.classList.add('visible');
@@ -2108,7 +2087,8 @@ async function extractPdfText(file) {
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
-    fullText += content.items.map(item => item.str).join(' ') + '\n';
+    fullText += content.items.map(item => item.str).join(' ') + '\
+';
   }
   return fullText;
 }
@@ -2186,18 +2166,31 @@ function renderResults(data) {
   } else { const tipSection = document.getElementById('tipsList').closest('.result-card'); if (tipSection) tipSection.style.display = 'none'; }
   document.getElementById('results').classList.add('visible');
   const overlay = document.getElementById('tipsBlurOverlay');
-  if (overlay) { const u = getUsage(); overlay.style.display = u.pro ? 'none' : 'flex'; }
+  const tipsCard = document.getElementById('tipsCard');
+  if (overlay) {
+    const u = getUsage();
+    const isGated = !u.pro;
+    overlay.style.display = isGated ? 'flex' : 'none';
+    if (tipsCard) { isGated ? tipsCard.classList.add('gated') : tipsCard.classList.remove('gated'); }
+  }
 }
 
 function getResultsAsText() {
   const summary = document.getElementById('summaryText')?.textContent || '';
   const score = document.getElementById('scoreBadge')?.textContent || '';
-  const terms = [...document.querySelectorAll('#termsGrid .term-chip')].map(c => '  ' + (c.querySelector('.term-label')?.textContent || '') + ': ' + (c.querySelector('.term-value')?.textContent || '')).join('\n');
-  const flags = [...document.querySelectorAll('#flagsList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  \u2022 ' + (t ? t + ': ' + d : d); }).join('\n');
-  const missing = [...document.querySelectorAll('#missingList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  \u2022 ' + (t ? t + ': ' + d : d); }).join('\n');
-  const tips = [...document.querySelectorAll('#tipsList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  \u2022 ' + (t ? t + ': ' + d : d); }).join('\n');
+  const terms = [...document.querySelectorAll('#termsGrid .term-chip')].map(c => '  ' + (c.querySelector('.term-label')?.textContent || '') + ': ' + (c.querySelector('.term-value')?.textContent || '')).join('\
+');
+  const flags = [...document.querySelectorAll('#flagsList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\
+');
+  const missing = [...document.querySelectorAll('#missingList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\
+');
+  const tips = [...document.querySelectorAll('#tipsList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\
+');
   const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  return ['\u2554' + '\u2550'.repeat(46) + '\u2557', '  ANALYZETHISCONTRACT \u2014 Contract Analysis Report', '  Generated: ' + date, '\u255a' + '\u2550'.repeat(46) + '\u255d', '', '\u258c SUMMARY', summary, score ? 'Assessment: ' + score : '', '', '\u258c KEY TERMS', terms || '  None extracted.', '', '\u258c RED FLAGS', flags || '  No significant red flags found.', '', '\u258c MISSING CLAUSES', missing || '  All standard clauses present.', tips ? ('\n\u258c NEGOTIATION TIPS\n' + tips) : '', '', '\u2500'.repeat(50), 'Not legal advice. Consult a qualified attorney.'].join('\n');
+  return ['╔' + '═'.repeat(46) + '╗', '  ANALYZETHISCONTRACT — Contract Analysis Report', '  Generated: ' + date, '╚' + '═'.repeat(46) + '╝', '', '▌ SUMMARY', summary, score ? 'Assessment: ' + score : '', '', '▌ KEY TERMS', terms || '  None extracted.', '', '▌ RED FLAGS', flags || '  No significant red flags found.', '', '▌ MISSING CLAUSES', missing || '  All standard clauses present.', tips ? ('\
+▌ NEGOTIATION TIPS\
+' + tips) : '', '', '─'.repeat(50), 'Not legal advice. Consult a qualified attorney.'].join('\
+');
 }
 
 async function copyResults() {
@@ -2205,7 +2198,7 @@ async function copyResults() {
   try { await navigator.clipboard.writeText(getResultsAsText()); }
   catch(e) { const ta = document.createElement('textarea'); ta.value = getResultsAsText(); ta.style.cssText = 'position:fixed;opacity:0;'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
   btn.textContent = '✓ Copied!'; btn.classList.add('copied');
-  setTimeout(() => { btn.innerHTML = '📋 Copy to clipboard'; btn.classList.remove('copied'); }, 2500);
+  setTimeout(() => { btn.innerHTML = ' Copy to clipboard'; btn.classList.remove('copied'); }, 2500);
 }
 
 async function downloadPDF() {
@@ -2280,10 +2273,10 @@ async function loadDashboard() {
   try {
     const res = await fetch('/api/analyses', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'list', token: authToken }) });
     const data = await res.json();
-    if (data.locked) { body.innerHTML = '<div class="dashboard-empty"><div class="empty-icon">🔒</div><p>Upgrade to Pro to save and revisit your analyses.</p></div>'; countEl.textContent = ''; return; }
+    if (data.locked) { body.innerHTML = '<div class="dashboard-empty"><div class="empty-icon"></div><p>Upgrade to Pro to save and revisit your analyses.</p></div>'; countEl.textContent = ''; return; }
     const analyses = data.analyses || [];
     countEl.textContent = analyses.length ? analyses.length + ' saved' : '';
-    if (!analyses.length) { body.innerHTML = '<div class="dashboard-empty"><div class="empty-icon">📄</div><p>No saved analyses yet.<br>Run your first contract analysis to get started.</p></div>'; return; }
+    if (!analyses.length) { body.innerHTML = '<div class="dashboard-empty"><div class="empty-icon"></div><p>No saved analyses yet.<br>Run your first contract analysis to get started.</p></div>'; return; }
     body.innerHTML = analyses.map(a => {
       const date = new Date(a.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
       const scoreClass = a.score === 'good' ? 'row-score-good' : a.score === 'bad' ? 'row-score-bad' : 'row-score-warn';
@@ -2315,7 +2308,7 @@ async function loadSavedAnalysis(id, event) {
   } catch(e) { showToast('Error loading analysis.'); if (row) { row.style.opacity = ''; row.style.pointerEvents = ''; } }
 }
 
-function showConfirm({ icon = '🗑️', title, message, okLabel = 'Delete', onConfirm }) {
+function showConfirm({ icon = '️', title, message, okLabel = 'Delete', onConfirm }) {
   const overlay = document.getElementById('confirmOverlay');
   document.getElementById('confirmIcon').textContent = icon;
   document.getElementById('confirmTitle').textContent = title;
@@ -2331,7 +2324,7 @@ function showConfirm({ icon = '🗑️', title, message, okLabel = 'Delete', onC
 }
 
 async function deleteAnalysis(id) {
-  showConfirm({ icon: '🗑️', title: 'Delete this analysis?', message: 'This cannot be undone.', okLabel: 'Delete', onConfirm: async () => {
+  showConfirm({ icon: '️', title: 'Delete this analysis?', message: 'This cannot be undone.', okLabel: 'Delete', onConfirm: async () => {
     try {
       await fetch('/api/analyses', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete', token: authToken, analysisId: id }) });
       const row = document.getElementById('row-' + id);
@@ -2344,7 +2337,7 @@ function updateDashboardCount() {
   const rows = document.querySelectorAll('.analysis-row');
   const countEl = document.getElementById('dashboardCount');
   if (countEl) countEl.textContent = rows.length ? rows.length + ' saved' : '';
-  if (!rows.length) { const body = document.getElementById('dashboardBody'); if (body) body.innerHTML = '<div class="dashboard-empty"><div class="empty-icon">📄</div><p>No saved analyses yet.</p></div>'; }
+  if (!rows.length) { const body = document.getElementById('dashboardBody'); if (body) body.innerHTML = '<div class="dashboard-empty"><div class="empty-icon"></div><p>No saved analyses yet.</p></div>'; }
 }
 
 function startRename(id) {
@@ -2389,5 +2382,13 @@ function startRename(id) {
 }
 </script>
 
+
+<div id="upgradeBar">
+  <div class="ub-text"><strong>Upgrade to Pro</strong> &mdash; Unlimited analyses, negotiation tips &amp; saved history</div>
+  <div class="ub-sep"></div>
+  <div class="ub-feats"><span class="ub-feat">Unlimited analyses</span><span class="ub-feat">Negotiation tips</span><span class="ub-feat">Saved history</span><span class="ub-feat">PDF export</span></div>
+  <button class="ub-btn" onclick="startCheckout('pro')">Go Pro &mdash; $12.99/mo</button>
+  <button class="ub-x" onclick="dismissUpgradeBar()" title="Dismiss">&times;</button>
+</div>
 </body>
 </html>

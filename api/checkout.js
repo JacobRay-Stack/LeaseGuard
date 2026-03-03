@@ -94,7 +94,7 @@ module.exports = function handler(req, res) {
 
     const params = new URLSearchParams({
       'payment_method_types[0]': 'card',
-      'line_items[0][price]': price_1T6xYf2YmDjtDUCXvOwlxNVB,
+      'line_items[0][price]': priceId,
       'line_items[0][quantity]': '1',
       'mode': 'subscription',
       'success_url': successUrl,

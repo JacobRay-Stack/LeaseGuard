@@ -1,0 +1,2394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- SEO -->
+<title>AI Contract Analyzer — Review Any Lease or Contract Instantly | AnalyzeThisContract</title>
+<meta name="description" content="Instantly analyze any lease or contract with AI. Get red flags, missing clauses, key terms, and negotiation tips in plain English. No lawyer needed.">
+<meta name="keywords" content="lease agreement analyzer, contract review AI, rental contract checker, AI contract analysis, lease red flags, contract analyzer">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://analyzethiscontract.com/app">
+<meta property="og:title" content="AI Contract Analyzer — Review Any Lease Instantly">
+<meta property="og:description" content="Upload any lease or contract and get an instant plain-English breakdown — red flags, missing clauses, and negotiation tips included.">
+<meta property="og:url" content="https://analyzethiscontract.com/app">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AI Contract Analyzer — AnalyzeThisContract">
+<meta name="twitter:description" content="Upload any lease or contract and get an instant AI breakdown. Red flags, missing clauses, key terms — in plain English.">
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjMWUyMTI4Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzEzMTUxYSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ29sZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNmMGQ4NzgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjYjg5NDNlIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNCIgZmlsbD0idXJsKCNiZykiLz4KICA8cmVjdCB4PSIxIiB5PSIxIiB3aWR0aD0iNjIiIGhlaWdodD0iNjIiIHJ4PSIxMyIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ1cmwoI2dvbGQpIiBzdHJva2Utd2lkdGg9IjAuNzUiIG9wYWNpdHk9IjAuMjUiLz4KICA8cGF0aCBkPSJNMTAgMTAgTDU0IDEwIEw1NCA0MiBRMzIgNjAgMTAgNDIgWiIgZmlsbD0icmdiYSgyNDAsMjE2LDEyMCwwLjA1KSIgc3Ryb2tlPSJ1cmwoI2dvbGQpIiBzdHJva2Utd2lkdGg9IjEuNzUiLz4KICA8cmVjdCB4PSIyMiIgeT0iMTgiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgcng9IjMiIGZpbGw9Im5vbmUiIHN0cm9rZT0idXJsKCNnb2xkKSIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KICA8dGV4dCB4PSIzMiIgeT0iMzIiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI5IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjZjBkODc4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5BSTwvdGV4dD4KPC9zdmc+">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjMWUyMTI4Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzEzMTUxYSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ29sZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNmMGQ4NzgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjYjg5NDNlIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNCIgZmlsbD0idXJsKCNiZykiLz4KICA8dGV4dCB4PSIzMiIgeT0iMzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI2YwZDg3OCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QUk8L3RleHQ+Cjwvc3ZnPg==">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>if (typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+
+<style>
+  /* ── Design tokens ─────────────────────────────────────────────────── */
+  :root {
+    --bg:        #060810;
+    --surface:   rgba(255,255,255,0.035);
+    --surface2:  rgba(255,255,255,0.06);
+    --border:    rgba(255,255,255,0.08);
+    --border-hi: rgba(0,200,255,0.35);
+    --cyan:      #00c8ff;
+    --purple:    #bf00ff;
+    --teal:      #00ffb4;
+    --red:       #ff5577;
+    --green:     #00ffb4;
+    --blue:      #5b9bd5;
+    --text:      #e8f0ff;
+    --muted:     #4a6080;
+    --radius:    18px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── Ambient background ────────────────────────────────────────────── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 50% at 15% 30%, rgba(0,200,255,0.07) 0%, transparent 65%),
+      radial-gradient(ellipse 60% 60% at 85% 20%, rgba(191,0,255,0.06) 0%, transparent 65%),
+      radial-gradient(ellipse 50% 40% at 50% 90%, rgba(0,255,180,0.04) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,200,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,200,255,0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Glass card mixin ──────────────────────────────────────────────── */
+  .glass {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .glass::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,200,255,0.4), rgba(191,0,255,0.3), transparent);
+    pointer-events: none;
+  }
+
+  /* ── Iridescent text ───────────────────────────────────────────────── */
+  .iridescent {
+    background: linear-gradient(135deg, #00c8ff 0%, #bf00ff 50%, #00ffb4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .shimmer {
+    background: linear-gradient(90deg, #00c8ff, #bf00ff, #00ffb4, #00c8ff);
+    background-size: 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 6s linear infinite;
+  }
+
+  @keyframes shimmer { to { background-position: 300% center; } }
+
+  /* ── Header ────────────────────────────────────────────────────────── */
+  header {
+    margin-bottom: 40px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: rgba(0,200,255,0.08);
+    border: 1px solid rgba(0,200,255,0.25);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 0 24px rgba(0,200,255,0.15);
+  }
+
+  .logo-wordmark {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    line-height: 1.15;
+  }
+
+  .logo-wordmark .line1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+
+  .logo-wordmark .line2 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(0,200,255,0.07);
+    border: 1px solid rgba(0,200,255,0.2);
+    font-size: 11px;
+    color: var(--cyan);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: block;
+    width: fit-content;
+    margin: 0 auto 16px;
+  }
+
+  .badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 8px var(--cyan);
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 4px;
+  }
+
+  .header-hero {
+    text-align: center;
+    padding: 8px 0 4px;
+  }
+
+  .header-hero h1 {
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 12px;
+    letter-spacing: -1px;
+  }
+
+  .header-hero p {
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 400;
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  /* ── Nav buttons ───────────────────────────────────────────────────── */
+  .top-nav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+  .nav-btn {
+    padding: 8px 18px;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    backdrop-filter: blur(10px);
+  }
+
+  .nav-btn:hover {
+    border-color: rgba(0,200,255,0.3);
+    color: var(--cyan);
+    background: rgba(0,200,255,0.06);
+  }
+
+  .nav-btn.primary {
+    background: rgba(0,200,255,0.12);
+    color: var(--cyan);
+    border-color: rgba(0,200,255,0.3);
+  }
+
+  .nav-btn.primary:hover {
+    background: rgba(0,200,255,0.2);
+    box-shadow: 0 0 20px rgba(0,200,255,0.15);
+  }
+
+  .nav-btn.history {
+    gap: 5px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .user-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .user-nav span {
+    font-size: 12px;
+    color: var(--muted);
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .credit-badge {
+    background: rgba(0,200,255,0.08);
+    border: 1px solid rgba(0,200,255,0.2);
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 12px;
+    color: var(--cyan);
+    font-weight: 600;
+  }
+
+  /* ── Input card ────────────────────────────────────────────────────── */
+  .input-card {
+    padding: 28px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.6s ease 0.1s both;
+  }
+
+  .input-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  /* ── Drop zone ─────────────────────────────────────────────────────── */
+  .drop-zone {
+    border: 1px dashed rgba(0,200,255,0.25);
+    border-radius: 14px;
+    padding: 36px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: 0;
+    background: rgba(0,200,255,0.02);
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: rgba(0,200,255,0.5);
+    background: rgba(0,200,255,0.05);
+    box-shadow: 0 0 30px rgba(0,200,255,0.08) inset;
+  }
+
+  .drop-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .drop-zone-ring {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0,200,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 14px;
+    font-size: 26px;
+    box-shadow: 0 0 30px rgba(0,200,255,0.12), inset 0 0 20px rgba(0,200,255,0.04);
+    background: rgba(0,200,255,0.04);
+  }
+
+  .drop-zone-text {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .drop-zone-text strong { color: var(--cyan); font-weight: 600; }
+
+  .drop-zone-meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+    opacity: 0.5;
+  }
+
+  /* ── File loaded ───────────────────────────────────────────────────── */
+  .file-loaded {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0,255,180,0.06);
+    border: 1px solid rgba(0,255,180,0.2);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--teal);
+    margin-bottom: 12px;
+  }
+
+  .file-loaded button {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0 2px;
+  }
+
+  .file-loaded button:hover { color: var(--red); }
+
+  /* ── Divider ───────────────────────────────────────────────────────── */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 16px 0;
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    opacity: 0.5;
+  }
+
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Textarea ──────────────────────────────────────────────────────── */
+  textarea {
+    width: 100%;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 14px 16px;
+    resize: vertical;
+    min-height: 180px;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  textarea:focus { border-color: rgba(0,200,255,0.4); }
+  textarea::placeholder { color: var(--muted); }
+
+  /* ── Analyze button ────────────────────────────────────────────────── */
+  .analyze-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 15px;
+    background: rgba(0,200,255,0.1);
+    color: var(--cyan);
+    border: 1px solid rgba(0,200,255,0.35);
+    border-radius: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+  }
+
+  .analyze-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(0,200,255,0.06), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+  }
+
+  .analyze-btn:hover {
+    background: rgba(0,200,255,0.18);
+    border-color: rgba(0,200,255,0.6);
+    box-shadow: 0 0 40px rgba(0,200,255,0.15);
+    transform: translateY(-1px);
+  }
+
+  .analyze-btn:hover::before { transform: translateX(100%); }
+  .analyze-btn:active { transform: translateY(0); }
+  .analyze-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* ── Error ─────────────────────────────────────────────────────────── */
+  .error-msg {
+    display: none;
+    background: rgba(255,85,119,0.08);
+    border: 1px solid rgba(255,85,119,0.25);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: var(--red);
+    font-size: 13px;
+    margin-top: 12px;
+  }
+
+  .error-msg.visible { display: block; }
+
+  /* ── Loading ───────────────────────────────────────────────────────── */
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 64px 48px;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  .loading.visible { display: block; }
+
+  .spinner-ring {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 2px solid rgba(0,200,255,0.1);
+    border-top-color: var(--cyan);
+    animation: spin 0.9s linear infinite;
+    margin: 0 auto 20px;
+    box-shadow: 0 0 20px rgba(0,200,255,0.15);
+  }
+
+  .loading p { color: var(--muted); font-size: 14px; }
+  .loading p strong { color: var(--cyan); font-weight: 500; }
+
+  /* ── Results ───────────────────────────────────────────────────────── */
+  .results {
+    display: none;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .results.visible { display: block; }
+
+  /* ── Section title ─────────────────────────────────────────────────── */
+  .section-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--muted);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Result cards ──────────────────────────────────────────────────── */
+  .result-card {
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .result-card h3 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    color: var(--text);
+  }
+
+  .result-card p {
+    font-size: 14px;
+    color: rgba(232,240,255,0.65);
+    line-height: 1.8;
+  }
+
+  .result-card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Summary score borders */
+  .summary-bad  { border-color: rgba(255,85,119,0.35) !important; box-shadow: inset 3px 0 0 var(--red); }
+  .summary-warn { border-color: rgba(0,200,255,0.35) !important; box-shadow: inset 3px 0 0 var(--cyan); }
+  .summary-good { border-color: rgba(0,255,180,0.35) !important; box-shadow: inset 3px 0 0 var(--teal); }
+
+  /* ── Stats bar ─────────────────────────────────────────────────────── */
+  .stats-bar {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .stat-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .stat-chip.red   { background: rgba(255,85,119,0.08);  border-color: rgba(255,85,119,0.25);  color: var(--red); }
+  .stat-chip.blue  { background: rgba(0,200,255,0.08);   border-color: rgba(0,200,255,0.25);   color: var(--cyan); }
+  .stat-chip.green { background: rgba(0,255,180,0.08);   border-color: rgba(0,255,180,0.25);   color: var(--teal); }
+
+  /* ── Score badge ───────────────────────────────────────────────────── */
+  .score-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-left: auto;
+  }
+
+  .score-good { background: rgba(0,255,180,0.1);   color: var(--teal);  border: 1px solid rgba(0,255,180,0.3); }
+  .score-warn { background: rgba(0,200,255,0.1);   color: var(--cyan);  border: 1px solid rgba(0,200,255,0.3); }
+  .score-bad  { background: rgba(255,85,119,0.1);  color: var(--red);   border: 1px solid rgba(255,85,119,0.3); }
+
+  /* ── List items ────────────────────────────────────────────────────── */
+  .result-card li {
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .item-inner {
+    padding: 12px 16px 12px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .item-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .item-detail {
+    font-size: 13px;
+    color: rgba(232,240,255,0.55);
+    line-height: 1.7;
+  }
+
+  .flag-item {
+    background: rgba(255,85,119,0.06);
+    border: 1px solid rgba(255,85,119,0.18);
+    border-left: 2px solid var(--red);
+  }
+  .flag-item .item-title { color: var(--red); }
+
+  .missing-item {
+    background: rgba(0,200,255,0.05);
+    border: 1px solid rgba(0,200,255,0.15);
+    border-left: 2px solid var(--cyan);
+  }
+  .missing-item .item-title { color: var(--cyan); }
+
+  .tip-item {
+    background: rgba(0,255,180,0.05);
+    border: 1px solid rgba(0,255,180,0.15);
+    border-left: 2px solid var(--teal);
+  }
+  .tip-item .item-title { color: var(--teal); }
+
+  /* ── Key terms grid ────────────────────────────────────────────────── */
+  .terms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+  }
+
+  .term-chip {
+    background: rgba(0,200,255,0.04);
+    border: 1px solid rgba(0,200,255,0.12);
+    border-radius: 10px;
+    padding: 12px 14px;
+    transition: border-color 0.2s;
+  }
+
+  .term-chip:hover { border-color: rgba(0,200,255,0.3); }
+
+  .term-chip .term-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 5px;
+  }
+
+  .term-chip .term-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--cyan);
+    line-height: 1.4;
+  }
+
+  /* ── Export bar ────────────────────────────────────────────────────── */
+  .export-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .export-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    backdrop-filter: blur(10px);
+  }
+
+  .export-btn:hover { border-color: rgba(0,200,255,0.3); color: var(--cyan); }
+  .export-btn.copied { border-color: rgba(0,255,180,0.4); color: var(--teal); }
+
+  /* ── Reset btn ─────────────────────────────────────────────────────── */
+  .reset-btn {
+    display: block;
+    margin: 28px auto 0;
+    padding: 10px 28px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .reset-btn:hover { border-color: rgba(0,200,255,0.3); color: var(--cyan); }
+
+  /* ── AI disclaimer ─────────────────────────────────────────────────── */
+  .ai-disclaimer {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: rgba(0,200,255,0.04);
+    border: 1px solid rgba(0,200,255,0.12);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 24px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+
+  .ai-disclaimer-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .ai-disclaimer strong { color: var(--text); font-weight: 600; }
+  .ai-disclaimer a { color: var(--cyan); text-decoration: none; }
+  .ai-disclaimer a:hover { text-decoration: underline; }
+
+  /* ── Usage counter ─────────────────────────────────────────────────── */
+  #usageCounter {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin: 12px 0 4px;
+  }
+
+  .usage-dots {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 6px;
+  }
+
+  .usage-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+
+  .usage-dot.used {
+    background: var(--cyan);
+    box-shadow: 0 0 8px rgba(0,200,255,0.5);
+  }
+
+  /* ── Auth overlay ──────────────────────────────────────────────────── */
+  .auth-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.88);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+
+  .auth-overlay.visible { display: flex; }
+
+  .auth-modal {
+    background: #0d1020;
+    border: 1px solid rgba(0,200,255,0.2);
+    border-radius: 20px;
+    padding: 36px;
+    max-width: 380px;
+    width: 100%;
+    position: relative;
+    box-shadow: 0 0 80px rgba(0,200,255,0.1);
+  }
+
+  .auth-modal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    border-radius: 20px 20px 0 0;
+    background: linear-gradient(90deg, transparent, rgba(0,200,255,0.5), rgba(191,0,255,0.4), transparent);
+  }
+
+  .auth-modal h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    text-align: center;
+    color: var(--text);
+  }
+
+  .auth-modal .auth-sub {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .auth-input {
+    width: 100%;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .auth-input:focus { border-color: rgba(0,200,255,0.4); }
+
+  .auth-submit-btn {
+    width: 100%;
+    padding: 13px;
+    background: rgba(0,200,255,0.12);
+    color: var(--cyan);
+    border: 1px solid rgba(0,200,255,0.35);
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 12px;
+  }
+
+  .auth-submit-btn:hover {
+    background: rgba(0,200,255,0.2);
+    box-shadow: 0 0 30px rgba(0,200,255,0.15);
+  }
+
+  .auth-switch {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .auth-switch a { color: var(--cyan); cursor: pointer; text-decoration: none; }
+
+  .auth-error {
+    background: rgba(255,85,119,0.08);
+    border: 1px solid rgba(255,85,119,0.25);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--red);
+    font-size: 13px;
+    margin-bottom: 12px;
+    display: none;
+  }
+
+  .auth-error.visible { display: block; }
+
+  /* ── Paywall modal ─────────────────────────────────────────────────── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.visible { display: flex; }
+
+  .modal {
+    background: #0d1020;
+    border: 1px solid rgba(0,200,255,0.2);
+    border-radius: 20px;
+    max-width: 480px;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 80px rgba(0,200,255,0.1);
+  }
+
+  .modal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,200,255,0.5), rgba(191,0,255,0.4), transparent);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 14px; right: 16px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 6px;
+    z-index: 10;
+    transition: color 0.2s;
+  }
+
+  .modal-close:hover { color: var(--text); }
+
+  .modal-top-bar {
+    background: rgba(0,0,0,0.3);
+    padding: 22px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .modal-top-bar h2 { font-size: 17px; font-weight: 700; color: var(--text); margin: 0; }
+
+  .modal-top-badge {
+    background: rgba(0,200,255,0.12);
+    color: var(--cyan);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(0,200,255,0.3);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .modal-body { padding: 24px 28px; }
+
+  .modal-comparison {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    flex-wrap: wrap;
+  }
+
+  .modal-comparison .vs-bad  { color: var(--red);  font-weight: 700; }
+  .modal-comparison .vs-sep  { color: var(--muted); }
+  .modal-comparison .vs-good { color: var(--teal);  font-weight: 700; }
+
+  .modal-plan {
+    border-radius: 14px;
+    padding: 22px;
+    border: 1px solid rgba(0,200,255,0.2);
+    background: rgba(0,200,255,0.04);
+    margin-bottom: 16px;
+  }
+
+  .modal-plan-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--cyan);
+    margin-bottom: 8px;
+  }
+
+  .modal-plan .plan-price {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .modal-plan .plan-price span { font-size: 13px; font-weight: 400; color: var(--muted); }
+
+  .modal-plan .plan-features {
+    list-style: none;
+    margin: 12px 0 18px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 20px;
+  }
+
+  .modal-plan .plan-features li {
+    font-size: 12px;
+    color: rgba(232,240,255,0.6);
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+  }
+
+  .modal-plan .plan-features li::before {
+    content: '✓';
+    color: var(--teal);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .modal-plan .plan-btn {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: rgba(0,200,255,0.12);
+    color: var(--cyan);
+    border: 1px solid rgba(0,200,255,0.35);
+  }
+
+  .modal-plan .plan-btn:hover {
+    background: rgba(0,200,255,0.22);
+    box-shadow: 0 0 30px rgba(0,200,255,0.2);
+  }
+
+  .modal-trust {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    font-size: 11px;
+    color: var(--muted);
+    padding-bottom: 4px;
+    opacity: 0.7;
+  }
+
+  /* ── Tips pro gate ─────────────────────────────────────────────────── */
+  .tips-gate-card { min-height: 180px; }
+
+  .tips-blur-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: var(--radius);
+  }
+
+  .tips-blur-bg {
+    position: absolute;
+    inset: 0;
+    background: rgba(6, 8, 16, 0.82);
+    border-radius: var(--radius);
+  }
+
+  /* Blur list items directly — cross-browser reliable */
+  #tipsCard.gated #tipsList {
+    filter: blur(5px);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .tips-upsell {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 28px 32px;
+    max-width: 360px;
+  }
+
+  .tips-upsell-icon { font-size: 28px; margin-bottom: 10px; }
+
+  .tips-upsell-headline {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .tips-upsell-sub {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .tips-upsell-btn {
+    display: block;
+    width: 100%;
+    padding: 13px;
+    background: rgba(0,200,255,0.12);
+    color: var(--cyan);
+    border: 1px solid rgba(0,200,255,0.35);
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: all 0.2s;
+  }
+
+  .tips-upsell-btn:hover {
+    background: rgba(0,200,255,0.22);
+    box-shadow: 0 0 30px rgba(0,200,255,0.2);
+    transform: translateY(-1px);
+  }
+
+  .tips-upsell-free {
+    background: none;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .tips-upsell-free:hover { color: rgba(232,240,255,0.6); }
+
+  /* ── Dashboard ─────────────────────────────────────────────────────── */
+  .dashboard-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 150;
+    backdrop-filter: blur(3px);
+  }
+
+  .dashboard-overlay.visible { display: block; }
+
+  .dashboard-panel {
+    position: fixed;
+    top: 0; right: -520px;
+    width: 100%; max-width: 500px;
+    height: 100vh;
+    background: #0a0d18;
+    border-left: 1px solid rgba(0,200,255,0.15);
+    z-index: 151;
+    display: flex;
+    flex-direction: column;
+    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+  }
+
+  .dashboard-panel.open { right: 0; }
+
+  .dashboard-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    background: rgba(0,200,255,0.02);
+  }
+
+  .dashboard-header h2 { font-size: 17px; font-weight: 700; color: var(--text); }
+
+  .dashboard-close {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 20px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px;
+    transition: color 0.2s;
+  }
+
+  .dashboard-close:hover { color: var(--text); }
+
+  .dashboard-body { flex: 1; overflow-y: auto; padding: 16px; }
+
+  .dashboard-empty {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--muted);
+  }
+
+  .dashboard-empty .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .dashboard-empty p { font-size: 14px; line-height: 1.6; }
+
+  .analysis-row {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+
+  .analysis-row:hover {
+    border-color: rgba(0,200,255,0.3);
+    background: rgba(0,200,255,0.04);
+  }
+
+  .analysis-row-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .analysis-row-name {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.4;
+    word-break: break-word;
+  }
+
+  .analysis-row-name.editing {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(0,200,255,0.4);
+    border-radius: 4px;
+    padding: 2px 6px;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    width: 100%;
+  }
+
+  .analysis-row-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .analysis-row-date { font-size: 12px; color: var(--muted); }
+
+  .row-score-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    letter-spacing: 0.3px;
+  }
+
+  .row-score-good { background: rgba(0,255,180,0.1);   color: var(--teal);  border: 1px solid rgba(0,255,180,0.25); }
+  .row-score-warn { background: rgba(0,200,255,0.1);   color: var(--cyan);  border: 1px solid rgba(0,200,255,0.25); }
+  .row-score-bad  { background: rgba(255,85,119,0.1);  color: var(--red);   border: 1px solid rgba(255,85,119,0.25); }
+
+  .row-actions {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .row-action-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .row-action-btn:hover { border-color: rgba(0,200,255,0.3); color: var(--cyan); }
+  .row-action-btn.danger:hover { border-color: rgba(255,85,119,0.4); color: var(--red); }
+
+  .dashboard-loading { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
+
+  .save-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--teal);
+    opacity: 0;
+    transition: opacity 0.3s;
+    margin-left: 8px;
+  }
+
+  .save-indicator.visible { opacity: 1; }
+
+  /* ── Confirm dialog ────────────────────────────────────────────────── */
+  .confirm-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 300;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+
+  .confirm-overlay.visible { display: flex; }
+
+  .confirm-box {
+    background: #0d1020;
+    border: 1px solid rgba(255,85,119,0.25);
+    border-radius: 16px;
+    padding: 28px 28px 24px;
+    max-width: 340px;
+    width: 100%;
+    text-align: center;
+    animation: fadeUp 0.2s ease both;
+  }
+
+  .confirm-icon { font-size: 32px; margin-bottom: 12px; }
+  .confirm-box h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+  .confirm-box p { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 22px; }
+
+  .confirm-actions { display: flex; gap: 10px; justify-content: center; }
+
+  .confirm-cancel-btn {
+    flex: 1;
+    padding: 11px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .confirm-cancel-btn:hover { border-color: rgba(0,200,255,0.3); color: var(--cyan); }
+
+  .confirm-ok-btn {
+    flex: 1;
+    padding: 11px;
+    background: rgba(255,85,119,0.12);
+    border: 1px solid rgba(255,85,119,0.3);
+    border-radius: 10px;
+    color: var(--red);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .confirm-ok-btn:hover { background: rgba(255,85,119,0.22); }
+
+  /* ── Disclaimer ────────────────────────────────────────────────────── */
+  .disclaimer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 40px;
+    opacity: 0.5;
+  }
+
+  .disclaimer a { color: var(--muted); text-decoration: none; }
+
+  /* ── Print ─────────────────────────────────────────────────────────── */
+  @media print {
+    @page { margin: 14mm 16mm; size: A4; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body { background: #fff !important; color: #1a1a1a !important; font-family: 'Inter', sans-serif !important; font-size: 12px !important; }
+    body::before, body::after { display: none !important; }
+    .print-only { display: block !important; }
+    #inputSection, #loading, .reset-btn, .export-bar,
+    header, .modal-overlay, .auth-overlay, .disclaimer,
+    #topNav, .header-top p, .stats-bar { display: none !important; }
+    #results { display: block !important; animation: none !important; }
+    .container { padding: 0 !important; max-width: 100% !important; }
+    .section-title { color: #1a1a2e !important; font-size: 9px !important; font-weight: 700 !important; letter-spacing: 2.5px !important; margin: 20px 0 8px !important; text-transform: uppercase !important; }
+    .section-title::after { background: #ddd !important; }
+    .result-card { background: #fff !important; border: 1px solid #e0e0e8 !important; border-radius: 6px !important; page-break-inside: avoid; margin-bottom: 10px !important; padding: 14px 16px !important; box-shadow: none !important; }
+    .result-card h3 { color: #1a1a2e !important; font-size: 12px !important; margin-bottom: 10px !important; padding-bottom: 8px !important; border-bottom: 1px solid #eee !important; font-weight: 700 !important; }
+    .result-card p { color: #333 !important; font-size: 12px !important; line-height: 1.7 !important; }
+    .score-badge { font-size: 9px !important; padding: 3px 10px !important; font-weight: 700 !important; }
+    .score-good { background: #f0fff6 !important; color: #1a6640 !important; border: 1px solid #a8e6c8 !important; }
+    .score-warn { background: #f0faff !important; color: #1a5080 !important; border: 1px solid #a8d8f0 !important; }
+    .score-bad  { background: #fff5f5 !important; color: #c0392b !important; border: 1px solid #ffb3b3 !important; }
+    .summary-bad  { border-left: 4px solid #e05c5c !important; }
+    .summary-warn { border-left: 4px solid #5b9bd5 !important; }
+    .summary-good { border-left: 4px solid #5cb88a !important; }
+    .result-card li { border-radius: 5px !important; margin-bottom: 6px !important; page-break-inside: avoid; }
+    .flag-item    { background: #fff8f8 !important; border: 1px solid #ffd0d0 !important; border-left: 3px solid #e05c5c !important; }
+    .flag-item .item-title { color: #c0392b !important; }
+    .missing-item { background: #f5f8ff !important; border: 1px solid #c8d8f8 !important; border-left: 3px solid #5b9bd5 !important; }
+    .missing-item .item-title { color: #2a5ca8 !important; }
+    .tip-item     { background: #f5fff9 !important; border: 1px solid #b8e8cc !important; border-left: 3px solid #5cb88a !important; }
+    .tip-item .item-title { color: #1a6640 !important; }
+    .item-inner { padding: 8px 12px 8px 14px !important; }
+    .item-title { font-size: 9px !important; letter-spacing: 0.8px !important; }
+    .item-detail { font-size: 11px !important; color: #444 !important; line-height: 1.6 !important; }
+    .terms-grid { display: grid !important; grid-template-columns: repeat(3,1fr) !important; gap: 6px !important; }
+    .term-chip { background: #f8f8fa !important; border: 1px solid #e0e0e8 !important; padding: 7px 10px !important; border-radius: 4px !important; }
+    .term-chip .term-label { color: #888 !important; font-size: 8px !important; margin-bottom: 3px !important; }
+    .term-chip .term-value { color: #1a5080 !important; font-size: 11px !important; }
+    .print-header { display: flex !important; align-items: flex-start !important; justify-content: space-between !important; padding: 16px 20px !important; margin-bottom: 18px !important; background: #1a1a2e !important; border-radius: 6px !important; }
+    .print-header-left h1 { font-size: 16px !important; color: #fff !important; margin-bottom: 3px !important; font-weight: 700 !important; }
+    .print-header-left p { font-size: 10px !important; color: #9090b0 !important; }
+    .print-header-right { text-align: right !important; }
+    .print-header-right p { font-size: 10px !important; color: #9090b0 !important; line-height: 1.7 !important; }
+    .print-disclaimer { display: block !important; margin-top: 20px !important; padding: 10px 14px !important; background: #f8f8fa !important; border: 1px solid #e0e0e8 !important; border-radius: 5px !important; font-size: 9px !important; color: #999 !important; text-align: center !important; line-height: 1.6 !important; }
+    .ai-disclaimer { display: block !important; background: #f5f8ff !important; border: 1px solid #c8d8f8 !important; border-radius: 6px !important; padding: 10px 14px !important; margin-bottom: 14px !important; font-size: 10px !important; color: #444 !important; line-height: 1.6 !important; }
+    .ai-disclaimer strong { color: #1a1a2e !important; }
+    .tips-blur-overlay { display: none !important; }
+  }
+
+  .print-only { display: none; }
+  .print-disclaimer { display: none; }
+
+  /* ── Animations ────────────────────────────────────────────────────── */
+  @keyframes fadeDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: none; } }
+  @keyframes fadeUp   { from { opacity: 0; transform: translateY(16px);  } to { opacity: 1; transform: none; } }
+  @keyframes spin     { to { transform: rotate(360deg); } }
+
+  #upgradeBar {
+    display:none; position:fixed; bottom:0; left:0; right:0; z-index:90;
+    padding:13px 24px; background:rgba(6,8,16,0.93);
+    backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+    border-top:1px solid rgba(0,200,255,0.12);
+    align-items:center; justify-content:center; gap:18px; flex-wrap:wrap;
+  }
+  #upgradeBar::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:1px;
+    background:linear-gradient(90deg,transparent,rgba(0,200,255,0.5),rgba(191,0,255,0.4),transparent);
+  }
+  #upgradeBar.visible{display:flex;animation:slideUp 0.4s cubic-bezier(.4,0,.2,1) both}
+  @keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+  .ub-text{font-size:13px;color:rgba(232,240,255,0.72);line-height:1.4}
+  .ub-text strong{color:var(--text);font-weight:600}
+  .ub-sep{width:1px;height:20px;background:var(--border);flex-shrink:0}
+  .ub-feats{display:flex;align-items:center;gap:14px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+  .ub-feat{display:flex;align-items:center;gap:4px}
+  .ub-feat::before{content:'✓ ';color:var(--teal);font-weight:700;font-size:11px}
+  .ub-btn{padding:9px 22px;border-radius:10px;background:rgba(0,200,255,0.12);border:1px solid rgba(0,200,255,0.4);color:var(--cyan);font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0}
+  .ub-btn:hover{background:rgba(0,200,255,0.22);box-shadow:0 0 28px rgba(0,200,255,0.2);transform:translateY(-1px)}
+  .ub-x{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:2px 6px;border-radius:4px;transition:color .2s;flex-shrink:0;line-height:1}
+  .ub-x:hover{color:var(--text)}
+  body.has-bar{padding-bottom:72px}
+  .nav-btn.upgrade{background:rgba(191,0,255,0.1);color:#d580ff;border-color:rgba(191,0,255,0.35);display:inline-flex;align-items:center;gap:6px;animation:pb 3s ease-in-out infinite}
+  .nav-btn.upgrade:hover{background:rgba(191,0,255,0.2);box-shadow:0 0 20px rgba(191,0,255,0.2)}
+  @keyframes pb{0%,100%{box-shadow:0 0 0 0 rgba(191,0,255,0)}50%{box-shadow:0 0 0 3px rgba(191,0,255,0.15)}}
+  @media(max-width:600px){.ub-feats,.ub-sep{display:none}#upgradeBar{padding:10px 14px;gap:10px}}
+  @media print{#upgradeBar{display:none!important}}
+</style>
+</head>
+<body>
+
+<!-- ── Auth Modal ─────────────────────────────────────────────────────── -->
+<div class="auth-overlay" id="authModal">
+  <div class="auth-modal">
+    <button onclick="document.getElementById('authModal').classList.remove('visible')" style="position:absolute;top:14px;right:16px;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--muted);font-size:16px;cursor:pointer;padding:3px 8px;border-radius:6px;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">✕</button>
+    <h2 id="authTitle">Create Account</h2>
+    <p class="auth-sub" id="authSub">Sign up to save your analyses and manage credits</p>
+    <div class="auth-error" id="authError"></div>
+    <input class="auth-input" type="email" id="authEmail" placeholder="Email address">
+    <input class="auth-input" type="tel" id="authPhone" placeholder="Phone number (optional)" style="display:none;">
+    <input class="auth-input" type="password" id="authPassword" placeholder="Password">
+    <div id="signupExtra" style="display:none;">
+      <input class="auth-input" type="password" id="authPasswordConfirm" placeholder="Confirm password">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.6;">
+        Password must be at least 8 characters, include one capital letter and one symbol (!@#$%^&*).
+      </div>
+      <label style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--muted);cursor:pointer;margin-bottom:16px;">
+        <input type="checkbox" id="emailOptIn" style="margin-top:2px;accent-color:var(--cyan);">
+        <span>I agree to receive product updates and tips by email. You can unsubscribe at any time.</span>
+      </label>
+    </div>
+    <button class="auth-submit-btn" id="authSubmitBtn" onclick="submitAuth()">Create Account</button>
+    <div class="auth-switch" id="authSwitch">Already have an account? <a onclick="toggleAuthMode()">Log in</a></div>
+  </div>
+</div>
+
+<!-- ── Main container ─────────────────────────────────────────────────── -->
+<div class="container">
+
+  <header>
+    <div class="header-top">
+      <div class="logo">
+        <div class="logo-icon">⚖️</div>
+        <div class="logo-wordmark">
+          <span class="line1">AnalyzeThis</span>
+          <span class="line2 shimmer">Contract</span>
+        </div>
+      </div>
+      <div id="topNav" class="top-nav-right"></div>
+    </div>
+
+    <div class="header-hero">
+      <div class="header-badge"><span class="badge-dot"></span>AI-Powered · Instant Analysis</div>
+      <h1><span class="iridescent">Read before you sign.</span></h1>
+      <p id="headerSubtitle">Drop any contract and get an instant plain-English breakdown — red flags, missing clauses, and key terms included.</p>
+    </div>
+  </header>
+
+  <!-- ── Input section ───────────────────────────────────────────────── -->
+  <div class="glass input-card" id="inputSection">
+    <label class="input-label">Upload your contract (PDF, TXT, DOCX)</label>
+
+    <div class="drop-zone" id="dropZone">
+      <input type="file" id="fileInput" accept=".pdf,.txt,.docx" onchange="handleFileSelect(event)">
+      <div class="drop-zone-ring"></div>
+      <div class="drop-zone-text"><strong>Drop a file here</strong> or click to browse</div>
+      <div class="drop-zone-meta">Supports PDF, TXT, DOCX &mdash; paste .doc text manually</div>
+    </div>
+
+    <div class="file-loaded" id="fileLoaded" style="display:none">
+      <span></span>
+      <span id="fileName"></span>
+      <button onclick="clearFile()" title="Remove file">✕</button>
+    </div>
+
+    <div class="divider">or</div>
+
+    <label class="input-label" for="contractText">Paste text manually</label>
+    <textarea id="contractText" placeholder="Paste the full text of your contract here..."></textarea>
+
+    <div id="usageCounter" style="display:none;">
+      <div class="usage-dots" id="usageDots"></div>
+      <span id="usageText"></span>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <button class="analyze-btn" id="analyzeBtn" onclick="analyzeContract()">
+      <span></span> Analyze Contract
+    </button>
+  </div>
+
+  <!-- ── Loading ─────────────────────────────────────────────────────── -->
+  <div class="loading" id="loading">
+    <div class="spinner-ring"></div>
+    <p>Analyzing your contract…</p>
+  </div>
+
+  <!-- ── Results ─────────────────────────────────────────────────────── -->
+  <div class="results" id="results">
+
+    <div class="print-only print-header">
+      <div class="print-header-left">
+        <h1>⚖️ AnalyzeThisContract</h1>
+        <p>Contract Analysis Report &mdash; analyzethiscontract.com</p>
+      </div>
+      <div class="print-header-right">
+        <p id="printDate"></p>
+        <p>Not legal advice. Consult a qualified attorney.</p>
+      </div>
+    </div>
+
+    <div class="export-bar">
+      <button class="export-btn" id="copyBtn" onclick="copyResults()"> Copy to clipboard</button>
+      <button class="export-btn" onclick="downloadPDF()">⬇ Download PDF</button>
+    </div>
+
+    <div class="ai-disclaimer">
+      <div class="ai-disclaimer-icon"></div>
+      <div>
+        <strong>AI-assisted review — not legal advice.</strong> This analysis identifies clauses that appear unusual or one-sided compared to standard leases. It does not determine whether any clause is legally enforceable in your jurisdiction. For any clause that concerns you, <strong>consult a local tenant rights organization or attorney</strong> before signing.
+      </div>
+    </div>
+
+    <div class="section-title">Overview</div>
+    <div class="glass result-card" id="summaryCard">
+      <h3> Plain English Summary<span class="score-badge" id="scoreBadge"></span></h3>
+      <p id="summaryText"></p>
+      <div class="stats-bar" id="statsBar"></div>
+    </div>
+
+    <div class="section-title">Key Terms</div>
+    <div class="glass result-card">
+      <h3> Key Terms Extracted</h3>
+      <div class="terms-grid" id="termsGrid"></div>
+    </div>
+
+    <div class="section-title">Red Flags</div>
+    <div class="glass result-card">
+      <h3> Red Flags</h3>
+      <ul id="flagsList"></ul>
+    </div>
+
+    <div class="section-title">Missing Clauses</div>
+    <div class="glass result-card">
+      <h3>⚠️ Missing or Unclear Clauses</h3>
+      <ul id="missingList"></ul>
+    </div>
+
+    <div class="section-title">Negotiation Tips</div>
+    <div class="glass result-card tips-gate-card" id="tipsCard" style="position:relative;overflow:hidden;">
+      <h3> What to Negotiate Before Signing</h3>
+      <ul id="tipsList"></ul>
+      <div class="tips-blur-overlay" id="tipsBlurOverlay">
+        <div class="tips-blur-bg"></div>
+        <div class="tips-upsell">
+          <div class="tips-upsell-icon"></div>
+          <div class="tips-upsell-headline">Negotiation tips are a Pro feature</div>
+          <div class="tips-upsell-sub">Know exactly what to push back on — and how to word it. Upgrade to unlock all 4 tips for this contract.</div>
+          <button class="tips-upsell-btn" onclick="startCheckout('pro')">Unlock Pro — $12.99/mo →</button>
+          <button class="tips-upsell-free" onclick="showAuth('signup')">or create a free account</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="print-disclaimer">
+      AnalyzeThisContract is not a law firm and does not provide legal advice.
+      This report is for informational purposes only. Always consult a qualified attorney before signing any contract.
+      &copy; analyzethiscontract.com
+    </div>
+
+    <button class="reset-btn" onclick="resetApp()">← Analyze another contract</button>
+  </div>
+
+  <!-- ── Paywall modal ──────────────────────────────────────────────── -->
+  <div class="modal-overlay" id="paywallModal">
+    <div class="modal">
+      <button class="modal-close" onclick="document.getElementById('paywallModal').classList.remove('visible')">✕</button>
+      <div class="modal-top-bar">
+        <h2>You've Used Your Free Analyses</h2>
+        <span class="modal-top-badge">Lawyers charge $300/hr</span>
+      </div>
+      <div class="modal-body">
+        <div class="modal-comparison">
+          <span class="vs-bad">Lawyer review: $300–$500</span>
+          <span class="vs-sep">vs</span>
+          <span class="vs-good">AnalyzeThisContract Pro: $12.99/mo</span>
+        </div>
+        <div class="modal-plan">
+          <div class="modal-plan-badge">Pro Plan</div>
+          <div class="plan-price">$12.99 <span>/month &nbsp;·&nbsp; cancel anytime</span></div>
+          <ul class="plan-features">
+            <li>Unlimited analyses</li>
+            <li>Red flags identified</li>
+            <li>Missing clause alerts</li>
+            <li>Negotiation tips</li>
+            <li>Saved history</li>
+            <li>PDF export</li>
+          </ul>
+          <button class="plan-btn" onclick="startCheckout('pro')">Start Pro — $12.99/mo →</button>
+        </div>
+        <div class="modal-trust"> Stripe &nbsp;·&nbsp; ✓ No hidden fees &nbsp;·&nbsp; ↩ Cancel anytime</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="disclaimer">AnalyzeThisContract is not a law firm and does not provide legal advice. Always consult a qualified attorney for legal matters. &nbsp;·&nbsp; <a href="/services.html">Services &amp; Pricing</a></p>
+</div>
+
+<!-- ── Custom Confirm Dialog ──────────────────────────────────────────── -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-icon" id="confirmIcon">️</div>
+    <h3 id="confirmTitle">Delete this analysis?</h3>
+    <p id="confirmMessage">This cannot be undone.</p>
+    <div class="confirm-actions">
+      <button class="confirm-cancel-btn" id="confirmCancelBtn">Cancel</button>
+      <button class="confirm-ok-btn" id="confirmOkBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Dashboard overlay ──────────────────────────────────────────────── -->
+<div class="dashboard-overlay" id="dashboardOverlay" onclick="closeDashboard()"></div>
+
+<!-- ── Dashboard panel ───────────────────────────────────────────────── -->
+<div class="dashboard-panel" id="dashboardPanel">
+  <div class="dashboard-header">
+    <h2> My Analyses</h2>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-size:12px;color:var(--muted);" id="dashboardCount"></span>
+      <button class="dashboard-close" onclick="closeDashboard()">✕</button>
+    </div>
+  </div>
+  <div class="dashboard-body" id="dashboardBody">
+    <div class="dashboard-loading">Loading your analyses…</div>
+  </div>
+</div>
+
+<!-- ── All original JS — completely unchanged ─────────────────────────── -->
+<script>
+const FREE_LIMIT = 5;
+
+function getUsage() {
+  try { return JSON.parse(localStorage.getItem('atc_usage') || '{"free":0,"paid":0}'); }
+  catch(e) { return {free:0, paid:0}; }
+}
+function saveUsage(u) { localStorage.setItem('atc_usage', JSON.stringify(u)); }
+function getRemainingAnalyses() {
+  const u = getUsage();
+  if (u.paid > 0) return { type: 'paid', remaining: u.paid };
+  return { type: 'free', remaining: Math.max(0, FREE_LIMIT - (u.free || 0)) };
+}
+function incrementUsage() {
+  const u = getUsage();
+  if (u.paid > 0) { u.paid--; } else { u.free = (u.free || 0) + 1; }
+  saveUsage(u);
+}
+function updateUsageUI() {
+  const { remaining } = getRemainingAnalyses();
+  const dots = document.getElementById('usageDots');
+  const text = document.getElementById('usageText');
+  if (!dots) return;
+  dots.innerHTML = '';
+  const used = FREE_LIMIT - remaining;
+  for (let i = 0; i < FREE_LIMIT; i++) {
+    const d = document.createElement('div');
+    d.className = 'usage-dot' + (i < used ? ' used' : '');
+    dots.appendChild(d);
+  }
+  if (remaining === 0) { text.textContent = 'No analyses remaining'; text.style.color = 'var(--red)'; }
+  else { text.textContent = `${remaining} free ${remaining === 1 ? 'analysis' : 'analyses'} remaining`; text.style.color = ''; }
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(0,255,180,0.15);border:1px solid rgba(0,255,180,0.4);color:#00ffb4;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;z-index:9999;backdrop-filter:blur(10px);';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+async function startCheckout(plan) {
+  const btn = event.target;
+  const origText = btn.textContent;
+  btn.textContent = 'Redirecting...';
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan: plan || 'pro', token: authToken || null })
+    });
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+    else { btn.textContent = origText; btn.disabled = false; }
+  } catch(e) { btn.textContent = origText; btn.disabled = false; }
+}
+
+let authMode = 'signup';
+let currentUser = null;
+let authToken = null;
+
+function getStoredAuth() {
+  try {
+    const t = localStorage.getItem('atc_token');
+    const u = localStorage.getItem('atc_user');
+    if (t && u) { authToken = t; currentUser = JSON.parse(u); }
+  } catch(e) {}
+}
+
+async function refreshAuthToken() {
+  const refreshToken = localStorage.getItem('atc_refresh');
+  if (!refreshToken) { clearAuth(); return false; }
+  try {
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'refresh', token: refreshToken })
+    });
+    const data = await res.json();
+    if (data.error || !data.token) { clearAuth(); return false; }
+    saveAuth(data.token, data.user || currentUser, data.refreshToken);
+    return true;
+  } catch(e) { clearAuth(); return false; }
+}
+
+function saveAuth(token, user, refreshToken) {
+  authToken = token; currentUser = user;
+  localStorage.setItem('atc_token', token);
+  localStorage.setItem('atc_user', JSON.stringify(user));
+  if (refreshToken) localStorage.setItem('atc_refresh', refreshToken);
+}
+
+function clearAuth() {
+  authToken = null; currentUser = null;
+  localStorage.removeItem('atc_token');
+  localStorage.removeItem('atc_user');
+  localStorage.removeItem('atc_refresh');
+}
+
+function showAuth(mode) {
+  authMode = mode || 'signup';
+  const isLogin = authMode === 'login';
+  document.getElementById('authTitle').textContent = isLogin ? 'Welcome Back' : 'Create Account';
+  document.getElementById('authSub').textContent = isLogin ? 'Log in to access your analyses' : 'Sign up to save your analyses and manage credits';
+  document.getElementById('authSubmitBtn').textContent = isLogin ? 'Log In' : 'Create Account';
+  document.getElementById('authSwitch').innerHTML = isLogin ? "Don't have an account? <a onclick=\"toggleAuthMode()\">Sign up</a>" : "Already have an account? <a onclick=\"toggleAuthMode()\">Log in</a>";
+  document.getElementById('authError').classList.remove('visible');
+  document.getElementById('signupExtra').style.display = isLogin ? 'none' : 'block';
+  document.getElementById('authPhone').style.display = isLogin ? 'none' : 'block';
+  document.getElementById('authModal').classList.add('visible');
+}
+
+function toggleAuthMode() { showAuth(authMode === 'signup' ? 'login' : 'signup'); }
+
+function validatePassword(pw) {
+  if (pw.length < 8) return 'Password must be at least 8 characters.';
+  if (!/[A-Z]/.test(pw)) return 'Password must include at least one capital letter.';
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pw)) return 'Password must include at least one symbol (!@#$%^&*).';
+  return null;
+}
+
+async function submitAuth() {
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const btn = document.getElementById('authSubmitBtn');
+  const errEl = document.getElementById('authError');
+  errEl.classList.remove('visible');
+  if (!email || !password) { errEl.textContent = 'Please enter your email and password.'; errEl.classList.add('visible'); return; }
+  if (authMode === 'signup') {
+    const pwError = validatePassword(password);
+    if (pwError) { errEl.textContent = pwError; errEl.classList.add('visible'); return; }
+    const confirm = document.getElementById('authPasswordConfirm').value;
+    if (password !== confirm) { errEl.textContent = 'Passwords do not match.'; errEl.classList.add('visible'); return; }
+  }
+  btn.textContent = 'Please wait...'; btn.disabled = true;
+  const phone = authMode === 'signup' ? document.getElementById('authPhone').value.trim() : null;
+  const emailOptIn = authMode === 'signup' ? document.getElementById('emailOptIn').checked : null;
+  try {
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: authMode, email, password, phone, emailOptIn })
+    });
+    const data = await res.json();
+    if (data.error) {
+      errEl.textContent = data.error; errEl.classList.add('visible');
+      btn.textContent = authMode === 'login' ? 'Log In' : 'Create Account'; btn.disabled = false;
+      return;
+    }
+    if (authMode === 'signup') {
+      errEl.style.background = 'rgba(0,255,180,0.08)';
+      errEl.style.borderColor = 'rgba(0,255,180,0.3)';
+      errEl.style.color = 'var(--teal)';
+      errEl.textContent = '✓ Account created! Please check your email and click the confirmation link before logging in.';
+      errEl.classList.add('visible');
+      btn.textContent = 'Go to Log In'; btn.disabled = false;
+      btn.onclick = () => { errEl.classList.remove('visible'); errEl.removeAttribute('style'); btn.onclick = submitAuth; showAuth('login'); };
+      return;
+    }
+    saveAuth(data.token, data.user, data.refreshToken);
+    document.getElementById('authModal').classList.remove('visible');
+    await updateNavForUser();
+    showToast('Welcome back!');
+  } catch(e) {
+    errEl.textContent = 'Something went wrong. Please try again.'; errEl.classList.add('visible');
+    btn.textContent = authMode === 'login' ? 'Log In' : 'Create Account'; btn.disabled = false;
+  }
+}
+
+async function ensureFreshToken() {
+  if (!authToken) return true;
+  try {
+    const payload = JSON.parse(atob(authToken.split('.')[1]));
+    if (payload.exp - Math.floor(Date.now() / 1000) > 60) return true;
+  } catch(e) {}
+  const refreshed = await refreshAuthToken();
+  if (!refreshed) { clearAuth(); await updateNavForUser(); return false; }
+  return true;
+}
+
+async function analyzeContract() {
+  const text = document.getElementById('contractText').value.trim();
+  const errorMsg = document.getElementById('errorMsg');
+  const btn = document.getElementById('analyzeBtn');
+  errorMsg.classList.remove('visible');
+
+  if (authToken) {
+    try {
+      const res = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'getCredits', token: authToken }) });
+      const credits = await res.json();
+      if (credits.plan !== 'pro' && credits.credits <= 0) { document.getElementById('paywallModal').classList.add('visible'); return; }
+    } catch(e) {}
+  } else {
+    const { remaining } = getRemainingAnalyses();
+    if (remaining <= 0) { document.getElementById('paywallModal').classList.add('visible'); return; }
+  }
+
+  if (!text || text.length < 50) { errorMsg.textContent = 'Please upload a file or paste a contract to analyze.'; errorMsg.classList.add('visible'); return; }
+
+  btn.disabled = true; btn.innerHTML = '<span>⏳</span> Analyzing…';
+  document.getElementById('inputSection').style.display = 'none';
+  document.getElementById('loading').classList.add('visible');
+  document.getElementById('results').classList.remove('visible');
+
+  try {
+    const response = await fetch('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contractText: text, token: authToken || null }) });
+    const result = await response.json();
+    if (response.status === 403 && result.code === 'NO_CREDITS') {
+      document.getElementById('loading').classList.remove('visible');
+      document.getElementById('inputSection').style.display = 'block';
+      document.getElementById('paywallModal').classList.add('visible');
+      btn.disabled = false; btn.innerHTML = '<span></span> Analyze Contract';
+      return;
+    }
+    if (!response.ok) throw new Error(result.error || 'Analysis failed');
+    if (!authToken) { incrementUsage(); updateUsageUI(); } else { await updateNavForUser(); }
+    renderResults(result);
+    const subtitle = document.getElementById('headerSubtitle');
+    if (subtitle) subtitle.style.display = 'none';
+    if (authToken) { autoSaveAnalysis(result, text); } else { setTimeout(() => showSaveNudge(), 1500); }
+  } catch(err) {
+    document.getElementById('loading').classList.remove('visible');
+    document.getElementById('inputSection').style.display = 'block';
+    errorMsg.textContent = 'Something went wrong analyzing the contract. Please try again.';
+    errorMsg.classList.add('visible');
+  } finally {
+    btn.disabled = false; btn.innerHTML = '<span></span> Analyze Contract';
+  }
+}
+
+async function updateNavForUser() {
+  const nav = document.getElementById('topNav');
+  if (!authToken || !currentUser) {
+    nav.innerHTML = '<button class="nav-btn" onclick="showAuth(\'login\')">Log In</button><button class="nav-btn upgrade" onclick="startCheckout(\'pro\')">&#11014; Upgrade</button><button class="nav-btn primary" onclick="showAuth(\'signup\')">Sign Up</button>';
+    showUpgradeBar();
+    return;
+  }
+  try {
+    let res = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'getCredits', token: authToken }) });
+    if (res.status === 401) {
+      const refreshed = await refreshAuthToken();
+      if (!refreshed) { clearAuth(); nav.innerHTML = '<button class="nav-btn" onclick="showAuth(\'login\')">Log In</button><button class="nav-btn upgrade" onclick="startCheckout(\'pro\')">&#11014; Upgrade</button><button class="nav-btn primary" onclick="showAuth(\'signup\')">Sign Up</button>'; showUpgradeBar(); return; }
+      res = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'getCredits', token: authToken }) });
+    }
+    const credits = await res.json();
+    if (credits && !credits.error) {
+      const u = getUsage();
+      if (credits.plan === 'pro') { u.pro = true; u.paid = 9999; }
+      else { u.pro = false; u.paid = 0; u.free = Math.max(0, 5 - (credits.credits || 0)); }
+      saveUsage(u);
+    }
+    const label = credits.plan === 'pro' ? '✦ Pro — Unlimited' : `${credits.credits} ${credits.credits === 1 ? 'analysis' : 'analyses'} left`;
+    const email = currentUser.email || '';
+    const isPaid = credits.plan === 'pro';
+    const historyBtn = isPaid ? `<button class="nav-btn history" onclick="openDashboard()"> History</button>` : '';
+    const upgradeBtn = !isPaid ? `<button class="nav-btn upgrade" onclick="startCheckout('pro')">&#11014; Upgrade</button>` : '';
+    nav.innerHTML = `<div class="user-nav"><span title="${email}">${email}</span><span class="credit-badge">${label}</span>${upgradeBtn}${historyBtn}<button class="nav-btn" onclick="logout()">Log Out</button></div>`;
+    if (!isPaid) { showUpgradeBar(); } else { hideUpgradeBar(); }
+  } catch(e) {
+    nav.innerHTML = `<div class="user-nav"><span>${currentUser.email}</span><button class="nav-btn" onclick="logout()">Log Out</button></div>`;
+  }
+}
+
+function logout() { clearAuth(); updateNavForUser(); resetApp(); showToast('Logged out.'); }
+
+
+function showUpgradeBar(){if(sessionStorage.getItem('atc_bar_dismissed'))return;const bar=document.getElementById('upgradeBar');if(!bar)return;bar.classList.remove('visible');void bar.offsetWidth;bar.classList.add('visible');document.body.classList.add('has-bar');}
+function hideUpgradeBar(){const bar=document.getElementById('upgradeBar');if(bar)bar.classList.remove('visible');document.body.classList.remove('has-bar');}
+function dismissUpgradeBar(){hideUpgradeBar();sessionStorage.setItem('atc_bar_dismissed','1');}
+
+window.addEventListener('load', async () => {
+  getStoredAuth();
+  await updateNavForUser();
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('checkout') === 'success') {
+    const plan = params.get('plan') || 'pro';
+    showToast(plan === 'pro' ? ' Pro plan activated! Unlimited analyses are ready.' : 'Payment received! Your analyses will be available shortly.');
+    window.history.replaceState({}, '', window.location.pathname);
+    let attempts = 0;
+    const poll = setInterval(async () => { attempts++; await updateNavForUser(); if (attempts >= 6) clearInterval(poll); }, 2000);
+  }
+  updateUsageUI();
+});
+
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+});
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) processFile(file);
+}
+
+async function processFile(file) {
+  const errorMsg = document.getElementById('errorMsg');
+  errorMsg.classList.remove('visible');
+  const ext = file.name.split('.').pop().toLowerCase();
+  try {
+    let text = '';
+    if (ext === 'txt') {
+      text = await file.text();
+    } else if (ext === 'pdf') {
+      text = await extractPdfText(file);
+    } else if (ext === 'docx') {
+      if (typeof mammoth === 'undefined') {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
+          s.onload = resolve;
+          s.onerror = () => reject(new Error('Failed to load DOCX parser'));
+          document.head.appendChild(s);
+        });
+      }
+      const arrayBuffer = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({ arrayBuffer });
+      text = result.value || '';
+    } else if (ext === 'doc') {
+      errorMsg.textContent = '.doc files cannot be read directly. Please open the file in Word or Google Docs, then copy and paste the text into the box below.';
+      errorMsg.classList.add('visible');
+      return;
+    } else {
+      errorMsg.textContent = 'Unsupported file type. Please use PDF, TXT, or DOCX.';
+      errorMsg.classList.add('visible');
+      return;
+    }
+    text = text.replace(/\r\
+/g, '\
+').replace(/\
+{3,}/g, '\
+\
+').trim();
+    if (!text || text.length < 50) {
+      errorMsg.textContent = 'Could not extract enough text from this file. Try pasting the text manually.';
+      errorMsg.classList.add('visible');
+      return;
+    }
+    document.getElementById('contractText').value = text;
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileLoaded').style.display = 'flex';
+    dropZone.style.display = 'none';
+  } catch(err) {
+    console.error('[processFile] Error:', err);
+    errorMsg.textContent = 'Failed to read this file. Try pasting the text manually.';
+    errorMsg.classList.add('visible');
+  }
+}
+
+async function extractPdfText(file) {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let fullText = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    fullText += content.items.map(item => item.str).join(' ') + '\
+';
+  }
+  return fullText;
+}
+
+function clearFile() {
+  document.getElementById('contractText').value = '';
+  document.getElementById('fileLoaded').style.display = 'none';
+  document.getElementById('dropZone').style.display = 'block';
+  document.getElementById('fileInput').value = '';
+}
+
+function parseItemTitle(text) {
+  const m = text.match(/^([A-Z][A-Z\s\-\/&']+?)(?:\s*\([^)]*\))?:\s*(.+)$/s);
+  if (m && m[1].length < 80) return { title: m[1].trim(), detail: m[2].trim() };
+  const dot = text.indexOf('. ');
+  if (dot > 10 && dot < 80) return { title: text.slice(0, dot), detail: text.slice(dot + 2) };
+  return { title: null, detail: text };
+}
+
+function renderResults(data) {
+  document.getElementById('loading').classList.remove('visible');
+  document.getElementById('summaryText').textContent = data.summary;
+  const badge = document.getElementById('scoreBadge');
+  badge.textContent = data.scoreLabel; badge.className = 'score-badge';
+  if (data.score === 'good') badge.classList.add('score-good');
+  else if (data.score === 'warn') badge.classList.add('score-warn');
+  else badge.classList.add('score-bad');
+  const summaryCard = document.getElementById('summaryCard');
+  summaryCard.classList.remove('summary-good','summary-warn','summary-bad');
+  summaryCard.classList.add('summary-' + (data.score || 'warn'));
+  const statsBar = document.getElementById('statsBar');
+  statsBar.innerHTML = '';
+  const flagCount = data.redFlags?.length || 0;
+  const missingCount = data.missingClauses?.length || 0;
+  const tipCount = data.negotiationTips?.length || 0;
+  if (flagCount) statsBar.innerHTML += '<span class="stat-chip red">' + flagCount + ' red flag' + (flagCount !== 1 ? 's' : '') + '</span>';
+  if (missingCount) statsBar.innerHTML += '<span class="stat-chip blue">' + missingCount + ' missing clause' + (missingCount !== 1 ? 's' : '') + '</span>';
+  if (tipCount) statsBar.innerHTML += '<span class="stat-chip green">' + tipCount + ' negotiation tip' + (tipCount !== 1 ? 's' : '') + '</span>';
+  const termsGrid = document.getElementById('termsGrid');
+  termsGrid.innerHTML = '';
+  (data.keyTerms || []).forEach(t => {
+    const chip = document.createElement('div'); chip.className = 'term-chip';
+    chip.innerHTML = '<div class="term-label">' + t.label + '</div><div class="term-value">' + t.value + '</div>';
+    termsGrid.appendChild(chip);
+  });
+  const flagsList = document.getElementById('flagsList');
+  flagsList.innerHTML = '';
+  if (data.redFlags?.length) {
+    data.redFlags.forEach(f => {
+      const { title, detail } = parseItemTitle(f);
+      const li = document.createElement('li'); li.className = 'flag-item';
+      li.innerHTML = '<div class="item-inner">' + (title ? '<div class="item-title">' + title + '</div>' : '') + '<div class="item-detail">' + detail + '</div></div>';
+      flagsList.appendChild(li);
+    });
+  } else { flagsList.innerHTML = '<li><div class="item-inner"><div class="item-detail" style="color:var(--teal)">✓ No significant red flags found.</div></div></li>'; }
+  const missingList = document.getElementById('missingList');
+  missingList.innerHTML = '';
+  if (data.missingClauses?.length) {
+    data.missingClauses.forEach(m => {
+      const { title, detail } = parseItemTitle(m);
+      const li = document.createElement('li'); li.className = 'missing-item';
+      li.innerHTML = '<div class="item-inner">' + (title ? '<div class="item-title">' + title + '</div>' : '') + '<div class="item-detail">' + detail + '</div></div>';
+      missingList.appendChild(li);
+    });
+  } else { missingList.innerHTML = '<li><div class="item-inner"><div class="item-detail" style="color:var(--teal)">✓ All standard clauses appear to be present.</div></div></li>'; }
+  const tipsList = document.getElementById('tipsList');
+  tipsList.innerHTML = '';
+  if (data.negotiationTips?.length) {
+    data.negotiationTips.forEach(t => {
+      const { title, detail } = parseItemTitle(t);
+      const li = document.createElement('li'); li.className = 'tip-item';
+      li.innerHTML = '<div class="item-inner">' + (title ? '<div class="item-title">' + title + '</div>' : '') + '<div class="item-detail">' + detail + '</div></div>';
+      tipsList.appendChild(li);
+    });
+  } else { const tipSection = document.getElementById('tipsList').closest('.result-card'); if (tipSection) tipSection.style.display = 'none'; }
+  document.getElementById('results').classList.add('visible');
+  const overlay = document.getElementById('tipsBlurOverlay');
+  const tipsCard = document.getElementById('tipsCard');
+  if (overlay) {
+    const u = getUsage();
+    const isGated = !u.pro;
+    overlay.style.display = isGated ? 'flex' : 'none';
+    if (tipsCard) { isGated ? tipsCard.classList.add('gated') : tipsCard.classList.remove('gated'); }
+  }
+}
+
+function getResultsAsText() {
+  const summary = document.getElementById('summaryText')?.textContent || '';
+  const score = document.getElementById('scoreBadge')?.textContent || '';
+  const terms = [...document.querySelectorAll('#termsGrid .term-chip')].map(c => '  ' + (c.querySelector('.term-label')?.textContent || '') + ': ' + (c.querySelector('.term-value')?.textContent || '')).join('\
+');
+  const flags = [...document.querySelectorAll('#flagsList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\
+');
+  const missing = [...document.querySelectorAll('#missingList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\
+');
+  const tips = [...document.querySelectorAll('#tipsList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\
+');
+  const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  return ['╔' + '═'.repeat(46) + '╗', '  ANALYZETHISCONTRACT — Contract Analysis Report', '  Generated: ' + date, '╚' + '═'.repeat(46) + '╝', '', '▌ SUMMARY', summary, score ? 'Assessment: ' + score : '', '', '▌ KEY TERMS', terms || '  None extracted.', '', '▌ RED FLAGS', flags || '  No significant red flags found.', '', '▌ MISSING CLAUSES', missing || '  All standard clauses present.', tips ? ('\
+▌ NEGOTIATION TIPS\
+' + tips) : '', '', '─'.repeat(50), 'Not legal advice. Consult a qualified attorney.'].join('\
+');
+}
+
+async function copyResults() {
+  const btn = document.getElementById('copyBtn');
+  try { await navigator.clipboard.writeText(getResultsAsText()); }
+  catch(e) { const ta = document.createElement('textarea'); ta.value = getResultsAsText(); ta.style.cssText = 'position:fixed;opacity:0;'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+  btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+  setTimeout(() => { btn.innerHTML = ' Copy to clipboard'; btn.classList.remove('copied'); }, 2500);
+}
+
+async function downloadPDF() {
+  if (!authToken) { showAuth('signup'); return; }
+  try {
+    const res = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'getCredits', token: authToken }) });
+    const credits = await res.json();
+    if (credits.plan !== 'pro') { document.getElementById('paywallModal').classList.add('visible'); return; }
+  } catch(e) { document.getElementById('paywallModal').classList.add('visible'); return; }
+  const el = document.getElementById('printDate');
+  if (el) el.textContent = 'Generated: ' + new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  window.print();
+}
+
+function resetApp() {
+  document.getElementById('results').classList.remove('visible');
+  document.getElementById('inputSection').style.display = 'block';
+  document.getElementById('contractText').value = '';
+  const subtitle = document.getElementById('headerSubtitle');
+  if (subtitle) { subtitle.textContent = 'Drop any contract and get an instant plain-English breakdown — red flags, missing clauses, and key terms included.'; subtitle.style.display = ''; }
+  clearFile();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+let lastSavedId = null;
+let lastSavedName = null;
+
+async function autoSaveAnalysis(analysisData, contractText) {
+  try {
+    const res = await fetch('/api/analyses', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'save', token: authToken, analysisData, contractText }) });
+    const data = await res.json();
+    if (data.success) { lastSavedId = data.id; lastSavedName = data.contractName; showSaveBadge(data.contractName); }
+  } catch(e) {}
+}
+
+function showSaveBadge(name) {
+  const bar = document.querySelector('.export-bar');
+  if (!bar) return;
+  let badge = document.getElementById('saveIndicator');
+  if (!badge) { badge = document.createElement('span'); badge.id = 'saveIndicator'; badge.className = 'save-indicator'; bar.insertBefore(badge, bar.firstChild); }
+  badge.innerHTML = '✓ Saved'; badge.classList.add('visible');
+  setTimeout(() => badge.classList.remove('visible'), 3000);
+}
+
+function showSaveNudge() {
+  const bar = document.querySelector('.export-bar');
+  if (!bar || authToken) return;
+  let nudge = document.getElementById('saveNudge');
+  if (nudge) return;
+  nudge = document.createElement('span');
+  nudge.id = 'saveNudge';
+  nudge.style.cssText = 'font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px;';
+  nudge.innerHTML = '<a onclick="showAuth(\'signup\')" style="color:var(--cyan);cursor:pointer;text-decoration:underline;">Sign up free</a> to save this analysis';
+  bar.insertBefore(nudge, bar.firstChild);
+}
+
+async function openDashboard() {
+  document.getElementById('dashboardOverlay').classList.add('visible');
+  document.getElementById('dashboardPanel').classList.add('open');
+  await loadDashboard();
+}
+
+function closeDashboard() {
+  document.getElementById('dashboardOverlay').classList.remove('visible');
+  document.getElementById('dashboardPanel').classList.remove('open');
+}
+
+async function loadDashboard() {
+  const body = document.getElementById('dashboardBody');
+  const countEl = document.getElementById('dashboardCount');
+  body.innerHTML = '<div class="dashboard-loading">Loading…</div>';
+  try {
+    const res = await fetch('/api/analyses', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'list', token: authToken }) });
+    const data = await res.json();
+    if (data.locked) { body.innerHTML = '<div class="dashboard-empty"><div class="empty-icon"></div><p>Upgrade to Pro to save and revisit your analyses.</p></div>'; countEl.textContent = ''; return; }
+    const analyses = data.analyses || [];
+    countEl.textContent = analyses.length ? analyses.length + ' saved' : '';
+    if (!analyses.length) { body.innerHTML = '<div class="dashboard-empty"><div class="empty-icon"></div><p>No saved analyses yet.<br>Run your first contract analysis to get started.</p></div>'; return; }
+    body.innerHTML = analyses.map(a => {
+      const date = new Date(a.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const scoreClass = a.score === 'good' ? 'row-score-good' : a.score === 'bad' ? 'row-score-bad' : 'row-score-warn';
+      const scoreEmoji = a.score === 'good' ? '✓' : a.score === 'bad' ? '⚠' : '~';
+      return `<div class="analysis-row" id="row-${a.id}" onclick="loadSavedAnalysis('${a.id}', event)"><div class="analysis-row-top"><div class="analysis-row-name" id="name-${a.id}">${escHtml(a.contract_name || 'Untitled')}</div><div class="row-actions" onclick="event.stopPropagation()"><button class="row-action-btn" onclick="startRename('${a.id}')">✏ Rename</button><button class="row-action-btn danger" onclick="deleteAnalysis('${a.id}')">✕</button></div></div><div class="analysis-row-meta"><span class="analysis-row-date">${date}</span><span class="row-score-badge ${scoreClass}">${scoreEmoji} ${a.score_label || a.score}</span></div></div>`;
+    }).join('');
+  } catch(e) { body.innerHTML = '<div class="dashboard-empty"><p>Failed to load analyses. Please try again.</p></div>'; }
+}
+
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+async function loadSavedAnalysis(id, event) {
+  if (event && event.target.closest('.row-actions')) return;
+  if (event && event.target.classList.contains('analysis-row-name') && event.target.isContentEditable) return;
+  const row = document.getElementById('row-' + id);
+  if (row) { row.style.opacity = '0.5'; row.style.pointerEvents = 'none'; }
+  try {
+    const res = await fetch('/api/analyses', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'get', token: authToken, analysisId: id }) });
+    const data = await res.json();
+    if (data.error || !data.analysisData) { showToast('Failed to load analysis.'); if (row) { row.style.opacity = ''; row.style.pointerEvents = ''; } return; }
+    closeDashboard();
+    document.getElementById('inputSection').style.display = 'none';
+    lastSavedId = id; lastSavedName = data.contract_name;
+    const subtitle = document.getElementById('headerSubtitle');
+    if (subtitle) { subtitle.textContent = data.contract_name ? `Viewing: ${data.contract_name}` : 'Viewing saved analysis'; subtitle.style.display = ''; }
+    renderResults(data.analysisData);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    showSaveBadge('Loaded: ' + (data.contract_name || 'Analysis'));
+  } catch(e) { showToast('Error loading analysis.'); if (row) { row.style.opacity = ''; row.style.pointerEvents = ''; } }
+}
+
+function showConfirm({ icon = '️', title, message, okLabel = 'Delete', onConfirm }) {
+  const overlay = document.getElementById('confirmOverlay');
+  document.getElementById('confirmIcon').textContent = icon;
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMessage').textContent = message;
+  document.getElementById('confirmOkBtn').textContent = okLabel;
+  overlay.classList.add('visible');
+  const okBtn = document.getElementById('confirmOkBtn');
+  const cancelBtn = document.getElementById('confirmCancelBtn');
+  function close() { overlay.classList.remove('visible'); okBtn.removeEventListener('click', handleOk); cancelBtn.removeEventListener('click', close); overlay.removeEventListener('click', handleOverlay); }
+  function handleOk() { close(); onConfirm(); }
+  function handleOverlay(e) { if (e.target === overlay) close(); }
+  okBtn.addEventListener('click', handleOk); cancelBtn.addEventListener('click', close); overlay.addEventListener('click', handleOverlay);
+}
+
+async function deleteAnalysis(id) {
+  showConfirm({ icon: '️', title: 'Delete this analysis?', message: 'This cannot be undone.', okLabel: 'Delete', onConfirm: async () => {
+    try {
+      await fetch('/api/analyses', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete', token: authToken, analysisId: id }) });
+      const row = document.getElementById('row-' + id);
+      if (row) { row.style.transition = 'opacity 0.2s'; row.style.opacity = '0'; setTimeout(() => { row.remove(); updateDashboardCount(); }, 220); }
+    } catch(e) { showToast('Failed to delete.'); }
+  }});
+}
+
+function updateDashboardCount() {
+  const rows = document.querySelectorAll('.analysis-row');
+  const countEl = document.getElementById('dashboardCount');
+  if (countEl) countEl.textContent = rows.length ? rows.length + ' saved' : '';
+  if (!rows.length) { const body = document.getElementById('dashboardBody'); if (body) body.innerHTML = '<div class="dashboard-empty"><div class="empty-icon"></div><p>No saved analyses yet.</p></div>'; }
+}
+
+function startRename(id) {
+  const nameEl = document.getElementById('name-' + id);
+  if (!nameEl) return;
+  const previous = nameEl.textContent;
+  nameEl.contentEditable = 'true';
+  nameEl.classList.add('editing');
+  nameEl.focus();
+  const range = document.createRange();
+  range.selectNodeContents(nameEl);
+  window.getSelection().removeAllRanges();
+  window.getSelection().addRange(range);
+
+  async function finishRename() {
+    nameEl.contentEditable = 'false';
+    nameEl.classList.remove('editing');
+    const newName = nameEl.textContent.trim();
+    if (!newName || newName === previous) { nameEl.textContent = previous; return; }
+    try {
+      const res = await fetch('/api/analyses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'rename', token: authToken, analysisId: id, newName }),
+      });
+      if (!res.ok) throw new Error('Server error');
+    } catch(e) {
+      nameEl.textContent = previous;
+      showToast('⚠️ Rename failed — please try again.');
+    }
+  }
+
+  nameEl.addEventListener('keydown', function handler(e) {
+    if (e.key === 'Enter') { e.preventDefault(); nameEl.removeEventListener('keydown', handler); finishRename(); }
+    if (e.key === 'Escape') { nameEl.textContent = previous; nameEl.contentEditable = 'false'; nameEl.classList.remove('editing'); nameEl.removeEventListener('keydown', handler); }
+  });
+
+  nameEl.addEventListener('blur', function handler() {
+    nameEl.removeEventListener('blur', handler);
+    finishRename();
+  }, { once: true });
+}
+</script>
+
+
+<div id="upgradeBar">
+  <div class="ub-text"><strong>Upgrade to Pro</strong> &mdash; Unlimited analyses, negotiation tips &amp; saved history</div>
+  <div class="ub-sep"></div>
+  <div class="ub-feats"><span class="ub-feat">Unlimited analyses</span><span class="ub-feat">Negotiation tips</span><span class="ub-feat">Saved history</span><span class="ub-feat">PDF export</span></div>
+  <button class="ub-btn" onclick="startCheckout('pro')">Go Pro &mdash; $12.99/mo</button>
+  <button class="ub-x" onclick="dismissUpgradeBar()" title="Dismiss">&times;</button>
+</div>
+</body>
+</html>

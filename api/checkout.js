@@ -90,11 +90,7 @@ module.exports = function handler(req, res) {
 
     const params = new URLSearchParams({
       'payment_method_types[0]': 'card',
-      'line_items[0][price_data][currency]': 'usd',
-      'line_items[0][price_data][product_data][name]': 'AnalyzeThisContract Pro',
-      'line_items[0][price_data][product_data][description]': 'Unlimited contract analyses per month, plus saved history and PDF export',
-      'line_items[0][price_data][unit_amount]': '1299',
-      'line_items[0][price_data][recurring][interval]': 'month',
+      'line_items[0][price]': process.env.STRIPE_PRICE_ID || 'price_1T6xYf2YmDjtDUCXvOwlxNVB',
       'line_items[0][quantity]': '1',
       'mode': 'subscription',
       'success_url': successUrl,

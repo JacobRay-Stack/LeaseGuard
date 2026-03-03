@@ -2000,7 +2000,8 @@ async function updateNavForUser() {
     const email = currentUser.email || '';
     const isPaid = credits.plan === 'pro';
     const historyBtn = isPaid ? `<button class="nav-btn history" onclick="openDashboard()">📁 History</button>` : '';
-    nav.innerHTML = `<div class="user-nav"><span title="${email}">${email}</span><span class="credit-badge">${label}</span>${historyBtn}<button class="nav-btn" onclick="logout()">Log Out</button></div>`;
+const upgradeBtn = !isPaid ? `<button class="nav-btn upgrade" onclick="startCheckout('pro')">⬆ Upgrade</button>` : '';
+nav.innerHTML = `<div class="user-nav"><span title="${email}">${email}</span><span class="credit-badge">${label}</span>${upgradeBtn}${historyBtn}<button class="nav-btn" onclick="logout()">Log Out</button></div>`;
   } catch(e) {
     nav.innerHTML = `<div class="user-nav"><span>${currentUser.email}</span><button class="nav-btn" onclick="logout()">Log Out</button></div>`;
   }

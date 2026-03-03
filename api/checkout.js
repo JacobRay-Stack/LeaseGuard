@@ -1,12 +1,10 @@
 const https = require('https');
 
-// ── Supabase helper (service key) ─────────────────────────────────────
 function supabaseReq(path, method, body, token) {
   return new Promise((resolve, reject) => {
     const useService = !token;
     const isGet = method === 'GET';
     const data = isGet ? null : JSON.stringify(body || {});
-
     const headers = {
       'apikey': useService ? process.env.SUPABASE_SERVICE_KEY : process.env.SUPABASE_ANON_KEY,
       'Authorization': `Bearer ${useService ? process.env.SUPABASE_SERVICE_KEY : token}`,
@@ -15,7 +13,6 @@ function supabaseReq(path, method, body, token) {
       headers['Content-Type'] = 'application/json';
       headers['Content-Length'] = Buffer.byteLength(data);
     }
-
     const req = https.request(
       { hostname: new URL(process.env.SUPABASE_URL).hostname, path, method, headers },
       (res) => {
@@ -39,7 +36,6 @@ async function getUserFromToken(token) {
   return r;
 }
 
-// ── Handler ───────────────────────────────────────────────────────────
 module.exports = function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -59,7 +55,7 @@ module.exports = function handler(req, res) {
   });
 
   req.on('end', async () => {
-    let plan = 'basic';
+    let plan = null;
     let clientToken = null;
 
     try {
@@ -87,14 +83,13 @@ module.exports = function handler(req, res) {
     const successUrl = `${origin}?checkout=success&plan=pro`;
     const cancelUrl = `${origin}?checkout=cancelled`;
 
-    const priceId = process.env.STRIPE_PRICE_ID || 'price_1T6xYf2YmDjtDUCXvOwlxNVB';
-    console.log('[checkout] priceId:', priceId);
-    console.log('[checkout] stripeKey present:', !!process.env.STRIPE_SECRET_KEY);
-    console.log('[checkout] stripeKey prefix:', (process.env.STRIPE_SECRET_KEY || '').slice(0, 7));
-
     const params = new URLSearchParams({
       'payment_method_types[0]': 'card',
-      'line_items[0][price]': priceId,
+      'line_items[0][price_data][currency]': 'usd',
+      'line_items[0][price_data][product_data][name]': 'AnalyzeThisContract Pro',
+      'line_items[0][price_data][product_data][description]': 'Unlimited contract analyses per month, plus saved history and PDF export',
+      'line_items[0][price_data][unit_amount]': '1299',
+      'line_items[0][price_data][recurring][interval]': 'month',
       'line_items[0][quantity]': '1',
       'mode': 'subscription',
       'success_url': successUrl,
@@ -104,7 +99,6 @@ module.exports = function handler(req, res) {
     });
 
     const paramStr = params.toString();
-    console.log('[checkout] params:', paramStr);
 
     const options = {
       hostname: 'api.stripe.com',
@@ -122,25 +116,20 @@ module.exports = function handler(req, res) {
       apiRes.on('data', (c) => (data += c));
       apiRes.on('end', () => {
         console.log('[checkout] stripe status:', apiRes.statusCode);
-        console.log('[checkout] stripe response:', data);
         try {
           const session = JSON.parse(data);
           if (session.error) {
-            console.error('[checkout] stripe error:', session.error);
+            console.error('[checkout] stripe error:', session.error.message);
             return res.status(500).json({ error: session.error.message });
           }
           res.status(200).json({ url: session.url });
         } catch (e) {
-          console.error('[checkout] parse error:', e.message, 'raw:', data);
           res.status(500).json({ error: 'Failed to create checkout session' });
         }
       });
     });
 
-    apiReq.on('error', (e) => {
-      console.error('[checkout] request error:', e.message);
-      res.status(500).json({ error: e.message });
-    });
+    apiReq.on('error', (e) => res.status(500).json({ error: e.message }));
     apiReq.write(paramStr);
     apiReq.end();
   });

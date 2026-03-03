@@ -64,7 +64,6 @@ module.exports = function handler(req, res) {
 
     try {
       const parsed = JSON.parse(body);
-      // Only pro plan exists now — anything else is rejected
       plan = parsed.plan === 'pro' ? 'pro' : null;
       clientToken = parsed.token || null;
     } catch (e) {
@@ -91,6 +90,7 @@ module.exports = function handler(req, res) {
     const priceId = process.env.STRIPE_PRICE_ID || 'price_1T6xYf2YmDjtDUCXvOwlxNVB';
     console.log('[checkout] priceId:', priceId);
     console.log('[checkout] stripeKey present:', !!process.env.STRIPE_SECRET_KEY);
+    console.log('[checkout] stripeKey prefix:', (process.env.STRIPE_SECRET_KEY || '').slice(0, 7));
 
     const params = new URLSearchParams({
       'payment_method_types[0]': 'card',
@@ -104,6 +104,7 @@ module.exports = function handler(req, res) {
     });
 
     const paramStr = params.toString();
+    console.log('[checkout] params:', paramStr);
 
     const options = {
       hostname: 'api.stripe.com',
@@ -120,17 +121,26 @@ module.exports = function handler(req, res) {
       let data = '';
       apiRes.on('data', (c) => (data += c));
       apiRes.on('end', () => {
+        console.log('[checkout] stripe status:', apiRes.statusCode);
+        console.log('[checkout] stripe response:', data);
         try {
           const session = JSON.parse(data);
-          if (session.error) return res.status(500).json({ error: session.error.message });
+          if (session.error) {
+            console.error('[checkout] stripe error:', session.error);
+            return res.status(500).json({ error: session.error.message });
+          }
           res.status(200).json({ url: session.url });
         } catch (e) {
+          console.error('[checkout] parse error:', e.message, 'raw:', data);
           res.status(500).json({ error: 'Failed to create checkout session' });
         }
       });
     });
 
-    apiReq.on('error', (e) => res.status(500).json({ error: e.message }));
+    apiReq.on('error', (e) => {
+      console.error('[checkout] request error:', e.message);
+      res.status(500).json({ error: e.message });
+    });
     apiReq.write(paramStr);
     apiReq.end();
   });

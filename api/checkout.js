@@ -80,8 +80,8 @@ module.exports = function handler(req, res) {
     }
 
     const origin = req.headers.origin || 'https://analyzethiscontract.com';
-    const successUrl = `${origin}?checkout=success&plan=pro`;
-    const cancelUrl = `${origin}?checkout=cancelled`;
+    const successUrl = `${origin}/app?checkout=success&plan=pro`;
+    const cancelUrl = `${origin}/app?checkout=cancelled`;
 
     const params = new URLSearchParams({
       'payment_method_types[0]': 'card',

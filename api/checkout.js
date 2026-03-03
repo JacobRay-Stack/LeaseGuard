@@ -88,9 +88,13 @@ module.exports = function handler(req, res) {
     const successUrl = `${origin}?checkout=success&plan=pro`;
     const cancelUrl = `${origin}?checkout=cancelled`;
 
+    const priceId = process.env.STRIPE_PRICE_ID || 'price_1T6xYf2YmDjtDUCXvOwlxNVB';
+    console.log('[checkout] priceId:', priceId);
+    console.log('[checkout] stripeKey present:', !!process.env.STRIPE_SECRET_KEY);
+
     const params = new URLSearchParams({
       'payment_method_types[0]': 'card',
-      'line_items[0][price]': process.env.STRIPE_PRICE_ID || 'price_1T6xYf2YmDjtDUCXvOwlxNVB',
+      'line_items[0][price]': priceId,
       'line_items[0][quantity]': '1',
       'mode': 'subscription',
       'success_url': successUrl,

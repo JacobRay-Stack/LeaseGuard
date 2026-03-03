@@ -1501,6 +1501,18 @@ body.has-bar .container { padding-bottom: 140px; }
   @keyframes spin     { to { transform: rotate(360deg); } }
 </style>
 </head>
+  <div id="upgradeBar">
+  <div class="ub-text"><strong>Upgrade to Pro</strong> — Unlimited analyses, negotiation tips &amp; saved history</div>
+  <div class="ub-sep"></div>
+  <div class="ub-feats">
+    <span class="ub-feat">Unlimited analyses</span>
+    <span class="ub-feat">Negotiation tips</span>
+    <span class="ub-feat">Saved history</span>
+    <span class="ub-feat">PDF export</span>
+  </div>
+  <button class="ub-btn" onclick="startCheckout('pro')">Go Pro — $12.99/mo</button>
+  <button class="ub-x" onclick="dismissUpgradeBar()" title="Dismiss">✕</button>
+</div>
 <body>
 
 <!-- ── Auth Modal ─────────────────────────────────────────────────────── -->

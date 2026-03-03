@@ -1,6 +1,5 @@
 const https = require('https');
 const { rateLimit } = require('./rateLimit');
-const { lastCreditEmail } = require('./email');
 
 // ── Timeout wrapper ────────────────────────────────────────────────────
 function withTimeout(promise, ms, label) {
@@ -27,7 +26,7 @@ function supabaseReq(path, method, body, useService, token) {
     if (!isGet && data) headers['Content-Length'] = Buffer.byteLength(data);
 
     const req = https.request(
-      { hostname: new URL(process.env.SUPABASE_URL).hostname },
+      { hostname: 'gbzyzsxuxwmdlzagkrvt.supabase.co', path, method, headers },
       (res) => {
         let d = '';
         res.on('data', (c) => (d += c));
@@ -89,50 +88,43 @@ async function consumeCredit(userId) {
 }
 
 // ── System prompt ──────────────────────────────────────────────────────
-const SYSTEM_PROMPT = `You are a careful, plain-English lease agreement reviewer. Your job is to read contracts and help tenants understand what they are agreeing to — flagging terms that are unusual, one-sided, or worth questioning before signing.
+const SYSTEM_PROMPT = `You are a plain-English contract reviewer helping tenants understand what they are agreeing to before signing.
 
-CRITICAL RULES — follow these without exception:
-1. NEVER cite specific statute numbers, section codes, or case law. You do not have reliable legal knowledge and citing statutes you are uncertain about causes real harm to real people.
-2. NEVER state that a clause "violates" or "is illegal" under any specific law. Instead use language like: "this is unusual," "this is worth questioning," "landlords typically cannot do this," "this is more one-sided than standard leases," "a lawyer should review this."
-3. NEVER make definitive legal conclusions. Your role is to flag, not adjudicate.
-4. DO be specific about what the clause actually says and why it is unusual or risky in plain English.
-5. DO compare to what is standard or common in most leases so the user understands what "normal" looks like.
-6. DO recommend consulting a local attorney or tenant rights organization for any clause that raises serious concern.
+RULES:
+- NEVER cite statute numbers, section codes, or case law.
+- NEVER say a clause "violates" or "is illegal." Use: "unusual," "worth questioning," "more one-sided than standard," "ask a lawyer about this."
+- NEVER make definitive legal conclusions. Flag, don't adjudicate.
+- Be specific and useful — explain what each clause actually says and why it matters in plain English.
 
-Your analysis must be genuinely useful — not vague or overly hedged. Flag real issues clearly. Explain the practical risk in plain English. Help the user know what questions to ask.
-
-Return ONLY a valid JSON object with exactly this structure — no preamble, no explanation, no markdown, no code fences:
+Return ONLY a valid JSON object with this exact structure. No preamble, no markdown, no code fences:
 
 {
-  "summary": "2-3 sentence plain English overview of the contract. Include the rent amount, lease term, location if visible, and your overall impression of whether this is a standard lease or one that warrants careful review.",
+  "summary": "2-3 sentences: rent amount, lease term, location if visible, and overall impression of whether this is standard or warrants careful review.",
   "score": "good or warn or bad",
   "scoreLabel": "One of: LOOKS STANDARD - Review before signing | WORTH REVIEWING - Some unusual terms | REVIEW CAREFULLY - Several one-sided clauses",
   "keyTerms": [
     { "label": "Term name", "value": "Term value" }
   ],
   "redFlags": [
-    "CLAUSE TITLE: What this clause says in plain English, why it is unusual or one-sided compared to a standard lease, and what practical risk it creates for the tenant. Do not cite statute numbers. End with: Recommend asking a lawyer about this before signing."
+    "CLAUSE TITLE: What it says, why it is unusual or one-sided, and what practical risk it creates. End with: Ask a lawyer about this before signing."
   ],
   "missingClauses": [
-    "CLAUSE NAME: What this clause would normally cover and what risk its absence creates for the tenant in plain English."
+    "CLAUSE NAME: What it would normally cover and what risk its absence creates."
   ],
   "negotiationTips": [
-    "NEGOTIATION POINT: Specific, practical advice on what to ask the landlord to change and how to word the request. Focus on realistic changes a tenant could actually negotiate."
+    "POINT: Specific advice on what to ask the landlord to change and how to word the request."
   ]
 }
 
-Scoring guidelines — score based on how unusual and one-sided the lease is, not on legal conclusions:
-- good: Lease looks fairly standard with no major unusual terms. Still recommend reading carefully before signing.
-- warn: Lease has 1-3 terms that are more one-sided or unusual than typical. Worth negotiating or getting a second opinion on.
-- bad: Lease has several terms that are significantly more one-sided than standard leases, or terms that are highly unusual and create serious financial risk.
+Scoring:
+- good: Standard lease, no major unusual terms.
+- warn: 1-3 terms more one-sided than typical.
+- bad: Several significantly one-sided or high-risk terms.
 
-keyTerms must include every financially significant term found: monthly rent, lease term, security deposit, late fee, notice period, pet policy, utilities, maintenance responsibility, early termination terms, and any other dollar amounts or deadlines in the lease.
-
-redFlags: Flag every clause that is more one-sided, unusual, or risky than what appears in standard leases. Explain clearly in plain English what the clause does and why it matters. Never cite statute numbers. Never say "violates [law]." Do say "unusual," "more restrictive than most leases," "worth asking a lawyer about." Include every flag you find — do not omit any.
-
-missingClauses: Flag protections that are absent but commonly appear in standard leases for the tenant's benefit. Explain what the missing clause would have covered and what the tenant is exposed to without it.
-
-negotiationTips: exactly 4 practical tips. Each must be specific to this lease — not generic advice. Tell the tenant exactly what to ask for and how.`;
+keyTerms: Include all financially significant terms — rent, lease term, deposit, late fees, notice period, pet policy, utilities, maintenance, early termination, and any other dollar amounts or deadlines.
+redFlags: Top 6 most important flags only. Be concise but specific.
+missingClauses: Up to 4 most important missing protections only.
+negotiationTips: Exactly 4 tips, specific to this contract.`
 
 // ── Handler ────────────────────────────────────────────────────────────
 module.exports = function handler(req, res) {
@@ -211,12 +203,6 @@ module.exports = function handler(req, res) {
           console.error('[analyze] consumeCredit unexpected failure:', creditResult);
           return res.status(500).json({ error: 'Could not verify account credits. Please try again.' });
         }
-        // ── Last-credit email: fire when user just used their final credit ──
-        if (creditResult.ok && creditResult.plan !== 'pro' && creditResult.credits === 0) {
-          lastCreditEmail(user.email).catch((err) =>
-            console.error('[analyze] Last-credit email failed:', err.message)
-          );
-        }
       } catch (err) {
         // Fail closed — don't allow free analyses if Supabase is unreachable
         console.error('[analyze] Credit check failed:', err.message);
@@ -240,7 +226,7 @@ module.exports = function handler(req, res) {
       system: SYSTEM_PROMPT,
       messages: [{
         role: 'user',
-        content: 'Analyze this lease agreement and return the JSON analysis:\n\n' + contractText.slice(0, 12000),
+        content: 'Analyze this lease agreement and return the JSON analysis:\n\n' + contractText.slice(0, 9000),
       }],
     });
 

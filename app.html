@@ -1767,11 +1767,16 @@ function showToast(msg) {
   setTimeout(() => t.remove(), 4000);
 }
 
-async function startCheckout(plan) {
-  const btn = event.target;
-  const origText = btn.textContent;
-  btn.textContent = 'Redirecting...';
-  btn.disabled = true;
+async function startCheckout(plan, btn) {
+  // If not logged in, show signup modal and resume checkout after auth
+  if (!authToken) {
+    pendingCheckoutPlan = plan || 'pro';
+    showAuth('signup');
+    return;
+  }
+  if (!btn) btn = event?.target;
+  const origText = btn ? btn.textContent : '';
+  if (btn) { btn.textContent = 'Redirecting...'; btn.disabled = true; }
   try {
     const res = await fetch('/api/checkout', {
       method: 'POST',
@@ -1780,13 +1785,14 @@ async function startCheckout(plan) {
     });
     const data = await res.json();
     if (data.url) window.location.href = data.url;
-    else { btn.textContent = origText; btn.disabled = false; }
-  } catch(e) { btn.textContent = origText; btn.disabled = false; }
+    else if (btn) { btn.textContent = origText; btn.disabled = false; }
+  } catch(e) { if (btn) { btn.textContent = origText; btn.disabled = false; } }
 }
 
 let authMode = 'signup';
 let currentUser = null;
 let authToken = null;
+let pendingCheckoutPlan = null;
 
 function getStoredAuth() {
   try {
@@ -1817,6 +1823,7 @@ function saveAuth(token, user, refreshToken) {
   localStorage.setItem('atc_token', token);
   localStorage.setItem('atc_user', JSON.stringify(user));
   if (refreshToken) localStorage.setItem('atc_refresh', refreshToken);
+  resumePendingCheckout();
 }
 
 function clearAuth() {
@@ -1824,6 +1831,14 @@ function clearAuth() {
   localStorage.removeItem('atc_token');
   localStorage.removeItem('atc_user');
   localStorage.removeItem('atc_refresh');
+}
+
+function resumePendingCheckout() {
+  if (pendingCheckoutPlan && authToken) {
+    const plan = pendingCheckoutPlan;
+    pendingCheckoutPlan = null;
+    startCheckout(plan, null);
+  }
 }
 
 function showAuth(mode) {

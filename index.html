@@ -1644,7 +1644,7 @@
           <div class="tips-upsell-icon"></div>
           <div class="tips-upsell-headline">Negotiation tips are a Pro feature</div>
           <div class="tips-upsell-sub">Know exactly what to push back on — and how to word it. Upgrade to unlock all 4 tips for this contract.</div>
-          <button class="tips-upsell-btn" onclick="startCheckout('pro', this)">Unlock Pro — $12.99/mo →</button>
+          <button class="tips-upsell-btn" onclick="startCheckout('pro')">Unlock Pro — $12.99/mo →</button>
           <button class="tips-upsell-free" onclick="showAuth('signup')">or create a free account</button>
         </div>
       </div>
@@ -1684,7 +1684,7 @@
             <li>Saved history</li>
             <li>PDF export</li>
           </ul>
-          <button class="plan-btn" onclick="startCheckout('pro', this)">Start Pro — $12.99/mo →</button>
+          <button class="plan-btn" onclick="startCheckout('pro')">Start Pro — $12.99/mo →</button>
         </div>
         <div class="modal-trust"> Stripe &nbsp;·&nbsp; ✓ No hidden fees &nbsp;·&nbsp; ↩ Cancel anytime</div>
       </div>
@@ -1767,7 +1767,8 @@ function showToast(msg) {
   setTimeout(() => t.remove(), 4000);
 }
 
-async function startCheckout(plan, btn) {
+async function startCheckout(plan) {
+  const btn = event.target;
   const origText = btn.textContent;
   btn.textContent = 'Redirecting...';
   btn.disabled = true;
@@ -1959,7 +1960,7 @@ async function analyzeContract() {
 async function updateNavForUser() {
   const nav = document.getElementById('topNav');
   if (!authToken || !currentUser) {
-    nav.innerHTML = '<button class="nav-btn" onclick="showAuth(\'login\')">Log In</button><button class="nav-btn upgrade" onclick="startCheckout(\'pro\', this)">&#11014; Upgrade</button><button class="nav-btn primary" onclick="showAuth(\'signup\')">Sign Up</button>';
+    nav.innerHTML = '<button class="nav-btn" onclick="showAuth(\'login\')">Log In</button><button class="nav-btn upgrade" onclick="startCheckout(\'pro\')">&#11014; Upgrade</button><button class="nav-btn primary" onclick="showAuth(\'signup\')">Sign Up</button>';
     showUpgradeBar();
     return;
   }
@@ -1967,7 +1968,7 @@ async function updateNavForUser() {
     let res = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'getCredits', token: authToken }) });
     if (res.status === 401) {
       const refreshed = await refreshAuthToken();
-      if (!refreshed) { clearAuth(); nav.innerHTML = '<button class="nav-btn" onclick="showAuth(\'login\')">Log In</button><button class="nav-btn upgrade" onclick="startCheckout(\'pro\', this)">&#11014; Upgrade</button><button class="nav-btn primary" onclick="showAuth(\'signup\')">Sign Up</button>'; showUpgradeBar(); return; }
+      if (!refreshed) { clearAuth(); nav.innerHTML = '<button class="nav-btn" onclick="showAuth(\'login\')">Log In</button><button class="nav-btn upgrade" onclick="startCheckout(\'pro\')">&#11014; Upgrade</button><button class="nav-btn primary" onclick="showAuth(\'signup\')">Sign Up</button>'; showUpgradeBar(); return; }
       res = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'getCredits', token: authToken }) });
     }
     const credits = await res.json();
@@ -1981,7 +1982,7 @@ async function updateNavForUser() {
     const email = currentUser.email || '';
     const isPaid = credits.plan === 'pro';
     const historyBtn = isPaid ? `<button class="nav-btn history" onclick="openDashboard()"> History</button>` : '';
-    const upgradeBtn = !isPaid ? `<button class="nav-btn upgrade" onclick="startCheckout('pro', this)">&#11014; Upgrade</button>` : '';
+    const upgradeBtn = !isPaid ? `<button class="nav-btn upgrade" onclick="startCheckout('pro')">&#11014; Upgrade</button>` : '';
     nav.innerHTML = `<div class="user-nav"><span title="${email}">${email}</span><span class="credit-badge">${label}</span>${upgradeBtn}${historyBtn}<button class="nav-btn" onclick="logout()">Log Out</button></div>`;
     if (!isPaid) { showUpgradeBar(); } else { hideUpgradeBar(); }
   } catch(e) {
@@ -2081,8 +2082,7 @@ async function extractPdfText(file) {
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
-    fullText += content.items.map(item => item.str).join(' ') + '\
-';
+    fullText += content.items.map(item => item.str).join(' ') + '\n';
   }
   return fullText;
 }
@@ -2172,19 +2172,12 @@ function renderResults(data) {
 function getResultsAsText() {
   const summary = document.getElementById('summaryText')?.textContent || '';
   const score = document.getElementById('scoreBadge')?.textContent || '';
-  const terms = [...document.querySelectorAll('#termsGrid .term-chip')].map(c => '  ' + (c.querySelector('.term-label')?.textContent || '') + ': ' + (c.querySelector('.term-value')?.textContent || '')).join('\
-');
-  const flags = [...document.querySelectorAll('#flagsList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\
-');
-  const missing = [...document.querySelectorAll('#missingList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\
-');
-  const tips = [...document.querySelectorAll('#tipsList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\
-');
+  const terms = [...document.querySelectorAll('#termsGrid .term-chip')].map(c => '  ' + (c.querySelector('.term-label')?.textContent || '') + ': ' + (c.querySelector('.term-value')?.textContent || '')).join('\n');
+  const flags = [...document.querySelectorAll('#flagsList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\n');
+  const missing = [...document.querySelectorAll('#missingList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\n');
+  const tips = [...document.querySelectorAll('#tipsList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\n');
   const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  return ['╔' + '═'.repeat(46) + '╗', '  ANALYZETHISCONTRACT — Contract Analysis Report', '  Generated: ' + date, '╚' + '═'.repeat(46) + '╝', '', '▌ SUMMARY', summary, score ? 'Assessment: ' + score : '', '', '▌ KEY TERMS', terms || '  None extracted.', '', '▌ RED FLAGS', flags || '  No significant red flags found.', '', '▌ MISSING CLAUSES', missing || '  All standard clauses present.', tips ? ('\
-▌ NEGOTIATION TIPS\
-' + tips) : '', '', '─'.repeat(50), 'Not legal advice. Consult a qualified attorney.'].join('\
-');
+  return ['╔' + '═'.repeat(46) + '╗', '  ANALYZETHISCONTRACT — Contract Analysis Report', '  Generated: ' + date, '╚' + '═'.repeat(46) + '╝', '', '▌ SUMMARY', summary, score ? 'Assessment: ' + score : '', '', '▌ KEY TERMS', terms || '  None extracted.', '', '▌ RED FLAGS', flags || '  No significant red flags found.', '', '▌ MISSING CLAUSES', missing || '  All standard clauses present.', tips ? ('\n▌ NEGOTIATION TIPS\n' + tips) : '', '', '─'.repeat(50), 'Not legal advice. Consult a qualified attorney.'].join('\n');
 }
 
 async function copyResults() {
@@ -2381,7 +2374,7 @@ function startRename(id) {
   <div class="ub-text"><strong>Upgrade to Pro</strong> &mdash; Unlimited analyses, negotiation tips &amp; saved history</div>
   <div class="ub-sep"></div>
   <div class="ub-feats"><span class="ub-feat">Unlimited analyses</span><span class="ub-feat">Negotiation tips</span><span class="ub-feat">Saved history</span><span class="ub-feat">PDF export</span></div>
-  <button class="ub-btn" onclick="startCheckout('pro', this)">Go Pro &mdash; $12.99/mo</button>
+  <button class="ub-btn" onclick="startCheckout('pro')">Go Pro &mdash; $12.99/mo</button>
   <button class="ub-x" onclick="dismissUpgradeBar()" title="Dismiss">&times;</button>
 </div>
 </body>

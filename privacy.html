@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — AnalyzeThisContract</title>
+<meta name="description" content="Privacy Policy for AnalyzeThisContract — how we collect, use, and protect your data.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://analyzethiscontract.com/privacy">
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjMWUyMTI4Ii8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMTMxNTFhIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9InVybCgjYmcpIi8+PHRleHQgeD0iMzIiIHk9IjM4IiBmb250LWZhbWlseT0iQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzAwYzhmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QUk8L3RleHQ+PC9zdmc+">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:      #060810;
+  --surface: rgba(255,255,255,0.035);
+  --border:  rgba(255,255,255,0.08);
+  --cyan:    #00c8ff;
+  --purple:  #bf00ff;
+  --teal:    #00ffb4;
+  --text:    #e8f0ff;
+  --muted:   #4a6080;
+  --radius:  18px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  background:var(--bg); color:var(--text);
+  font-family:'Inter',sans-serif; min-height:100vh;
+  overflow-x:hidden; line-height:1.6;
+}
+body::before {
+  content:''; position:fixed; inset:0;
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 30%, rgba(0,200,255,0.06) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 60% at 85% 20%, rgba(191,0,255,0.05) 0%, transparent 65%);
+  pointer-events:none; z-index:0;
+}
+body::after {
+  content:''; position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(0,200,255,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,200,255,0.018) 1px, transparent 1px);
+  background-size:48px 48px; pointer-events:none; z-index:0;
+}
+
+/* Nav */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  padding:16px 40px;
+  display:flex; align-items:center; justify-content:space-between;
+  background:rgba(6,8,16,0.88); backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+.nav-logo-icon {
+  width:36px; height:36px;
+  background:rgba(0,200,255,0.08); border:1px solid rgba(0,200,255,0.25);
+  border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px;
+}
+.nav-logo-text { font-size:16px; font-weight:700; color:var(--text); }
+.nav-logo-text span {
+  background:linear-gradient(135deg,#00c8ff,#bf00ff);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.nav-back {
+  padding:8px 18px; border-radius:10px; font-family:'Inter',sans-serif;
+  font-size:13px; font-weight:500; cursor:pointer;
+  border:1px solid var(--border); background:transparent;
+  color:var(--muted); text-decoration:none; transition:all 0.2s;
+}
+.nav-back:hover { color:var(--cyan); border-color:rgba(0,200,255,0.3); }
+
+/* Main content */
+.page-wrap {
+  position:relative; z-index:1;
+  max-width:760px; margin:0 auto;
+  padding:120px 24px 80px;
+}
+
+/* Page header */
+.page-header {
+  margin-bottom:48px;
+  padding-bottom:32px;
+  border-bottom:1px solid var(--border);
+}
+.page-header .eyebrow {
+  font-size:11px; font-weight:700; text-transform:uppercase;
+  letter-spacing:3px; color:var(--cyan); margin-bottom:14px;
+  display:flex; align-items:center; gap:10px;
+}
+.page-header .eyebrow::before { content:''; width:24px; height:1px; background:var(--cyan); }
+.page-header h1 {
+  font-size:clamp(28px,4vw,42px); font-weight:800;
+  line-height:1.1; letter-spacing:-0.5px; margin-bottom:14px;
+}
+.page-header .meta {
+  font-size:13px; color:var(--muted); display:flex; gap:20px; flex-wrap:wrap;
+}
+.page-header .meta span { display:flex; align-items:center; gap:5px; }
+
+/* Notice box */
+.notice {
+  background:rgba(0,200,255,0.04);
+  border:1px solid rgba(0,200,255,0.15);
+  border-left:3px solid var(--cyan);
+  border-radius:12px;
+  padding:16px 20px;
+  font-size:13px;
+  color:rgba(232,240,255,0.7);
+  line-height:1.7;
+  margin-bottom:40px;
+}
+.notice strong { color:var(--text); }
+
+/* Sections */
+.policy-section {
+  margin-bottom:48px;
+}
+.policy-section h2 {
+  font-size:20px; font-weight:700; color:var(--text);
+  margin-bottom:16px;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:10px;
+}
+.policy-section h2 .sec-num {
+  font-size:11px; font-weight:700; color:var(--cyan);
+  background:rgba(0,200,255,0.08); border:1px solid rgba(0,200,255,0.2);
+  padding:3px 9px; border-radius:20px; letter-spacing:0.5px;
+}
+.policy-section p {
+  font-size:14px; color:rgba(232,240,255,0.65);
+  line-height:1.85; margin-bottom:14px;
+}
+.policy-section p:last-child { margin-bottom:0; }
+.policy-section ul {
+  list-style:none; margin:10px 0 14px; display:flex; flex-direction:column; gap:8px;
+}
+.policy-section ul li {
+  font-size:14px; color:rgba(232,240,255,0.65);
+  line-height:1.7; display:flex; align-items:flex-start; gap:10px;
+}
+.policy-section ul li::before {
+  content:'→'; color:var(--cyan); flex-shrink:0; margin-top:1px; font-size:13px;
+}
+.policy-section h3 {
+  font-size:15px; font-weight:700; color:var(--text);
+  margin:20px 0 8px;
+}
+a { color:var(--cyan); text-decoration:none; }
+a:hover { text-decoration:underline; }
+
+/* Data table */
+.data-table {
+  width:100%; border-collapse:collapse; margin:16px 0; font-size:13px;
+}
+.data-table th {
+  text-align:left; padding:10px 14px;
+  background:rgba(0,200,255,0.06);
+  border:1px solid rgba(0,200,255,0.12);
+  color:var(--cyan); font-weight:600; font-size:11px;
+  text-transform:uppercase; letter-spacing:1px;
+}
+.data-table td {
+  padding:10px 14px;
+  border:1px solid var(--border);
+  color:rgba(232,240,255,0.65);
+  line-height:1.6;
+  vertical-align:top;
+}
+.data-table tr:nth-child(even) td { background:rgba(255,255,255,0.015); }
+
+/* Contact card */
+.contact-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:20px 24px;
+  margin-top:16px;
+}
+.contact-card p { margin:0; font-size:14px; color:rgba(232,240,255,0.65); line-height:1.8; }
+
+/* Footer */
+footer {
+  border-top:1px solid var(--border);
+  padding:28px 40px;
+  display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap:16px; position:relative; z-index:1;
+}
+.footer-left { font-size:13px; color:var(--muted); }
+.footer-links { display:flex; gap:20px; }
+.footer-links a { font-size:12px; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+.footer-links a:hover { color:var(--cyan); }
+
+@media(max-width:640px){
+  nav { padding:14px 20px; }
+  .page-wrap { padding:100px 20px 60px; }
+  footer { padding:24px 20px; flex-direction:column; text-align:center; }
+  .data-table { font-size:12px; }
+  .data-table th, .data-table td { padding:8px 10px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="/">
+    <div class="nav-logo-icon">⚖️</div>
+    <div class="nav-logo-text">AnalyzeThis<span>Contract</span></div>
+  </a>
+  <a href="/" class="nav-back">← Back to Home</a>
+</nav>
+
+<div class="page-wrap">
+
+  <div class="page-header">
+    <div class="eyebrow">Legal</div>
+    <h1>Privacy Policy</h1>
+    <div class="meta">
+      <span>📅 Effective: March 3, 2026</span>
+      <span>🔄 Last updated: March 3, 2026</span>
+    </div>
+  </div>
+
+  <div class="notice">
+    <strong>Plain-English Summary:</strong> We collect only what we need to run the service — your email to create an account, payment info processed securely by Stripe, and the contract text you submit for analysis. We do not sell your data. You can delete your account and data at any time by contacting us.
+  </div>
+
+  <!-- 1. Who We Are -->
+  <div class="policy-section">
+    <h2><span class="sec-num">01</span> Who We Are</h2>
+    <p>AnalyzeThisContract ("we", "us", "our") operates the website at <a href="https://analyzethiscontract.com">analyzethiscontract.com</a> and the contract analysis service available through it. We are the data controller responsible for your personal information.</p>
+    <p>If you have any questions about this Privacy Policy or how we handle your data, contact us at: <a href="mailto:privacy@analyzethiscontract.com">privacy@analyzethiscontract.com</a></p>
+  </div>
+
+  <!-- 2. What We Collect -->
+  <div class="policy-section">
+    <h2><span class="sec-num">02</span> What Information We Collect</h2>
+
+    <h3>Information you provide directly</h3>
+    <ul>
+      <li><strong>Account information:</strong> Email address and password when you create an account.</li>
+      <li><strong>Phone number:</strong> Optionally provided during signup.</li>
+      <li><strong>Contract text:</strong> The content of any contract or lease you submit for analysis.</li>
+      <li><strong>Payment information:</strong> Billing details when you subscribe to Pro. Payment is processed by Stripe — we never see or store your full card number.</li>
+    </ul>
+
+    <h3>Information collected automatically</h3>
+    <ul>
+      <li><strong>Usage data:</strong> Pages visited, features used, and actions taken within the app.</li>
+      <li><strong>Technical data:</strong> IP address, browser type, device type, and operating system.</li>
+      <li><strong>Cookies:</strong> Session cookies to keep you logged in. We do not use third-party advertising cookies.</li>
+    </ul>
+
+    <h3>Information from third parties</h3>
+    <ul>
+      <li><strong>Stripe:</strong> Subscription status, payment confirmation, and customer ID when you subscribe to Pro.</li>
+    </ul>
+  </div>
+
+  <!-- 3. How We Use It -->
+  <div class="policy-section">
+    <h2><span class="sec-num">03</span> How We Use Your Information</h2>
+    <table class="data-table">
+      <thead>
+        <tr><th>Purpose</th><th>Data Used</th><th>Legal Basis</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Provide the contract analysis service</td>
+          <td>Contract text, account info</td>
+          <td>Contract performance</td>
+        </tr>
+        <tr>
+          <td>Process payments and manage subscriptions</td>
+          <td>Email, Stripe customer ID</td>
+          <td>Contract performance</td>
+        </tr>
+        <tr>
+          <td>Send account-related emails (receipts, confirmations)</td>
+          <td>Email address</td>
+          <td>Contract performance</td>
+        </tr>
+        <tr>
+          <td>Send product updates and tips (if opted in)</td>
+          <td>Email address</td>
+          <td>Consent (opt-in at signup)</td>
+        </tr>
+        <tr>
+          <td>Improve and debug the service</td>
+          <td>Usage data, technical data</td>
+          <td>Legitimate interest</td>
+        </tr>
+        <tr>
+          <td>Prevent fraud and abuse</td>
+          <td>IP address, usage data</td>
+          <td>Legitimate interest</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 4. Contract Text & AI Processing -->
+  <div class="policy-section">
+    <h2><span class="sec-num">04</span> Contract Text & AI Processing</h2>
+    <p>When you submit a contract for analysis, the text is sent to Anthropic's Claude AI API for processing. By submitting a contract, you acknowledge that:</p>
+    <ul>
+      <li>The contract text is transmitted to Anthropic's servers for analysis. Anthropic's <a href="https://www.anthropic.com/privacy" target="_blank">Privacy Policy</a> applies to this processing.</li>
+      <li>We do not use your contract text to train AI models.</li>
+      <li>For Pro users, analyzed contracts are stored in our database so you can access your history. You can delete any saved analysis at any time.</li>
+      <li>We strongly recommend removing or redacting sensitive personal information (Social Security numbers, bank account numbers, etc.) before submitting any contract.</li>
+    </ul>
+  </div>
+
+  <!-- 5. Data Sharing -->
+  <div class="policy-section">
+    <h2><span class="sec-num">05</span> How We Share Your Information</h2>
+    <p>We do not sell your personal information. We share data only with the following service providers who help us operate the service:</p>
+    <ul>
+      <li><strong>Anthropic:</strong> Contract text for AI analysis processing.</li>
+      <li><strong>Stripe:</strong> Payment processing and subscription management.</li>
+      <li><strong>Supabase:</strong> Database and authentication infrastructure.</li>
+      <li><strong>Vercel:</strong> Web hosting and serverless function infrastructure.</li>
+    </ul>
+    <p>We may also disclose information if required by law, court order, or to protect our rights and the safety of our users.</p>
+  </div>
+
+  <!-- 6. Data Retention -->
+  <div class="policy-section">
+    <h2><span class="sec-num">06</span> Data Retention</h2>
+    <ul>
+      <li><strong>Account data:</strong> Retained while your account is active. Deleted within 30 days of account deletion request.</li>
+      <li><strong>Saved analyses:</strong> Retained until you delete them or close your account.</li>
+      <li><strong>Payment records:</strong> Retained for 7 years as required by financial regulations.</li>
+      <li><strong>Usage logs:</strong> Retained for up to 90 days for security and debugging purposes.</li>
+    </ul>
+  </div>
+
+  <!-- 7. Your Rights -->
+  <div class="policy-section">
+    <h2><span class="sec-num">07</span> Your Rights</h2>
+    <p>Depending on where you live, you may have the following rights regarding your personal data:</p>
+    <ul>
+      <li><strong>Access:</strong> Request a copy of the personal data we hold about you.</li>
+      <li><strong>Correction:</strong> Request correction of inaccurate data.</li>
+      <li><strong>Deletion:</strong> Request deletion of your account and associated data.</li>
+      <li><strong>Portability:</strong> Request your data in a machine-readable format.</li>
+      <li><strong>Withdraw consent:</strong> Unsubscribe from marketing emails at any time via the unsubscribe link in any email.</li>
+      <li><strong>Object:</strong> Object to processing based on legitimate interests.</li>
+    </ul>
+    <p>To exercise any of these rights, contact us at <a href="mailto:privacy@analyzethiscontract.com">privacy@analyzethiscontract.com</a>. We will respond within 30 days.</p>
+  </div>
+
+  <!-- 8. Cookies -->
+  <div class="policy-section">
+    <h2><span class="sec-num">08</span> Cookies</h2>
+    <p>We use the following cookies:</p>
+    <ul>
+      <li><strong>Authentication cookies:</strong> To keep you logged in to your account. These are essential for the service to function.</li>
+      <li><strong>Preference cookies:</strong> To remember your settings (e.g., dismissed upgrade prompts).</li>
+    </ul>
+    <p>We do not use advertising, tracking, or analytics cookies from third parties. You can disable cookies in your browser settings, though this will prevent you from staying logged in.</p>
+  </div>
+
+  <!-- 9. Security -->
+  <div class="policy-section">
+    <h2><span class="sec-num">09</span> Security</h2>
+    <p>We take reasonable technical and organizational measures to protect your data, including:</p>
+    <ul>
+      <li>HTTPS encryption for all data in transit.</li>
+      <li>Passwords are hashed and never stored in plain text.</li>
+      <li>Payment data is handled exclusively by Stripe and never touches our servers.</li>
+      <li>Access to production databases is restricted and logged.</li>
+    </ul>
+    <p>No system is completely secure. If you believe your account has been compromised, contact us immediately at <a href="mailto:privacy@analyzethiscontract.com">privacy@analyzethiscontract.com</a>.</p>
+  </div>
+
+  <!-- 10. Children -->
+  <div class="policy-section">
+    <h2><span class="sec-num">10</span> Children's Privacy</h2>
+    <p>AnalyzeThisContract is not intended for use by anyone under the age of 18. We do not knowingly collect personal information from children. If you believe a child has provided us with personal information, please contact us and we will delete it promptly.</p>
+  </div>
+
+  <!-- 11. Changes -->
+  <div class="policy-section">
+    <h2><span class="sec-num">11</span> Changes to This Policy</h2>
+    <p>We may update this Privacy Policy from time to time. When we make material changes, we will notify you by email (if you have an account) and update the "Last updated" date at the top of this page. Continued use of the service after changes take effect constitutes acceptance of the updated policy.</p>
+  </div>
+
+  <!-- 12. Contact -->
+  <div class="policy-section">
+    <h2><span class="sec-num">12</span> Contact Us</h2>
+    <p>If you have any questions, concerns, or requests regarding this Privacy Policy or your personal data, please contact us:</p>
+    <div class="contact-card">
+      <p>
+        📧 <strong>Email:</strong> <a href="mailto:privacy@analyzethiscontract.com">privacy@analyzethiscontract.com</a><br>
+        🌐 <strong>Website:</strong> <a href="https://analyzethiscontract.com">analyzethiscontract.com</a><br><br>
+        We aim to respond to all privacy-related inquiries within 30 days.
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-left">⚖️ &nbsp;© 2026 AnalyzeThisContract &nbsp;·&nbsp; Not legal advice</div>
+  <div class="footer-links">
+    <a href="/">Home</a>
+    <a href="/app">App</a>
+    <a href="/services.html">Services</a>
+    <a href="/terms">Terms of Service</a>
+  </div>
+</footer>
+
+</body>
+</html>

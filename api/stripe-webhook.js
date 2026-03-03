@@ -128,6 +128,11 @@ module.exports = function handler(req, res) {
     const rawBody = Buffer.concat(chunks).toString('utf8');
     const sigHeader = req.headers['stripe-signature'];
 
+    console.log('[webhook] rawBody length:', rawBody.length);
+    console.log('[webhook] sigHeader:', sigHeader ? sigHeader.substring(0, 60) : 'MISSING');
+    console.log('[webhook] secret present:', !!process.env.STRIPE_WEBHOOK_SECRET);
+    console.log('[webhook] secret prefix:', process.env.STRIPE_WEBHOOK_SECRET?.substring(0, 10));
+
     if (!verifyStripeSignature(rawBody, sigHeader, process.env.STRIPE_WEBHOOK_SECRET)) {
       console.warn('[webhook] Signature verification failed');
       return res.status(400).json({ error: 'Invalid signature' });

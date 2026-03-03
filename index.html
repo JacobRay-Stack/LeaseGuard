@@ -24,6 +24,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>if (typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+  function showUpgradeBar() {
+  const bar = document.getElementById('upgradeBar');
+  if (!bar || sessionStorage.getItem('atc_bar_dismissed')) return;
+  bar.classList.remove('visible');
+  void bar.offsetWidth;
+  bar.classList.add('visible');
+  document.body.classList.add('has-bar');
+}
+
+function dismissUpgradeBar() {
+  document.getElementById('upgradeBar').classList.remove('visible');
+  document.body.classList.remove('has-bar');
+  sessionStorage.setItem('atc_bar_dismissed', '1');
+}
 /* ── Sticky upgrade bar ─────────────────────────── */
 #upgradeBar {
   display: none;

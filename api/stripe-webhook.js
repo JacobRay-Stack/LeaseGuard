@@ -128,11 +128,6 @@ module.exports = function handler(req, res) {
     const rawBody = Buffer.concat(chunks).toString('utf8');
     const sigHeader = req.headers['stripe-signature'];
 
-    console.log('[webhook] rawBody length:', rawBody.length);
-    console.log('[webhook] sigHeader:', sigHeader ? sigHeader.substring(0, 60) : 'MISSING');
-    console.log('[webhook] secret present:', !!process.env.STRIPE_WEBHOOK_SECRET);
-    console.log('[webhook] secret prefix:', process.env.STRIPE_WEBHOOK_SECRET?.substring(0, 10));
-
     if (!verifyStripeSignature(rawBody, sigHeader, process.env.STRIPE_WEBHOOK_SECRET)) {
       console.warn('[webhook] Signature verification failed');
       return res.status(400).json({ error: 'Invalid signature' });
@@ -160,20 +155,28 @@ module.exports = function handler(req, res) {
 
         case 'invoice.payment_succeeded': {
           if (!obj.subscription) break;
-          // Idempotent re-confirmation on every renewal cycle
+          // Idempotent re-confirmation on every renewal — clear any payment warning
           await supabaseReq(
             `/rest/v1/user_credits?stripe_subscription_id=eq.${obj.subscription}`,
             'PATCH',
-            { plan: 'pro', stripe_customer_id: obj.customer, updated_at: new Date().toISOString() }
+            { plan: 'pro', stripe_customer_id: obj.customer, payment_status: 'active', updated_at: new Date().toISOString() }
           );
           console.log('[webhook] Renewal confirmed for sub', obj.subscription);
           break;
         }
 
         case 'invoice.payment_failed': {
-          // Only downgrade when Stripe has exhausted all retries
           if (obj.next_payment_attempt === null) {
+            // Final failure — Stripe exhausted all retries, downgrade to free
             await deactivateProPlan(obj.subscription, 'payment_failed_final');
+          } else {
+            // Still retrying — mark payment_status so app can warn the user
+            await supabaseReq(
+              `/rest/v1/user_credits?stripe_subscription_id=eq.${obj.subscription}`,
+              'PATCH',
+              { payment_status: 'past_due', updated_at: new Date().toISOString() }
+            );
+            console.log('[webhook] Payment failed (retrying) for sub', obj.subscription);
           }
           break;
         }

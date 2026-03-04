@@ -1,10 +1,12 @@
 const https = require('https');
 
+// ── Supabase helper (service key) ─────────────────────────────────────
 function supabaseReq(path, method, body, token) {
   return new Promise((resolve, reject) => {
     const useService = !token;
     const isGet = method === 'GET';
     const data = isGet ? null : JSON.stringify(body || {});
+
     const headers = {
       'apikey': useService ? process.env.SUPABASE_SERVICE_KEY : process.env.SUPABASE_ANON_KEY,
       'Authorization': `Bearer ${useService ? process.env.SUPABASE_SERVICE_KEY : token}`,
@@ -13,6 +15,7 @@ function supabaseReq(path, method, body, token) {
       headers['Content-Type'] = 'application/json';
       headers['Content-Length'] = Buffer.byteLength(data);
     }
+
     const req = https.request(
       { hostname: new URL(process.env.SUPABASE_URL).hostname, path, method, headers },
       (res) => {
@@ -36,6 +39,7 @@ async function getUserFromToken(token) {
   return r;
 }
 
+// ── Handler ───────────────────────────────────────────────────────────
 module.exports = function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -55,11 +59,12 @@ module.exports = function handler(req, res) {
   });
 
   req.on('end', async () => {
-    let plan = null;
+    let plan = 'basic';
     let clientToken = null;
 
     try {
       const parsed = JSON.parse(body);
+      // Only pro plan exists now — anything else is rejected
       plan = parsed.plan === 'pro' ? 'pro' : null;
       clientToken = parsed.token || null;
     } catch (e) {
@@ -68,20 +73,20 @@ module.exports = function handler(req, res) {
 
     if (!plan) return res.status(400).json({ error: 'Invalid plan' });
 
+    // Server-side auth gate — must be logged in to checkout
+    if (!clientToken) return res.status(401).json({ error: 'You must be logged in to subscribe.' });
+
     let userId = null;
     let userEmail = null;
 
-    if (clientToken) {
-      const user = await getUserFromToken(clientToken);
-      if (user) {
-        userId = user.id;
-        userEmail = user.email;
-      }
-    }
+    const user = await getUserFromToken(clientToken);
+    if (!user) return res.status(401).json({ error: 'Session expired. Please log in again.' });
+    userId = user.id;
+    userEmail = user.email;
 
     const origin = req.headers.origin || 'https://analyzethiscontract.com';
-    const successUrl = `${origin}/app?checkout=success&plan=pro`;
-    const cancelUrl = `${origin}/app?checkout=cancelled`;
+    const successUrl = `${origin}?checkout=success&plan=pro`;
+    const cancelUrl = `${origin}?checkout=cancelled`;
 
     const params = new URLSearchParams({
       'payment_method_types[0]': 'card',
@@ -115,13 +120,9 @@ module.exports = function handler(req, res) {
       let data = '';
       apiRes.on('data', (c) => (data += c));
       apiRes.on('end', () => {
-        console.log('[checkout] stripe status:', apiRes.statusCode);
         try {
           const session = JSON.parse(data);
-          if (session.error) {
-            console.error('[checkout] stripe error:', session.error.message);
-            return res.status(500).json({ error: session.error.message });
-          }
+          if (session.error) return res.status(500).json({ error: session.error.message });
           res.status(200).json({ url: session.url });
         } catch (e) {
           res.status(500).json({ error: 'Failed to create checkout session' });

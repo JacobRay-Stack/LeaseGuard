@@ -101,6 +101,12 @@ module.exports = async function handler(req, res) {
         const result = await supabaseRequest('/auth/v1/signup', 'POST', { email, password });
         if (result.error) return res.status(400).json({ error: safeAuthError(result.error) });
 
+        // Supabase silently returns null user for already-registered emails
+        // instead of an error (anti-enumeration behavior). Detect and reject it.
+        if (!result.user || !result.user.id) {
+          return res.status(400).json({ error: 'An account with this email already exists. Try logging in instead.' });
+        }
+
         if (result.user) {
           await supabaseRequest(
             '/rest/v1/user_credits',

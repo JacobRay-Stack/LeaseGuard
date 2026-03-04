@@ -1499,7 +1499,7 @@
 <!-- ── Auth Modal ─────────────────────────────────────────────────────── -->
 <div class="auth-overlay" id="authModal">
   <div class="auth-modal">
-    <button onclick="document.getElementById('authModal').classList.remove('visible')" style="position:absolute;top:14px;right:16px;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--muted);font-size:16px;cursor:pointer;padding:3px 8px;border-radius:6px;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">✕</button>
+    <button onclick="pendingCheckoutPlan=null;document.getElementById('authModal').classList.remove('visible')" style="position:absolute;top:14px;right:16px;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--muted);font-size:16px;cursor:pointer;padding:3px 8px;border-radius:6px;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">✕</button>
     <h2 id="authTitle">Create Account</h2>
     <p class="auth-sub" id="authSub">Sign up to save your analyses and manage credits</p>
     <div class="auth-error" id="authError"></div>
@@ -1771,7 +1771,7 @@ async function startCheckout(plan, btn) {
   // If not logged in, show signup modal and resume checkout after auth
   if (!authToken) {
     pendingCheckoutPlan = plan || 'pro';
-    showAuth('signup');
+    showAuth('signup', true);
     return;
   }
   if (!btn) btn = event?.target;
@@ -1837,11 +1837,14 @@ function resumePendingCheckout() {
   if (pendingCheckoutPlan && authToken) {
     const plan = pendingCheckoutPlan;
     pendingCheckoutPlan = null;
-    startCheckout(plan, null);
+    // Close auth modal first, then redirect to Stripe
+    document.getElementById('authModal').classList.remove('visible');
+    setTimeout(() => startCheckout(plan, null), 300);
   }
 }
 
-function showAuth(mode) {
+function showAuth(mode, fromUpgrade) {
+  if (!fromUpgrade) pendingCheckoutPlan = null;  // clear pending if not an upgrade flow
   authMode = mode || 'signup';
   const isLogin = authMode === 'login';
   document.getElementById('authTitle').textContent = isLogin ? 'Welcome Back' : 'Create Account';
@@ -1895,10 +1898,13 @@ async function submitAuth() {
       errEl.style.background = 'rgba(0,255,180,0.08)';
       errEl.style.borderColor = 'rgba(0,255,180,0.3)';
       errEl.style.color = 'var(--teal)';
-      errEl.textContent = '✓ Account created! Please check your email and click the confirmation link before logging in.';
+      errEl.textContent = '✓ Account created! Check your email for a confirmation link, then log in here.';
       errEl.classList.add('visible');
-      btn.textContent = 'Go to Log In'; btn.disabled = false;
-      btn.onclick = () => { errEl.classList.remove('visible'); errEl.removeAttribute('style'); btn.onclick = submitAuth; showAuth('login'); };
+      btn.textContent = 'Go to Log In →'; btn.disabled = false;
+      // Auto-switch to login after 2.5s, or immediately on button click
+      const switchToLogin = () => { errEl.classList.remove('visible'); errEl.removeAttribute('style'); btn.onclick = submitAuth; showAuth('login', !!pendingCheckoutPlan); };
+      btn.onclick = switchToLogin;
+      setTimeout(switchToLogin, 2500);
       return;
     }
     saveAuth(data.token, data.user, data.refreshToken);
@@ -1994,11 +2000,16 @@ async function updateNavForUser() {
       saveUsage(u);
     }
     const label = credits.plan === 'pro' ? '✦ Pro — Unlimited' : `${credits.credits} ${credits.credits === 1 ? 'analysis' : 'analyses'} left`;
+    // Warn user if their payment is failing but Stripe is still retrying
+    if (credits.payment_status === 'past_due' || credits.payment_status === 'unpaid') {
+      showPaymentWarning();
+    }
     const email = currentUser.email || '';
     const isPaid = credits.plan === 'pro';
     const historyBtn = isPaid ? `<button class="nav-btn history" onclick="openDashboard()"> History</button>` : '';
     const upgradeBtn = !isPaid ? `<button class="nav-btn upgrade" onclick="startCheckout('pro')">&#11014; Upgrade</button>` : '';
-    nav.innerHTML = `<div class="user-nav"><span title="${email}">${email}</span><span class="credit-badge">${label}</span>${upgradeBtn}${historyBtn}<button class="nav-btn" onclick="logout()">Log Out</button></div>`;
+    const manageBtn = isPaid ? `<button class="nav-btn" onclick="openCustomerPortal()" title="Manage or cancel your subscription">Manage Plan</button>` : '';
+    nav.innerHTML = `<div class="user-nav"><span title="${email}">${email}</span><span class="credit-badge">${label}</span>${upgradeBtn}${historyBtn}${manageBtn}<button class="nav-btn" onclick="logout()">Log Out</button></div>`;
     if (!isPaid) { showUpgradeBar(); } else { hideUpgradeBar(); }
   } catch(e) {
     nav.innerHTML = `<div class="user-nav"><span>${currentUser.email}</span><button class="nav-btn" onclick="logout()">Log Out</button></div>`;
@@ -2006,6 +2017,31 @@ async function updateNavForUser() {
 }
 
 function logout() { clearAuth(); updateNavForUser(); resetApp(); showToast('Logged out.'); }
+
+function showPaymentWarning() {
+  if (document.getElementById('paymentWarningBanner')) return; // already shown
+  const banner = document.createElement('div');
+  banner.id = 'paymentWarningBanner';
+  banner.style.cssText = 'position:fixed;top:61px;left:0;right:0;z-index:99;background:rgba(255,85,119,0.12);border-bottom:1px solid rgba(255,85,119,0.3);padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:13px;color:#ff8899;';
+  banner.innerHTML = '⚠ Your last payment failed. Please <a onclick="openCustomerPortal()" style="color:var(--cyan);cursor:pointer;text-decoration:underline;">update your payment method</a> to keep Pro access.';
+  document.body.prepend(banner);
+}
+
+async function openCustomerPortal() {
+  if (!authToken) { showAuth('login'); return; }
+  try {
+    const res = await fetch('/api/portal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: authToken })
+    });
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+    else showToast('Could not open billing portal. Please try again.', 'error');
+  } catch(e) {
+    showToast('Could not open billing portal. Please try again.', 'error');
+  }
+}
 
 
 function showUpgradeBar(){if(sessionStorage.getItem('atc_bar_dismissed'))return;const bar=document.getElementById('upgradeBar');if(!bar)return;bar.classList.remove('visible');void bar.offsetWidth;bar.classList.add('visible');document.body.classList.add('has-bar');}
@@ -2018,10 +2054,14 @@ window.addEventListener('load', async () => {
   const params = new URLSearchParams(window.location.search);
   if (params.get('checkout') === 'success') {
     const plan = params.get('plan') || 'pro';
-    showToast(plan === 'pro' ? ' Pro plan activated! Unlimited analyses are ready.' : 'Payment received! Your analyses will be available shortly.');
+    showToast(plan === 'pro' ? '✦ Pro plan activated! Unlimited analyses are ready.' : 'Payment received! Your analyses will be available shortly.');
     window.history.replaceState({}, '', window.location.pathname);
     let attempts = 0;
     const poll = setInterval(async () => { attempts++; await updateNavForUser(); if (attempts >= 6) clearInterval(poll); }, 2000);
+  }
+  if (params.get('checkout') === 'cancelled') {
+    showToast('Checkout cancelled — you have not been charged.', 'info');
+    window.history.replaceState({}, '', window.location.pathname);
   }
   updateUsageUI();
 });

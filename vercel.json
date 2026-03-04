@@ -2,10 +2,20 @@
   "functions": {
     "api/analyze.js": {
       "maxDuration": 60
+    },
+    "api/portal.js": {
+      "maxDuration": 10
     }
   },
+  "cleanUrls": true,
   "rewrites": [
-    { "source": "/app", "destination": "/app.html" },
-    { "source": "/privacy", "destination": "/privacy.html" }
+    {
+      "source": "/app",
+      "destination": "/app.html"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/privacy.html"
+    }
   ]
 }

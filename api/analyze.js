@@ -129,7 +129,10 @@ Return ONLY a valid JSON object with exactly this structure — no preamble, no 
     }
   ],
   "missingClauses": [
-    "CLAUSE NAME: What this clause would normally cover and what risk its absence creates for the tenant in plain English."
+    {
+      "title": "Short clause name (3-5 words)",
+      "risk": "One sentence: what the tenant is exposed to without this clause."
+    }
   ],
   "negotiationTips": [
     "NEGOTIATION POINT: Specific, practical advice on what to ask the landlord to change and how to word the request. Focus on realistic changes a tenant could actually negotiate."
@@ -156,7 +159,19 @@ However, ALWAYS include a flag (even if it exceeds the 3 limit) if the lease con
 
 For everything else, pick the top 3 most impactful flags only. Do not pad with minor or routine observations.
 
-missingClauses: Flag protections that are absent but commonly appear in standard leases for the tenant's benefit. Explain what the missing clause would have covered and what the tenant is exposed to without it.
+missingClauses: Check for the following standard tenant-protective clauses and flag only the ones that are genuinely absent or unclear in this lease. Return a maximum of 4. Each entry must have a short title (3-5 words) and a single plain-English sentence explaining what the tenant is exposed to without it.
+
+Standard clauses to check for:
+- Move-in / move-out inspection process (protects deposit)
+- Specific security deposit return timeline and process
+- Lease renewal terms and rent increase notice
+- Landlord entry notice requirement (typically 24-48 hours)
+- Maintenance and repair request process
+- Renter's insurance requirement or recommendation
+- Subletting or early termination process
+- Dispute resolution or mediation process
+
+Only flag clauses that are clearly missing. If a clause is present but vague, flag it. If the lease clearly addresses it, do not flag it. Do not invent missing clauses that wouldn't realistically be in a standard lease.
 
 negotiationTips: exactly 4 practical tips. Each must be specific to this lease — not generic advice. Tell the tenant exactly what to ask for and how.`;
 

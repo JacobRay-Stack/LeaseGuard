@@ -2193,12 +2193,6 @@ async function analyzeContract() {
     const result = await response.json();
     if (response.status === 403 && result.code === 'NO_CREDITS') {
       document.getElementById('loading').classList.remove('visible');
-  document.getElementById('analysisSteps').style.display = 'none';
-  document.getElementById('loadingUpsell').style.display = 'none';
-  document.getElementById('loadingUpsellCta').style.display = 'none';
-  document.getElementById('loadingSub').style.display = 'block';
-  document.querySelectorAll('.analysis-step').forEach(s => { s.classList.remove('active','done'); s.querySelector('.step-icon').textContent = '→'; });
-  document.querySelectorAll('.upsell-card').forEach(c => c.classList.remove('visible'));
       document.getElementById('analysisSteps').style.display = 'none';
       document.getElementById('loadingUpsell').style.display = 'none';
       document.getElementById('loadingUpsellCta').style.display = 'none';
@@ -2244,8 +2238,8 @@ async function updateNavForUser() {
     if (credits && !credits.error) {
       const u = getUsage();
       if (credits.plan === 'pro') { u.pro = true; u.paid = 9999; }
-      window._userCredits = credits;
       else { u.pro = false; u.paid = 0; u.free = Math.max(0, 5 - (credits.credits || 0)); }
+      window._userCredits = credits;
       saveUsage(u);
     }
     const label = credits.plan === 'pro' ? '✦ Pro — Unlimited' : `${credits.credits} ${credits.credits === 1 ? 'analysis' : 'analyses'} left`;

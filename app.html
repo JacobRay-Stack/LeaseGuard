@@ -2412,7 +2412,8 @@ function incrementUsage() {
 }
 // Returns true if free user has already used at least 1 analysis (ever, not just today)
 function shouldSoftGate() {
-  if (authToken) return false; // logged in users never soft-gated here
+  if (authToken) return false; // logged in users never soft-gated
+  if (window._userCredits && window._userCredits.plan === 'pro') return false;
   const u = getUsage();
   if (u.pro) return false;
   return (u.totalFree || 0) >= 1;
@@ -2504,6 +2505,10 @@ function saveAuth(token, user, refreshToken) {
   localStorage.setItem('atc_token', token);
   localStorage.setItem('atc_user', JSON.stringify(user));
   if (refreshToken) localStorage.setItem('atc_refresh', refreshToken);
+  // Remove the "Sign up free" nudge immediately on login,
+  // before updateNavForUser confirms the plan level.
+  const nudge = document.getElementById('saveNudge');
+  if (nudge) nudge.remove();
   resumePendingCheckout();
 }
 
@@ -2701,6 +2706,37 @@ async function analyzeContract() {
   }
 }
 
+// Called whenever we confirm a user is Pro — cleans up any upsell
+// elements that were shown while they were in a guest/free state.
+function removeUpsellForPro() {
+  // Remove "Sign up free" nudge
+  const nudge = document.getElementById('saveNudge');
+  if (nudge) nudge.remove();
+
+  // Remove upgrade bar
+  hideUpgradeBar();
+
+  // Remove tips blur overlay
+  const overlay = document.getElementById('tipsBlurOverlay');
+  if (overlay) overlay.style.display = 'none';
+  const tipsCard = document.getElementById('tipsCard');
+  if (tipsCard) tipsCard.classList.remove('gated');
+
+  // Remove section soft gates (blur + overlay)
+  ['termsGate', 'flagsGate', 'missingGate'].forEach(id => {
+    const gate = document.getElementById(id);
+    if (!gate) return;
+    gate.classList.remove('active');
+    // Show all hidden items
+    const list = gate.querySelector('ul') || gate.querySelector('#termsGrid');
+    if (list) {
+      [...list.children].forEach(item => { item.style.display = ''; });
+    }
+    const rows = gate.querySelectorAll('.term-row');
+    rows.forEach(r => { r.style.display = ''; });
+  });
+}
+
 async function updateNavForUser() {
   const nav = document.getElementById('topNav');
   if (!authToken || !currentUser) {
@@ -2734,7 +2770,7 @@ async function updateNavForUser() {
     const upgradeBtn = !isPaid ? `<button class="nav-btn upgrade" onclick="startCheckout('pro', this)">&#11014; Upgrade</button>` : '';
     const manageBtn = isPaid ? `<button class="nav-btn" onclick="openCustomerPortal()" title="Manage or cancel your subscription">Manage Plan</button>` : '';
     nav.innerHTML = `<div class="user-nav"><span title="${email}">${email}</span><span class="credit-badge">${label}</span>${upgradeBtn}${historyBtn}${manageBtn}<button class="nav-btn" onclick="logout()">Log Out</button></div>`;
-    if (!isPaid) { showUpgradeBar(); } else { hideUpgradeBar(); }
+    if (!isPaid) { showUpgradeBar(); } else { removeUpsellForPro(); }
   } catch(e) {
     nav.innerHTML = `<div class="user-nav"><span>${currentUser.email}</span><button class="nav-btn" onclick="logout()">Log Out</button></div>`;
   }
@@ -2985,14 +3021,13 @@ function renderResults(data) {
   } else { const tipSection = document.getElementById('tipsList').closest('.result-card'); if (tipSection) tipSection.style.display = 'none'; }
   document.getElementById('results').classList.add('visible');
 
-  // Tips gate (pro feature always)
+  // Tips gate (pro feature) — use authoritative _userCredits, fall back to usage
   const overlay = document.getElementById('tipsBlurOverlay');
   const tipsCard = document.getElementById('tipsCard');
   if (overlay) {
-    const u = getUsage();
-    const isGated = !u.pro;
-    overlay.style.display = isGated ? 'flex' : 'none';
-    if (tipsCard) { isGated ? tipsCard.classList.add('gated') : tipsCard.classList.remove('gated'); }
+    const isPro = (window._userCredits && window._userCredits.plan === 'pro') || getUsage().pro;
+    overlay.style.display = isPro ? 'none' : 'flex';
+    if (tipsCard) { isPro ? tipsCard.classList.remove('gated') : tipsCard.classList.add('gated'); }
   }
 
   // Soft gate: blur extra items after first free analysis

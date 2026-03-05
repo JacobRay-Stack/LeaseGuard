@@ -644,6 +644,46 @@
 
   .results.visible { display: block; }
 
+  /* ── Soft gate (blur after first free analysis) ─────────────────── */
+  .section-gate {
+    position: relative;
+  }
+  .section-gate-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    border-radius: var(--radius);
+    cursor: pointer;
+  }
+  .section-gate.active .section-gate-overlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .section-gate.active .section-gate-blur {
+    filter: blur(4px);
+    user-select: none;
+    pointer-events: none;
+  }
+  .gate-pill {
+    background: rgba(6,8,16,0.88);
+    border: 1px solid rgba(0,200,255,0.25);
+    border-radius: 30px;
+    padding: 8px 18px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--cyan);
+    backdrop-filter: blur(8px);
+    white-space: nowrap;
+    pointer-events: all;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .gate-pill:hover {
+    border-color: rgba(0,200,255,0.5);
+    box-shadow: 0 0 16px rgba(0,200,255,0.15);
+  }
+
   /* ── Section title ─────────────────────────────────────────────────── */
   .section-title {
     font-size: 10px;
@@ -1843,21 +1883,36 @@
     </div>
 
     <div class="section-title">Key Terms</div>
-    <div class="glass result-card">
-      <h3>📋 Key Terms</h3>
-      <div id="termsGrid"></div>
+    <div class="section-gate" id="termsGate">
+      <div class="glass result-card">
+        <h3>📋 Key Terms</h3>
+        <div id="termsGrid" class="section-gate-blur"></div>
+      </div>
+      <div class="section-gate-overlay" onclick="startCheckout('pro')">
+        <div class="gate-pill">✦ Unlock all key terms — Upgrade to Pro</div>
+      </div>
     </div>
 
     <div class="section-title">Red Flags</div>
-    <div class="glass result-card">
-      <h3> Red Flags</h3>
-      <ul id="flagsList" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;"></ul>
+    <div class="section-gate" id="flagsGate">
+      <div class="glass result-card">
+        <h3> Red Flags</h3>
+        <ul id="flagsList" class="section-gate-blur" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;"></ul>
+      </div>
+      <div class="section-gate-overlay" onclick="startCheckout('pro')">
+        <div class="gate-pill">✦ Unlock all red flags — Upgrade to Pro</div>
+      </div>
     </div>
 
     <div class="section-title">Missing Clauses</div>
-    <div class="glass result-card">
-      <h3>⚠️ Missing or Unclear Clauses</h3>
-      <ul id="missingList" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;"></ul>
+    <div class="section-gate" id="missingGate">
+      <div class="glass result-card">
+        <h3>⚠️ Missing or Unclear Clauses</h3>
+        <ul id="missingList" class="section-gate-blur" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;"></ul>
+      </div>
+      <div class="section-gate-overlay" onclick="startCheckout('pro')">
+        <div class="gate-pill">✦ Unlock all missing clauses — Upgrade to Pro</div>
+      </div>
     </div>
 
     <div class="section-title">Negotiation Tips</div>
@@ -1954,9 +2009,15 @@
 <script>
 const FREE_LIMIT = 5;
 
+function todayStr() { return new Date().toISOString().slice(0,10); }
 function getUsage() {
-  try { return JSON.parse(localStorage.getItem('atc_usage') || '{"free":0,"paid":0}'); }
-  catch(e) { return {free:0, paid:0}; }
+  try {
+    const raw = JSON.parse(localStorage.getItem('atc_usage') || '{}');
+    // Reset free count daily
+    if (raw.date !== todayStr()) { raw.date = todayStr(); raw.free = 0; }
+    return { free: 0, paid: 0, date: todayStr(), totalFree: 0, ...raw };
+  }
+  catch(e) { return {free:0, paid:0, date:todayStr(), totalFree:0}; }
 }
 function saveUsage(u) { localStorage.setItem('atc_usage', JSON.stringify(u)); }
 function getRemainingAnalyses() {
@@ -1966,8 +2027,18 @@ function getRemainingAnalyses() {
 }
 function incrementUsage() {
   const u = getUsage();
-  if (u.paid > 0) { u.paid--; } else { u.free = (u.free || 0) + 1; }
+  if (u.paid > 0) { u.paid--; } else {
+    u.free = (u.free || 0) + 1;
+    u.totalFree = (u.totalFree || 0) + 1; // lifetime count, never resets
+  }
   saveUsage(u);
+}
+// Returns true if free user has already used at least 1 analysis (ever, not just today)
+function shouldSoftGate() {
+  if (authToken) return false; // logged in users never soft-gated here
+  const u = getUsage();
+  if (u.pro) return false;
+  return (u.totalFree || 0) >= 1;
 }
 function updateUsageUI() {
   const { remaining } = getRemainingAnalyses();
@@ -2520,6 +2591,8 @@ function renderResults(data) {
     });
   } else { const tipSection = document.getElementById('tipsList').closest('.result-card'); if (tipSection) tipSection.style.display = 'none'; }
   document.getElementById('results').classList.add('visible');
+
+  // Tips gate (pro feature always)
   const overlay = document.getElementById('tipsBlurOverlay');
   const tipsCard = document.getElementById('tipsCard');
   if (overlay) {
@@ -2528,6 +2601,47 @@ function renderResults(data) {
     overlay.style.display = isGated ? 'flex' : 'none';
     if (tipsCard) { isGated ? tipsCard.classList.add('gated') : tipsCard.classList.remove('gated'); }
   }
+
+  // Soft gate: blur extra items after first free analysis
+  applySoftGate();
+}
+
+function applySoftGate() {
+  const gate = shouldSoftGate();
+
+  // Helper: hide all but first item in a list, then activate gate if any hidden
+  function gateList(listId, gateId) {
+    const list = document.getElementById(listId);
+    const gateEl = document.getElementById(gateId);
+    if (!list || !gateEl) return;
+    const items = list.children;
+    if (!gate || items.length <= 1) {
+      gateEl.classList.remove('active');
+      return;
+    }
+    for (let i = 0; i < items.length; i++) {
+      items[i].style.display = i === 0 ? '' : 'none';
+    }
+    gateEl.classList.add('active');
+  }
+
+  // Helper: hide all but first N rows in termsGrid
+  function gateTerms(gridId, gateId) {
+    const grid = document.getElementById(gridId);
+    const gateEl = document.getElementById(gateId);
+    if (!grid || !gateEl) return;
+    const rows = grid.querySelectorAll('.term-row');
+    if (!gate || rows.length <= 1) {
+      gateEl.classList.remove('active');
+      return;
+    }
+    rows.forEach((r, i) => { r.style.display = i === 0 ? '' : 'none'; });
+    gateEl.classList.add('active');
+  }
+
+  gateTerms('termsGrid', 'termsGate');
+  gateList('flagsList', 'flagsGate');
+  gateList('missingList', 'missingGate');
 }
 
 function getResultsAsText() {

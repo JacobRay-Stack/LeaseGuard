@@ -824,11 +824,32 @@
   }
 
   .missing-item {
-    background: rgba(0,200,255,0.05);
-    border: 1px solid rgba(0,200,255,0.15);
-    border-left: 2px solid var(--cyan);
+    background: rgba(0,200,255,0.04);
+    border: 1px solid rgba(0,200,255,0.12);
+    border-radius: 10px;
+    padding: 12px 15px !important;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
   }
-  .missing-item .item-title { color: var(--cyan); }
+  .missing-item .item-inner { flex: 1; min-width: 0; }
+  .missing-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+  }
+  .missing-risk {
+    font-size: 12px;
+    color: rgba(232,240,255,0.45);
+    line-height: 1.5;
+  }
+  .missing-icon {
+    font-size: 15px;
+    margin-top: 1px;
+    flex-shrink: 0;
+  }
 
   .tip-item {
     background: rgba(0,255,180,0.05);
@@ -1608,7 +1629,7 @@
     .result-card li { border-radius: 5px !important; margin-bottom: 6px !important; page-break-inside: avoid; }
     .flag-item    { background: #fff8f8 !important; border: 1px solid #ffd0d0 !important; border-radius: 6px !important; padding: 8px 10px !important; }
     .flag-item .item-title { color: #c0392b !important; }
-    .missing-item { background: #f5f8ff !important; border: 1px solid #c8d8f8 !important; border-left: 3px solid #5b9bd5 !important; }
+    .missing-item { background: #f5f8ff !important; border: 1px solid #c8d8f8 !important; border-radius: 6px !important; padding: 8px 10px !important; }
     .missing-item .item-title { color: #2a5ca8 !important; }
     .tip-item     { background: #f5fff9 !important; border: 1px solid #b8e8cc !important; border-left: 3px solid #5cb88a !important; }
     .tip-item .item-title { color: #1a6640 !important; }
@@ -1836,7 +1857,7 @@
     <div class="section-title">Missing Clauses</div>
     <div class="glass result-card">
       <h3>⚠️ Missing or Unclear Clauses</h3>
-      <ul id="missingList"></ul>
+      <ul id="missingList" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;"></ul>
     </div>
 
     <div class="section-title">Negotiation Tips</div>
@@ -2474,12 +2495,16 @@ function renderResults(data) {
   missingList.innerHTML = '';
   if (data.missingClauses?.length) {
     data.missingClauses.forEach(m => {
-      const { title, detail } = parseItemTitle(m);
       const li = document.createElement('li'); li.className = 'missing-item';
-      li.innerHTML = '<div class="item-inner">' + (title ? '<div class="item-title">' + title + '</div>' : '') + '<div class="item-detail">' + detail + '</div></div>';
+      li.innerHTML =
+        '<div class="missing-icon">⬜</div>' +
+        '<div class="item-inner">' +
+          '<div class="missing-title">' + (m.title || '') + '</div>' +
+          '<div class="missing-risk">' + (m.risk || '') + '</div>' +
+        '</div>';
       missingList.appendChild(li);
     });
-  } else { missingList.innerHTML = '<li><div class="item-inner"><div class="item-detail" style="color:var(--teal)">✓ All standard clauses appear to be present.</div></div></li>'; }
+  } else { missingList.innerHTML = '<li style="list-style:none;padding:8px 0"><div class="missing-risk" style="color:var(--teal)">✓ All standard clauses appear to be present.</div></li>'; }
   const tipsList = document.getElementById('tipsList');
   tipsList.innerHTML = '';
   if (data.negotiationTips?.length) {
@@ -2506,7 +2531,7 @@ function getResultsAsText() {
   const score = document.getElementById('scoreBadge')?.textContent || '';
   const terms = [...document.querySelectorAll('#termsGrid .term-row:not(.not-found)')].map(r => '  ' + (r.querySelector('.term-label')?.textContent || '') + ': ' + (r.querySelector('.term-value')?.textContent || '')).join('\n');
   const flags = [...document.querySelectorAll('#flagsList .flag-item')].map(i => { const t = i.querySelector('.flag-title')?.textContent || ''; const r = i.querySelector('.flag-risk')?.textContent || ''; const d = i.querySelector('.flag-detail')?.textContent || ''; return '  • ' + t + ': ' + r + (d ? ' ' + d : ''); }).join('\n');
-  const missing = [...document.querySelectorAll('#missingList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\n');
+  const missing = [...document.querySelectorAll('#missingList .missing-item')].map(i => { const t = i.querySelector('.missing-title')?.textContent || ''; const r = i.querySelector('.missing-risk')?.textContent || ''; return '  • ' + t + ': ' + r; }).join('\n');
   const tips = [...document.querySelectorAll('#tipsList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\n');
   const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   return ['╔' + '═'.repeat(46) + '╗', '  ANALYZETHISCONTRACT — Contract Analysis Report', '  Generated: ' + date, '╚' + '═'.repeat(46) + '╝', '', '▌ SUMMARY', summary, score ? 'Assessment: ' + score : '', '', '▌ KEY TERMS', terms || '  None extracted.', '', '▌ RED FLAGS', flags || '  No significant red flags found.', '', '▌ MISSING CLAUSES', missing || '  All standard clauses present.', tips ? ('\n▌ NEGOTIATION TIPS\n' + tips) : '', '', '─'.repeat(50), 'Not legal advice. Consult a qualified attorney.'].join('\n');

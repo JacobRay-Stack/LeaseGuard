@@ -121,7 +121,12 @@ Return ONLY a valid JSON object with exactly this structure — no preamble, no 
     "subletting": "e.g. Not permitted without written consent — or null"
   },
   "redFlags": [
-    "CLAUSE TITLE: What this clause says in plain English, why it is unusual or one-sided compared to a standard lease, and what practical risk it creates for the tenant. Do not cite statute numbers. End with: Recommend asking a lawyer about this before signing."
+    {
+      "title": "Short clause name (3-5 words max)",
+      "risk": "One sentence: what it means for the tenant in plain English.",
+      "detail": "One sentence: why it is unusual or what specific financial/legal risk it creates.",
+      "severity": "high or medium"
+    }
   ],
   "missingClauses": [
     "CLAUSE NAME: What this clause would normally cover and what risk its absence creates for the tenant in plain English."
@@ -138,7 +143,7 @@ Scoring guidelines — score based on how unusual and one-sided the lease is, no
 
 keyTerms: Fill in every field using exact values from the contract. Use null (not the string "null", but JSON null) for any field not mentioned in the contract. Be concise and specific — dollar amounts, dates, and durations where applicable.
 
-redFlags: Flag every clause that is more one-sided, unusual, or risky than what appears in standard leases. Explain clearly in plain English what the clause does and why it matters. Never cite statute numbers. Never say "violates [law]." Do say "unusual," "more restrictive than most leases," "worth asking a lawyer about." Include every flag you find — do not omit any.
+redFlags: Flag every clause that is more one-sided, unusual, or risky than standard leases. Each flag must be concise — title is 3-5 words, risk is one plain-English sentence, detail is one sentence on why it's unusual or what the financial/legal exposure is. severity: "high" for serious financial risk or highly unusual terms, "medium" for one-sided but common clauses worth negotiating. Never cite statutes. Include every flag — do not omit any.
 
 missingClauses: Flag protections that are absent but commonly appear in standard leases for the tenant's benefit. Explain what the missing clause would have covered and what the tenant is exposed to without it.
 

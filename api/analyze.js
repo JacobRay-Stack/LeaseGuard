@@ -175,6 +175,103 @@ Only flag clauses that are clearly missing. If a clause is present but vague, fl
 
 negotiationTips: exactly 4 practical tips. Each must be specific to this lease — not generic advice. Tell the tenant exactly what to ask for and how.`;
 
+// ── Sanitize: fix curly quotes and unescaped interior quotes ───────────
+function sanitizeJSON(str) {
+  str = str.replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'");
+  let out = '', inString = false, escaped = false;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str[i];
+    if (escaped) { out += ch; escaped = false; continue; }
+    if (ch === '\\') { out += ch; escaped = true; continue; }
+    if (ch === '"') {
+      if (!inString) { inString = true; out += ch; continue; }
+      const rest = str.slice(i + 1).trimStart();
+      if (/^[:\,\}\]]/.test(rest)) { inString = false; out += ch; continue; }
+      out += '\\"'; continue;
+    }
+    out += ch;
+  }
+  return out;
+}
+
+// ── Extract the outermost JSON object, discarding any trailing garbage ─
+// Handles the common case where the model appends explanatory text after
+// the closing brace despite being told not to.
+function extractRootObject(str) {
+  const start = str.indexOf('{');
+  if (start === -1) return null;
+  let depth = 0, inStr = false, esc = false;
+  for (let i = start; i < str.length; i++) {
+    const c = str[i];
+    if (esc) { esc = false; continue; }
+    if (c === '\\' && inStr) { esc = true; continue; }
+    if (c === '"') { inStr = !inStr; continue; }
+    if (inStr) continue;
+    if (c === '{') depth++;
+    else if (c === '}') {
+      depth--;
+      if (depth === 0) {
+        try { return JSON.parse(str.slice(start, i + 1)); } catch(e) { break; }
+      }
+    }
+  }
+  return null; // no complete root object found — input is truncated
+}
+
+// ── Repair truncated JSON using stack-based structure tracking ─────────
+// Correctly closes open strings, then closes open objects/arrays in order.
+function repairTruncated(str) {
+  str = str.replace(/,\s*$/, ''); // remove trailing comma
+
+  // Close any open string
+  let inStr = false, esc = false;
+  for (let i = 0; i < str.length; i++) {
+    const c = str[i];
+    if (esc) { esc = false; continue; }
+    if (c === '\\' && inStr) { esc = true; continue; }
+    if (c === '"') inStr = !inStr;
+  }
+  if (inStr) str += '"';
+
+  // Walk the (now string-safe) structure to find unclosed delimiters
+  const stack = [];
+  inStr = false; esc = false;
+  for (let i = 0; i < str.length; i++) {
+    const c = str[i];
+    if (esc) { esc = false; continue; }
+    if (c === '\\' && inStr) { esc = true; continue; }
+    if (c === '"') { inStr = !inStr; continue; }
+    if (inStr) continue;
+    if (c === '{' || c === '[') stack.push(c);
+    else if (c === '}' || c === ']') stack.pop();
+  }
+
+  // Close open structures in reverse order (innermost first)
+  let closing = '';
+  while (stack.length) closing += stack.pop() === '{' ? '}' : ']';
+  return str + closing;
+}
+
+// ── Parse with cascading repair attempts ──────────────────────────────
+function parseWithRepair(text) {
+  // Attempt 1: extract complete root object — handles trailing garbage/text
+  const extracted = extractRootObject(text);
+  if (extracted) return extracted;
+
+  // Attempt 2: stack-based truncation repair
+  const r1 = repairTruncated(text);
+  try { return JSON.parse(r1); } catch(e) {}
+
+  // Attempt 3: cut to last complete item, then stack-repair
+  const cutAt = Math.max(text.lastIndexOf('"}'), text.lastIndexOf('"]'));
+  if (cutAt > 100) {
+    const r2 = repairTruncated(text.slice(0, cutAt + 2));
+    try { return JSON.parse(r2); } catch(e) {}
+  }
+
+  return null; // all repair attempts failed
+}
+
 // ── Handler ────────────────────────────────────────────────────────────
 module.exports = function handler(req, res) {
   if (req.method !== 'POST') {
@@ -198,7 +295,7 @@ module.exports = function handler(req, res) {
 
   req.on('end', async () => {
     if (aborted) return res.status(413).json({ error: 'Request too large' });
-// ── Rate limiting: 30 analyze calls per IP per 10 minutes ─────────
+    // ── Rate limiting: 30 analyze calls per IP per 10 minutes ─────────
     const rl = rateLimit(req, { windowMs: 10 * 60_000, max: 30, label: 'analyze' });
     if (!rl.ok) return res.status(429).json({ error: rl.error });
     let contractText = '';
@@ -253,7 +350,7 @@ module.exports = function handler(req, res) {
           return res.status(500).json({ error: 'Could not verify account credits. Please try again.' });
         }
       } catch (err) {
-        // Fail closed — don't allow free analyses if Supabase is unreachable
+        // Fail closed — don't allow analyses if Supabase is unreachable
         console.error('[analyze] Credit check failed:', err.message);
         return res.status(503).json({ error: 'Service temporarily unavailable. Please try again in a moment.' });
       }
@@ -299,76 +396,52 @@ module.exports = function handler(req, res) {
       let data = '';
       apiRes.on('data', (c) => { data += c; });
       apiRes.on('end', () => {
+        // ── Step 1: parse the Anthropic response envelope ─────────────
+        let parsed;
         try {
-          const parsed = JSON.parse(data);
+          parsed = JSON.parse(data);
+        } catch (e) {
+          console.error('[analyze] Failed to parse Anthropic envelope — HTTP status:', apiRes.statusCode, 'body preview:', data.slice(0, 300));
+          return res.status(500).json({ error: 'Unexpected response from AI service. Please try again.' });
+        }
+
+        try {
           if (parsed.error) {
-            console.error('[analyze] Anthropic error:', parsed.error);
+            console.error('[analyze] Anthropic API error:', parsed.error);
             return res.status(500).json({
               error: parsed.error.message || parsed.error.type,
               type: parsed.error.type,
             });
           }
+
+          // ── Step 2: extract model text content ──────────────────────
+          const content = parsed.content;
+          if (!content || !content[0] || !content[0].text) {
+            console.error('[analyze] Unexpected response shape — stop_reason:', parsed.stop_reason, 'content:', JSON.stringify(content));
+            return res.status(500).json({ error: 'Unexpected response from AI service. Please try again.' });
+          }
+
           // Strip markdown code fences if model wraps output despite instructions
-          let text = parsed.content[0].text
+          let text = content[0].text
             .replace(/^```json\s*/i, '')
             .replace(/^```\s*/i, '')
             .replace(/\s*```$/i, '')
             .trim();
 
-          // Sanitize: fix unescaped quotes inside JSON string values
-          function sanitizeJSON(str) {
-            str = str.replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'");
-            let out = '', inString = false, escaped = false;
-            for (let i = 0; i < str.length; i++) {
-              const ch = str[i];
-              if (escaped) { out += ch; escaped = false; continue; }
-              if (ch === '\\') { out += ch; escaped = true; continue; }
-              if (ch === '"') {
-                if (!inString) { inString = true; out += ch; continue; }
-                const rest = str.slice(i + 1).trimStart();
-                if (/^[:\,\}\]]/.test(rest)) { inString = false; out += ch; continue; }
-                out += '\\"'; continue;
-              }
-              out += ch;
-            }
-            return out;
-          }
+          // ── Step 3: sanitize and parse the contract JSON ─────────────
           text = sanitizeJSON(text);
 
-          // If JSON is truncated, attempt to salvage it by closing open structures
-          let result;
-          try {
-            result = JSON.parse(text);
-          } catch(parseErr) {
-            // Truncated — close any open array/object and retry
-            const repaired = text
-              .replace(/,\s*$/, '')           // trailing comma
-              .replace(/"[^"]*$/, '"...')      // unclosed string
-              + ']}]}';                        // close array + object
-            try {
-              result = JSON.parse(repaired);
-            } catch(e2) {
-              // Still broken — try a more aggressive repair by finding last complete item
-              const lastBrace = text.lastIndexOf('"}');
-              const lastBracket = text.lastIndexOf('"]');
-              const cutAt = Math.max(lastBrace, lastBracket);
-              if (cutAt > 100) {
-                try {
-                  result = JSON.parse(text.slice(0, cutAt + 2) + ']}]}');
-                } catch(e3) {
-                  console.error('[analyze] Parse error after repair attempts:', parseErr.message);
-                  return res.status(500).json({ error: 'Could not parse AI response. Please try again.' });
-                }
-              } else {
-                console.error('[analyze] Parse error:', parseErr.message);
-                return res.status(500).json({ error: 'Could not parse AI response. Please try again.' });
-              }
-            }
+          const result = parseWithRepair(text);
+
+          if (!result) {
+            console.error('[analyze] All parse/repair attempts failed — text length:', text.length, 'preview:', text.slice(0, 300));
+            return res.status(500).json({ error: 'Could not parse AI response. Please try again.' });
           }
+
           res.status(200).json(result);
         } catch (e) {
-          console.error('[analyze] Parse error:', e.message);
-          res.status(500).json({ error: 'Parse error: ' + e.message });
+          console.error('[analyze] Unexpected error processing response:', e.message, e.stack);
+          res.status(500).json({ error: 'Something went wrong. Please try again.' });
         }
       });
     });

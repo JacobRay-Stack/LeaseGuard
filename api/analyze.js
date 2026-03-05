@@ -143,7 +143,18 @@ Scoring guidelines — score based on how unusual and one-sided the lease is, no
 
 keyTerms: Fill in every field using exact values from the contract. Use null (not the string "null", but JSON null) for any field not mentioned in the contract. Be concise and specific — dollar amounts, dates, and durations where applicable.
 
-redFlags: Flag every clause that is more one-sided, unusual, or risky than standard leases. Each flag must be concise — title is 3-5 words, risk is one plain-English sentence, detail is one sentence on why it's unusual or what the financial/legal exposure is. severity: "high" for serious financial risk or highly unusual terms, "medium" for one-sided but common clauses worth negotiating. Never cite statutes. Include every flag — do not omit any.
+redFlags: Return a maximum of 3 red flags total. Prioritize high severity over medium. Each flag must be concise — title is 3-5 words, risk is one plain-English sentence, detail is one sentence on why it's unusual or what the financial/legal exposure is. severity: "high" for serious financial risk or highly unusual terms, "medium" for one-sided but common clauses worth negotiating. Never cite statutes.
+
+However, ALWAYS include a flag (even if it exceeds the 3 limit) if the lease contains any of the following serious clauses:
+- Landlord can enter without notice or with less than 24 hours notice
+- Automatic lease renewal or automatic rent increase without tenant action
+- Tenant is responsible for ALL repairs regardless of cause or cost
+- No timeline specified for security deposit return
+- Landlord can terminate the lease at their sole discretion for any reason
+- Tenant waives right to sue or waives liability claims against landlord
+- Multiple overlapping fees (late fees + admin fees + other penalty fees stacked together)
+
+For everything else, pick the top 3 most impactful flags only. Do not pad with minor or routine observations.
 
 missingClauses: Flag protections that are absent but commonly appear in standard leases for the tenant's benefit. Explain what the missing clause would have covered and what the tenant is exposed to without it.
 

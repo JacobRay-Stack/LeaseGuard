@@ -653,11 +653,60 @@
   }
 
   .flag-item {
-    background: rgba(255,85,119,0.06);
-    border: 1px solid rgba(255,85,119,0.18);
-    border-left: 2px solid var(--red);
+    background: rgba(255,85,119,0.05);
+    border: 1px solid rgba(255,85,119,0.14);
+    border-radius: 10px;
+    padding: 13px 15px !important;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
   }
-  .flag-item .item-title { color: var(--red); }
+  .flag-item .item-inner { flex: 1; min-width: 0; }
+  .flag-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+  }
+  .flag-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.3px;
+  }
+  .flag-badge {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 20px;
+    flex-shrink: 0;
+  }
+  .flag-badge.high {
+    background: rgba(255,85,119,0.18);
+    color: var(--red);
+  }
+  .flag-badge.medium {
+    background: rgba(255,180,0,0.15);
+    color: #ffb800;
+  }
+  .flag-risk {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+    margin-bottom: 3px;
+  }
+  .flag-detail {
+    font-size: 12px;
+    color: rgba(232,240,255,0.45);
+    line-height: 1.5;
+  }
+  .flag-icon {
+    font-size: 16px;
+    margin-top: 1px;
+    flex-shrink: 0;
+  }
 
   .missing-item {
     background: rgba(0,200,255,0.05);
@@ -1442,7 +1491,7 @@
     .summary-warn { border-left: 4px solid #5b9bd5 !important; }
     .summary-good { border-left: 4px solid #5cb88a !important; }
     .result-card li { border-radius: 5px !important; margin-bottom: 6px !important; page-break-inside: avoid; }
-    .flag-item    { background: #fff8f8 !important; border: 1px solid #ffd0d0 !important; border-left: 3px solid #e05c5c !important; }
+    .flag-item    { background: #fff8f8 !important; border: 1px solid #ffd0d0 !important; border-radius: 6px !important; padding: 8px 10px !important; }
     .flag-item .item-title { color: #c0392b !important; }
     .missing-item { background: #f5f8ff !important; border: 1px solid #c8d8f8 !important; border-left: 3px solid #5b9bd5 !important; }
     .missing-item .item-title { color: #2a5ca8 !important; }
@@ -1636,7 +1685,7 @@
     <div class="section-title">Red Flags</div>
     <div class="glass result-card">
       <h3> Red Flags</h3>
-      <ul id="flagsList"></ul>
+      <ul id="flagsList" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;"></ul>
     </div>
 
     <div class="section-title">Missing Clauses</div>
@@ -2221,12 +2270,23 @@ function renderResults(data) {
   flagsList.innerHTML = '';
   if (data.redFlags?.length) {
     data.redFlags.forEach(f => {
-      const { title, detail } = parseItemTitle(f);
       const li = document.createElement('li'); li.className = 'flag-item';
-      li.innerHTML = '<div class="item-inner">' + (title ? '<div class="item-title">' + title + '</div>' : '') + '<div class="item-detail">' + detail + '</div></div>';
+      const isHigh = (f.severity || 'medium') === 'high';
+      const icon = isHigh ? '🔴' : '🟡';
+      const badge = (f.severity || 'medium');
+      li.innerHTML =
+        '<div class="flag-icon">' + icon + '</div>' +
+        '<div class="item-inner">' +
+          '<div class="flag-header">' +
+            '<span class="flag-title">' + (f.title || '') + '</span>' +
+            '<span class="flag-badge ' + badge + '">' + badge + '</span>' +
+          '</div>' +
+          '<div class="flag-risk">' + (f.risk || '') + '</div>' +
+          '<div class="flag-detail">' + (f.detail || '') + '</div>' +
+        '</div>';
       flagsList.appendChild(li);
     });
-  } else { flagsList.innerHTML = '<li><div class="item-inner"><div class="item-detail" style="color:var(--teal)">✓ No significant red flags found.</div></div></li>'; }
+  } else { flagsList.innerHTML = '<li style="list-style:none;padding:8px 0"><div class="item-detail" style="color:var(--teal)">✓ No significant red flags found.</div></li>'; }
   const missingList = document.getElementById('missingList');
   missingList.innerHTML = '';
   if (data.missingClauses?.length) {
@@ -2262,7 +2322,7 @@ function getResultsAsText() {
   const summary = document.getElementById('summaryText')?.textContent || '';
   const score = document.getElementById('scoreBadge')?.textContent || '';
   const terms = [...document.querySelectorAll('#termsGrid .term-row:not(.not-found)')].map(r => '  ' + (r.querySelector('.term-label')?.textContent || '') + ': ' + (r.querySelector('.term-value')?.textContent || '')).join('\n');
-  const flags = [...document.querySelectorAll('#flagsList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\n');
+  const flags = [...document.querySelectorAll('#flagsList .flag-item')].map(i => { const t = i.querySelector('.flag-title')?.textContent || ''; const r = i.querySelector('.flag-risk')?.textContent || ''; const d = i.querySelector('.flag-detail')?.textContent || ''; return '  • ' + t + ': ' + r + (d ? ' ' + d : ''); }).join('\n');
   const missing = [...document.querySelectorAll('#missingList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\n');
   const tips = [...document.querySelectorAll('#tipsList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\n');
   const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });

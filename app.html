@@ -680,30 +680,41 @@
     gap: 10px;
   }
 
-  .term-chip {
-    background: rgba(0,200,255,0.04);
-    border: 1px solid rgba(0,200,255,0.12);
-    border-radius: 10px;
-    padding: 12px 14px;
-    transition: border-color 0.2s;
+  .terms-table {
+    width: 100%;
+    border-collapse: collapse;
   }
-
-  .term-chip:hover { border-color: rgba(0,200,255,0.3); }
-
-  .term-chip .term-label {
+  .term-row {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s;
+  }
+  .term-row:last-child { border-bottom: none; }
+  .term-row:hover { background: rgba(0,200,255,0.03); }
+  .term-row.not-found { opacity: 0.35; }
+  .term-label {
     font-size: 10px;
     color: var(--muted);
     text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 5px;
+    letter-spacing: 1.2px;
+    padding: 11px 12px 11px 0;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
   }
-
-  .term-chip .term-value {
+  .term-value {
     font-size: 13px;
     font-weight: 600;
-    color: var(--cyan);
+    color: var(--text);
+    padding: 11px 0;
     line-height: 1.4;
+    display: flex;
+    align-items: center;
   }
+  .term-value.found { color: var(--cyan); }
+  .term-value.not-found-val { color: var(--muted); font-weight: 400; font-style: italic; font-size: 12px; }
+  @media(max-width:500px){ .term-row { grid-template-columns: 120px 1fr; } }
 
   /* ── Export bar ────────────────────────────────────────────────────── */
   .export-bar {
@@ -1441,9 +1452,9 @@
     .item-title { font-size: 9px !important; letter-spacing: 0.8px !important; }
     .item-detail { font-size: 11px !important; color: #444 !important; line-height: 1.6 !important; }
     .terms-grid { display: grid !important; grid-template-columns: repeat(3,1fr) !important; gap: 6px !important; }
-    .term-chip { background: #f8f8fa !important; border: 1px solid #e0e0e8 !important; padding: 7px 10px !important; border-radius: 4px !important; }
-    .term-chip .term-label { color: #888 !important; font-size: 8px !important; margin-bottom: 3px !important; }
-    .term-chip .term-value { color: #1a5080 !important; font-size: 11px !important; }
+    .term-row { border-bottom: 1px solid #e0e0e8 !important; }
+    .term-label { color: #888 !important; font-size: 9px !important; }
+    .term-value.found { color: #1a5080 !important; font-size: 11px !important; }
     .print-header { display: flex !important; align-items: flex-start !important; justify-content: space-between !important; padding: 16px 20px !important; margin-bottom: 18px !important; background: #1a1a2e !important; border-radius: 6px !important; }
     .print-header-left h1 { font-size: 16px !important; color: #fff !important; margin-bottom: 3px !important; font-weight: 700 !important; }
     .print-header-left p { font-size: 10px !important; color: #9090b0 !important; }
@@ -1618,8 +1629,8 @@
 
     <div class="section-title">Key Terms</div>
     <div class="glass result-card">
-      <h3> Key Terms Extracted</h3>
-      <div class="terms-grid" id="termsGrid"></div>
+      <h3>📋 Key Terms</h3>
+      <div id="termsGrid"></div>
     </div>
 
     <div class="section-title">Red Flags</div>
@@ -2178,10 +2189,33 @@ function renderResults(data) {
   if (tipCount) statsBar.innerHTML += '<span class="stat-chip green">' + tipCount + ' negotiation tip' + (tipCount !== 1 ? 's' : '') + '</span>';
   const termsGrid = document.getElementById('termsGrid');
   termsGrid.innerHTML = '';
-  (data.keyTerms || []).forEach(t => {
-    const chip = document.createElement('div'); chip.className = 'term-chip';
-    chip.innerHTML = '<div class="term-label">' + t.label + '</div><div class="term-value">' + t.value + '</div>';
-    termsGrid.appendChild(chip);
+
+  const TERM_FIELDS = [
+    { key: 'monthlyRent',      label: 'Monthly Rent' },
+    { key: 'leaseTerm',        label: 'Lease Term' },
+    { key: 'securityDeposit',  label: 'Security Deposit' },
+    { key: 'lateFee',          label: 'Late Fee' },
+    { key: 'petPolicy',        label: 'Pet Policy' },
+    { key: 'utilities',        label: 'Utilities' },
+    { key: 'parking',          label: 'Parking' },
+    { key: 'maintenance',      label: 'Maintenance' },
+    { key: 'noticeToVacate',   label: 'Notice to Vacate' },
+    { key: 'renewalTerms',     label: 'Renewal Terms' },
+    { key: 'earlyTermination', label: 'Early Termination' },
+    { key: 'subletting',       label: 'Subletting' },
+  ];
+
+  const terms = data.keyTerms || {};
+  TERM_FIELDS.forEach(({ key, label }) => {
+    const val = terms[key];
+    const hasVal = val && val !== 'null' && val !== 'N/A' && val !== '';
+    const row = document.createElement('div');
+    row.className = 'term-row' + (hasVal ? '' : ' not-found');
+    row.innerHTML =
+      '<div class="term-label">' + label + '</div>' +
+      '<div class="term-value ' + (hasVal ? 'found' : 'not-found-val') + '">' +
+      (hasVal ? val : 'Not specified') + '</div>';
+    termsGrid.appendChild(row);
   });
   const flagsList = document.getElementById('flagsList');
   flagsList.innerHTML = '';
@@ -2227,7 +2261,7 @@ function renderResults(data) {
 function getResultsAsText() {
   const summary = document.getElementById('summaryText')?.textContent || '';
   const score = document.getElementById('scoreBadge')?.textContent || '';
-  const terms = [...document.querySelectorAll('#termsGrid .term-chip')].map(c => '  ' + (c.querySelector('.term-label')?.textContent || '') + ': ' + (c.querySelector('.term-value')?.textContent || '')).join('\n');
+  const terms = [...document.querySelectorAll('#termsGrid .term-row:not(.not-found)')].map(r => '  ' + (r.querySelector('.term-label')?.textContent || '') + ': ' + (r.querySelector('.term-value')?.textContent || '')).join('\n');
   const flags = [...document.querySelectorAll('#flagsList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\n');
   const missing = [...document.querySelectorAll('#missingList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\n');
   const tips = [...document.querySelectorAll('#tipsList .item-inner')].map(i => { const t = i.querySelector('.item-title')?.textContent || ''; const d = i.querySelector('.item-detail')?.textContent || ''; return '  • ' + (t ? t + ': ' + d : d); }).join('\n');

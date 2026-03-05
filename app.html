@@ -502,24 +502,139 @@
   .loading {
     display: none;
     text-align: center;
-    padding: 64px 48px;
+    padding: 56px 32px;
     animation: fadeUp 0.3s ease both;
+    max-width: 480px;
+    margin: 0 auto;
   }
 
   .loading.visible { display: block; }
 
   .spinner-ring {
-    width: 52px; height: 52px;
+    width: 44px; height: 44px;
     border-radius: 50%;
     border: 2px solid rgba(0,200,255,0.1);
     border-top-color: var(--cyan);
     animation: spin 0.9s linear infinite;
-    margin: 0 auto 20px;
+    margin: 0 auto 24px;
     box-shadow: 0 0 20px rgba(0,200,255,0.15);
   }
 
-  .loading p { color: var(--muted); font-size: 14px; }
-  .loading p strong { color: var(--cyan); font-weight: 500; }
+  .loading-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .loading-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+
+  /* Pro: analysis steps ticker */
+  .analysis-steps {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 0;
+  }
+
+  .analysis-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: rgba(232,240,255,0.35);
+    transition: color 0.4s ease, opacity 0.4s ease;
+  }
+
+  .analysis-step.active {
+    color: var(--text);
+  }
+
+  .analysis-step.done {
+    color: var(--teal);
+  }
+
+  .step-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid rgba(232,240,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+    transition: all 0.4s ease;
+  }
+
+  .analysis-step.active .step-icon {
+    border-color: var(--cyan);
+    background: rgba(0,200,255,0.1);
+    color: var(--cyan);
+  }
+
+  .analysis-step.done .step-icon {
+    border-color: var(--teal);
+    background: rgba(0,255,180,0.1);
+    color: var(--teal);
+  }
+
+  /* Non-pro: upsell cards */
+  .loading-upsell {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .upsell-card {
+    background: rgba(0,200,255,0.04);
+    border: 1px solid rgba(0,200,255,0.1);
+    border-radius: 10px;
+    padding: 13px 15px;
+    text-align: left;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .upsell-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .upsell-card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--cyan);
+    margin-bottom: 3px;
+    letter-spacing: 0.2px;
+  }
+
+  .upsell-card-desc {
+    font-size: 12px;
+    color: rgba(232,240,255,0.5);
+    line-height: 1.5;
+  }
+
+  .loading-upsell-cta {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .loading-upsell-cta a {
+    color: var(--cyan);
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .loading-upsell-cta a:hover { text-decoration: underline; }
 
   /* ── Results ───────────────────────────────────────────────────────── */
   .results {
@@ -1640,7 +1755,37 @@
   <!-- ── Loading ─────────────────────────────────────────────────────── -->
   <div class="loading" id="loading">
     <div class="spinner-ring"></div>
-    <p>Analyzing your contract…</p>
+    <div class="loading-title">Analyzing your contract…</div>
+    <div class="loading-sub" id="loadingSub">This usually takes 15–30 seconds</div>
+
+    <!-- Pro user: steps ticker -->
+    <div class="analysis-steps" id="analysisSteps" style="display:none">
+      <div class="analysis-step" id="step0"><div class="step-icon">→</div><span>Reading lease structure</span></div>
+      <div class="analysis-step" id="step1"><div class="step-icon">→</div><span>Extracting key terms &amp; dates</span></div>
+      <div class="analysis-step" id="step2"><div class="step-icon">→</div><span>Checking for unusual clauses</span></div>
+      <div class="analysis-step" id="step3"><div class="step-icon">→</div><span>Identifying one-sided language</span></div>
+      <div class="analysis-step" id="step4"><div class="step-icon">→</div><span>Building negotiation strategy</span></div>
+      <div class="analysis-step" id="step5"><div class="step-icon">→</div><span>Finalizing your report</span></div>
+    </div>
+
+    <!-- Non-pro user: upsell cards -->
+    <div class="loading-upsell" id="loadingUpsell" style="display:none">
+      <div class="upsell-card" id="upsellCard0">
+        <div class="upsell-card-title">✦ Negotiation Tips</div>
+        <div class="upsell-card-desc">Pro users get 4 specific tips tailored to this exact lease — what to push back on and how to word it.</div>
+      </div>
+      <div class="upsell-card" id="upsellCard1">
+        <div class="upsell-card-title">✦ Unlimited Analyses</div>
+        <div class="upsell-card-desc">Reviewing multiple apartments? Pro lets you analyze as many leases as you need, no limits.</div>
+      </div>
+      <div class="upsell-card" id="upsellCard2">
+        <div class="upsell-card-title">✦ Saved History</div>
+        <div class="upsell-card-desc">Come back to any past analysis anytime. Share results with a roommate or revisit before your lease renewal.</div>
+      </div>
+    </div>
+    <div class="loading-upsell-cta" id="loadingUpsellCta" style="display:none">
+      <a onclick="startCheckout('pro')">Upgrade to Pro — $12.99/mo →</a>
+    </div>
   </div>
 
   <!-- ── Results ─────────────────────────────────────────────────────── -->
@@ -2012,11 +2157,54 @@ async function analyzeContract() {
   document.getElementById('loading').classList.add('visible');
   document.getElementById('results').classList.remove('visible');
 
+  // Determine user state for loading screen
+  const isPro = currentUser && window._userCredits && window._userCredits.plan === 'pro';
+  const isGuest = !currentUser;
+
+  let loadingInterval = null;
+
+  if (isPro) {
+    // Show analysis steps ticker
+    document.getElementById('analysisSteps').style.display = 'flex';
+    document.getElementById('loadingSub').style.display = 'none';
+    const steps = document.querySelectorAll('.analysis-step');
+    let stepIdx = 0;
+    const stepTimings = [0, 3000, 7000, 12000, 18000, 24000];
+    steps.forEach((s, i) => {
+      setTimeout(() => {
+        steps.forEach((ss, ii) => {
+          ss.classList.remove('active');
+          if (ii < i) { ss.classList.add('done'); ss.querySelector('.step-icon').textContent = '✓'; }
+        });
+        s.classList.add('active');
+        s.querySelector('.step-icon').textContent = '·';
+      }, stepTimings[i]);
+    });
+  } else {
+    // Show upsell cards staggered
+    document.getElementById('loadingUpsell').style.display = 'flex';
+    if (isGuest) document.getElementById('loadingUpsellCta').style.display = 'block';
+    const cards = document.querySelectorAll('.upsell-card');
+    cards.forEach((c, i) => { setTimeout(() => c.classList.add('visible'), 400 + i * 600); });
+  }
+
   try {
     const response = await fetch('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contractText: text, token: authToken || null }) });
     const result = await response.json();
     if (response.status === 403 && result.code === 'NO_CREDITS') {
       document.getElementById('loading').classList.remove('visible');
+  document.getElementById('analysisSteps').style.display = 'none';
+  document.getElementById('loadingUpsell').style.display = 'none';
+  document.getElementById('loadingUpsellCta').style.display = 'none';
+  document.getElementById('loadingSub').style.display = 'block';
+  document.querySelectorAll('.analysis-step').forEach(s => { s.classList.remove('active','done'); s.querySelector('.step-icon').textContent = '→'; });
+  document.querySelectorAll('.upsell-card').forEach(c => c.classList.remove('visible'));
+      document.getElementById('analysisSteps').style.display = 'none';
+      document.getElementById('loadingUpsell').style.display = 'none';
+      document.getElementById('loadingUpsellCta').style.display = 'none';
+      document.getElementById('loadingSub').style.display = 'block';
+      document.querySelectorAll('.analysis-step').forEach(s => { s.classList.remove('active','done'); s.querySelector('.step-icon').textContent = '→'; });
+      document.querySelectorAll('.upsell-card').forEach(c => c.classList.remove('visible'));
       document.getElementById('inputSection').style.display = 'block';
       document.getElementById('paywallModal').classList.add('visible');
       btn.disabled = false; btn.innerHTML = '<span></span> Analyze Contract';
@@ -2056,6 +2244,7 @@ async function updateNavForUser() {
     if (credits && !credits.error) {
       const u = getUsage();
       if (credits.plan === 'pro') { u.pro = true; u.paid = 9999; }
+      window._userCredits = credits;
       else { u.pro = false; u.paid = 0; u.free = Math.max(0, 5 - (credits.credits || 0)); }
       saveUsage(u);
     }

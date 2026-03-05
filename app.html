@@ -2313,7 +2313,11 @@ function hideUpgradeBar(){const bar=document.getElementById('upgradeBar');if(bar
 function dismissUpgradeBar(){hideUpgradeBar();sessionStorage.setItem('atc_bar_dismissed','1');}
 
 window.addEventListener('load', async () => {
-  getStoredAuth();
+  // Add ?guest=1 to URL to skip auto-login (useful for testing free features)
+  const initParams = new URLSearchParams(window.location.search);
+  if (initParams.get('guest') !== '1') {
+    getStoredAuth();
+  }
   await updateNavForUser();
   const params = new URLSearchParams(window.location.search);
   if (params.get('checkout') === 'success') {

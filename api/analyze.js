@@ -289,6 +289,26 @@ module.exports = function handler(req, res) {
             .replace(/\s*```$/i, '')
             .trim();
 
+          // Sanitize: fix unescaped quotes inside JSON string values
+          function sanitizeJSON(str) {
+            str = str.replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'");
+            let out = '', inString = false, escaped = false;
+            for (let i = 0; i < str.length; i++) {
+              const ch = str[i];
+              if (escaped) { out += ch; escaped = false; continue; }
+              if (ch === '\\') { out += ch; escaped = true; continue; }
+              if (ch === '"') {
+                if (!inString) { inString = true; out += ch; continue; }
+                const rest = str.slice(i + 1).trimStart();
+                if (/^[:\,\}\]]/.test(rest)) { inString = false; out += ch; continue; }
+                out += '\\"'; continue;
+              }
+              out += ch;
+            }
+            return out;
+          }
+          text = sanitizeJSON(text);
+
           // If JSON is truncated, attempt to salvage it by closing open structures
           let result;
           try {

@@ -259,7 +259,7 @@ module.exports = function handler(req, res) {
       }
     } else {
       // ── Guest (unauthenticated) IP limit: 3 analyses per 24 hours ─────
-      const DEV_IPS = ['70.80.221.13'];
+      const DEV_IPS = (process.env.DEV_IPS || '').split(',').map(s => s.trim()).filter(Boolean);
       const clientIp = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket?.remoteAddress || '';
       if (!DEV_IPS.includes(clientIp)) {
         const guestRl = rateLimit(req, { windowMs: 24 * 60 * 60_000, max: 3, label: 'guest_analyze' });

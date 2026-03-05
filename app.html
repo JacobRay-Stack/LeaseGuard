@@ -2477,10 +2477,14 @@ function hideUpgradeBar(){const bar=document.getElementById('upgradeBar');if(bar
 function dismissUpgradeBar(){hideUpgradeBar();sessionStorage.setItem('atc_bar_dismissed','1');}
 
 window.addEventListener('load', async () => {
-  // Add ?guest=1 to URL to skip auto-login (useful for testing free features)
+  // Always start logged out — user must log in each session explicitly.
+  // Exception: if returning from Stripe checkout, restore session so we can
+  // poll for their updated plan after payment.
   const initParams = new URLSearchParams(window.location.search);
-  if (initParams.get('guest') !== '1') {
+  if (initParams.get('checkout') === 'success') {
     getStoredAuth();
+  } else {
+    clearAuth();
   }
   await updateNavForUser();
   const params = new URLSearchParams(window.location.search);

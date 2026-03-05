@@ -106,9 +106,20 @@ Return ONLY a valid JSON object with exactly this structure — no preamble, no 
   "summary": "2-3 sentence plain English overview of the contract. Include the rent amount, lease term, location if visible, and your overall impression of whether this is a standard lease or one that warrants careful review.",
   "score": "good or warn or bad",
   "scoreLabel": "One of: LOOKS STANDARD - Review before signing | WORTH REVIEWING - Some unusual terms | REVIEW CAREFULLY - Several one-sided clauses",
-  "keyTerms": [
-    { "label": "Term name", "value": "Term value" }
-  ],
+  "keyTerms": {
+    "monthlyRent": "e.g. $2,400/mo — or null if not found",
+    "leaseTerm": "e.g. 12 months (Jan 1 – Dec 31 2026) — or null",
+    "securityDeposit": "e.g. $4,800 (2 months rent) — or null",
+    "lateFee": "e.g. $50 after 5-day grace period — or null",
+    "petPolicy": "e.g. No pets allowed — or null",
+    "utilities": "e.g. Tenant pays electric & gas, landlord pays water — or null",
+    "parking": "e.g. 1 spot included, additional $75/mo — or null",
+    "maintenance": "e.g. Tenant responsible for repairs under $100 — or null",
+    "noticeToVacate": "e.g. 60 days written notice required — or null",
+    "renewalTerms": "e.g. Month-to-month after term at 3% increase — or null",
+    "earlyTermination": "e.g. 2 months rent penalty — or null",
+    "subletting": "e.g. Not permitted without written consent — or null"
+  },
   "redFlags": [
     "CLAUSE TITLE: What this clause says in plain English, why it is unusual or one-sided compared to a standard lease, and what practical risk it creates for the tenant. Do not cite statute numbers. End with: Recommend asking a lawyer about this before signing."
   ],
@@ -125,7 +136,7 @@ Scoring guidelines — score based on how unusual and one-sided the lease is, no
 - warn: Lease has 1-3 terms that are more one-sided or unusual than typical. Worth negotiating or getting a second opinion on.
 - bad: Lease has several terms that are significantly more one-sided than standard leases, or terms that are highly unusual and create serious financial risk.
 
-keyTerms must include every financially significant term found: monthly rent, lease term, security deposit, late fee, notice period, pet policy, utilities, maintenance responsibility, early termination terms, and any other dollar amounts or deadlines in the lease.
+keyTerms: Fill in every field using exact values from the contract. Use null (not the string "null", but JSON null) for any field not mentioned in the contract. Be concise and specific — dollar amounts, dates, and durations where applicable.
 
 redFlags: Flag every clause that is more one-sided, unusual, or risky than what appears in standard leases. Explain clearly in plain English what the clause does and why it matters. Never cite statute numbers. Never say "violates [law]." Do say "unusual," "more restrictive than most leases," "worth asking a lawyer about." Include every flag you find — do not omit any.
 

@@ -19,7 +19,7 @@ function supabaseReq(path, method, body, token, isService) {
       'Prefer': 'return=representation',
     };
     if (data) headers['Content-Length'] = Buffer.byteLength(data);
-    const options = { hostname: 'gbzyzsxuxwmdlzagkrvt.supabase.co', path, method, headers };
+    const options = { hostname: new URL(process.env.SUPABASE_URL || 'https://gbzyzsxuxwmdlzagkrvt.supabase.co').hostname, path, method, headers };
     const req = https.request(options, (res) => {
       let d = '';
       res.on('data', (c) => (d += c));
@@ -162,7 +162,6 @@ module.exports = async function handler(req, res) {
 
     // ── RENAME ────────────────────────────────────────────────────────
     if (action === 'rename') {
-      if (!isPaid) return res.status(403).json({ error: 'Paid plan required' });
       if (!analysisId || !isValidUUID(analysisId)) {
         return res.status(400).json({ error: 'Invalid analysisId' });
       }

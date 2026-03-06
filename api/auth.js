@@ -49,7 +49,7 @@ function supabaseRequest(path, method, body, token) {
     }
 
     const options = {
-      hostname: 'gbzyzsxuxwmdlzagkrvt.supabase.co',
+      hostname: new URL(process.env.SUPABASE_URL || 'https://gbzyzsxuxwmdlzagkrvt.supabase.co').hostname,
       path,
       method,
       headers
@@ -71,9 +71,9 @@ function supabaseRequest(path, method, body, token) {
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  // ── Rate limiting: 20 auth attempts per IP per minute ─────────────  // ADD THIS
-  const rl = rateLimit(req, { windowMs: 60_000, max: 20, label: 'auth' });  // ADD THIS
-  if (!rl.ok) return res.status(429).json({ error: rl.error });  // ADD THIS
+  // ── Rate limiting: 20 auth attempts per IP per minute ─────────────────
+  const rl = rateLimit(req, { windowMs: 60_000, max: 20, label: 'auth' });
+  if (!rl.ok) return res.status(429).json({ error: rl.error });
 
   // ── Body size limit ────────────────────────────────────────────────
   const MAX_BODY = 10_000;
@@ -169,6 +169,33 @@ module.exports = async function handler(req, res) {
           refreshToken: result.refresh_token,
           user: result.user
         });
+      }
+
+      // ── FORGOT PASSWORD ──────────────────────────────────────────────
+      if (action === 'forgotPassword') {
+        if (!email) return res.status(400).json({ error: 'Please enter your email address.' });
+        // Always call recover — never reveal whether email exists (prevents enumeration)
+        try { await supabaseRequest('/auth/v1/recover', 'POST', { email }); } catch(e) {}
+        return res.status(200).json({ ok: true });
+      }
+
+      // ── UPDATE PASSWORD (recovery flow) ─────────────────────────────
+      if (action === 'updatePassword') {
+        if (!token || !password) return res.status(400).json({ error: 'Missing token or password.' });
+        if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters.' });
+        if (!/[A-Z]/.test(password)) return res.status(400).json({ error: 'Password must include at least one capital letter.' });
+        if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) return res.status(400).json({ error: 'Password must include at least one symbol (!@#$%^&*).' });
+        // token is the recovery access_token from the Supabase reset email link
+        const result = await supabaseRequest('/auth/v1/user', 'PUT', { password }, token);
+        if (result.error) return res.status(400).json({ error: safeAuthError(result.error) });
+        return res.status(200).json({ ok: true });
+      }
+
+      // ── RESEND CONFIRMATION ──────────────────────────────────────────
+      if (action === 'resendConfirmation') {
+        if (!email) return res.status(400).json({ error: 'Please enter your email address.' });
+        try { await supabaseRequest('/auth/v1/resend', 'POST', { type: 'signup', email }); } catch(e) {}
+        return res.status(200).json({ ok: true });
       }
 
       return res.status(400).json({ error: 'Invalid action' });

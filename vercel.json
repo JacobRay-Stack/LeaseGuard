@@ -15,8 +15,8 @@
       "destination": "/privacy.html"
     },
     {
-      "source": "/services",
-      "destination": "/services.html"
+      "source": "/blog",
+      "destination": "/blog.html"
     }
   ]
 }

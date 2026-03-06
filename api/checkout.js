@@ -17,7 +17,7 @@ function supabaseReq(path, method, body, token) {
     }
 
     const req = https.request(
-      { hostname: new URL(process.env.SUPABASE_URL).hostname, path, method, headers },
+      { hostname: new URL(process.env.SUPABASE_URL || 'https://gbzyzsxuxwmdlzagkrvt.supabase.co').hostname, path, method, headers },
       (res) => {
         let d = '';
         res.on('data', (c) => (d += c));

@@ -2071,6 +2071,101 @@
   .print-only { display: none; }
   .print-disclaimer { display: none; }
 
+  /* ── Email Capture Modal ───────────────────────────────────────────── */
+  .ec-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(6,8,16,0.82); backdrop-filter: blur(8px);
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .ec-overlay.visible { display: flex; animation: ecFadeIn 0.25s ease both; }
+  @keyframes ecFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .ec-modal {
+    background: #0d1120;
+    border: 1px solid rgba(0,200,255,0.2);
+    border-radius: 20px;
+    padding: 40px 36px 32px;
+    max-width: 440px; width: 100%;
+    position: relative;
+    box-shadow: 0 0 80px rgba(0,200,255,0.08), 0 32px 64px rgba(0,0,0,0.6);
+    animation: ecSlideUp 0.3s cubic-bezier(.4,0,.2,1) both;
+  }
+  @keyframes ecSlideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
+
+  .ec-modal::before {
+    content: ''; position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,200,255,0.5), rgba(191,0,255,0.4), transparent);
+  }
+  .ec-close {
+    position: absolute; top: 14px; right: 14px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    color: var(--muted); font-size: 15px; cursor: pointer;
+    padding: 3px 8px; border-radius: 6px; transition: color 0.2s; line-height: 1.4;
+  }
+  .ec-close:hover { color: var(--text); }
+
+  .ec-bonus-badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--teal); background: rgba(0,255,180,0.08);
+    border: 1px solid rgba(0,255,180,0.2); padding: 5px 12px;
+    border-radius: 100px; margin-bottom: 18px;
+  }
+  .ec-modal h2 {
+    font-family: 'Inter', sans-serif; font-size: 22px; font-weight: 800;
+    color: var(--text); line-height: 1.25; margin: 0 0 10px;
+  }
+  .ec-modal p {
+    font-size: 14px; color: var(--muted); line-height: 1.7; margin: 0 0 24px;
+  }
+  .ec-perks {
+    display: flex; flex-direction: column; gap: 7px;
+    margin: 0 0 24px;
+    padding: 16px; border-radius: 12px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+  }
+  .ec-perk {
+    display: flex; align-items: center; gap: 9px;
+    font-size: 13px; color: rgba(232,240,255,0.7);
+  }
+  .ec-perk::before { content: '✓'; color: var(--teal); font-weight: 700; font-size: 12px; flex-shrink: 0; }
+
+  .ec-input-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .ec-input {
+    flex: 1; padding: 12px 16px; border-radius: 10px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px;
+    outline: none; transition: border-color 0.2s;
+  }
+  .ec-input:focus { border-color: rgba(0,200,255,0.4); }
+  .ec-input::placeholder { color: var(--muted); }
+  .ec-input.error { border-color: rgba(255,85,119,0.5); }
+
+  .ec-submit {
+    padding: 12px 20px; border-radius: 10px; white-space: nowrap; flex-shrink: 0;
+    background: rgba(0,200,255,0.15); border: 1px solid rgba(0,200,255,0.4);
+    color: var(--cyan); font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+  }
+  .ec-submit:hover { background: rgba(0,200,255,0.25); box-shadow: 0 0 20px rgba(0,200,255,0.15); }
+  .ec-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .ec-error { font-size: 12px; color: var(--red); margin-bottom: 10px; min-height: 16px; }
+  .ec-skip {
+    display: block; text-align: center; font-size: 12px; color: var(--muted);
+    cursor: pointer; background: none; border: none; width: 100%;
+    padding: 6px; transition: color 0.2s; margin-top: 4px;
+  }
+  .ec-skip:hover { color: rgba(232,240,255,0.5); }
+
+  /* Success state */
+  .ec-success { text-align: center; padding: 8px 0; }
+  .ec-success .ec-check { font-size: 44px; margin-bottom: 14px; display: block; }
+  .ec-success h2 { font-size: 20px; margin-bottom: 10px; }
+  .ec-success p { font-size: 14px; margin-bottom: 0; }
+
+  /* Exit-intent: same modal, triggered differently — no extra styles needed */
+
   /* ── Animations ────────────────────────────────────────────────────── */
   @keyframes fadeDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: none; } }
   @keyframes fadeUp   { from { opacity: 0; transform: translateY(16px);  } to { opacity: 1; transform: none; } }
@@ -2109,6 +2204,38 @@
 </head>
 <body>
 
+<!-- ── Email Capture Modal ────────────────────────────────────────────── -->
+<div class="ec-overlay" id="ecModal" role="dialog" aria-modal="true" aria-labelledby="ecTitle">
+  <div class="ec-modal">
+    <button class="ec-close" onclick="dismissEmailCapture('close')" aria-label="Close">✕</button>
+
+    <!-- Default state -->
+    <div id="ecDefault">
+      <div class="ec-bonus-badge">🎁 Free Bonus</div>
+      <h2 id="ecTitle">Get one more free analysis.</h2>
+      <p>Drop your email and we'll unlock a bonus analysis credit — plus occasional renter tips. No spam, ever.</p>
+      <div class="ec-perks">
+        <div class="ec-perk">+1 free analysis credit, added instantly</div>
+        <div class="ec-perk">Occasional renter tips &amp; lease guides</div>
+        <div class="ec-perk">Unsubscribe anytime, one click</div>
+      </div>
+      <div class="ec-input-row">
+        <input class="ec-input" type="email" id="ecEmail" placeholder="your@email.com" autocomplete="email">
+        <button class="ec-submit" id="ecSubmitBtn" onclick="submitEmailCapture()">Claim It →</button>
+      </div>
+      <div class="ec-error" id="ecError"></div>
+      <button class="ec-skip" onclick="dismissEmailCapture('skip')">No thanks, I don't want a free credit</button>
+    </div>
+
+    <!-- Success state -->
+    <div id="ecSuccess" style="display:none;" class="ec-success">
+      <span class="ec-check">🎉</span>
+      <h2>You're all set!</h2>
+      <p>Check your inbox — your bonus credit is on its way. It'll be waiting when you come back.</p>
+    </div>
+  </div>
+</div>
+
 <!-- ── Auth Modal ─────────────────────────────────────────────────────── -->
 <div class="auth-overlay" id="authModal">
   <div class="auth-modal">
@@ -2116,14 +2243,9 @@
     <h2 id="authTitle">Create Account</h2>
     <p class="auth-sub" id="authSub">Sign up to save your analyses and manage credits</p>
     <div class="auth-error" id="authError"></div>
-    <button id="resendConfirmBtn" onclick="doResendConfirmation()" style="display:none;width:100%;margin-bottom:12px;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--muted);font-size:13px;padding:10px 14px;border-radius:8px;cursor:pointer;text-align:center;transition:border-color 0.2s;" onmouseover="this.style.borderColor='rgba(0,200,255,0.3)'" onmouseout="this.style.borderColor='var(--border)'">↩ Resend confirmation email</button>
     <input class="auth-input" type="email" id="authEmail" placeholder="Email address">
     <input class="auth-input" type="tel" id="authPhone" placeholder="Phone number (optional)" style="display:none;">
     <input class="auth-input" type="password" id="authPassword" placeholder="Password">
-    <input class="auth-input" type="password" id="authPasswordConfirmNew" placeholder="Confirm new password" style="display:none;">
-    <div id="forgotLink" style="display:none;text-align:right;margin:-8px 0 12px;">
-      <a onclick="showAuth('forgot')" style="font-size:12px;color:var(--muted);cursor:pointer;text-decoration:none;border-bottom:1px dotted rgba(138,143,158,0.5);">Forgot password?</a>
-    </div>
     <div id="signupExtra" style="display:none;">
       <input class="auth-input" type="password" id="authPasswordConfirm" placeholder="Confirm password">
       <div style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.6;">
@@ -2535,49 +2657,16 @@ function resumePendingCheckout() {
 }
 
 function showAuth(mode, fromUpgrade) {
-  if (!fromUpgrade) pendingCheckoutPlan = null;
+  if (!fromUpgrade) pendingCheckoutPlan = null;  // clear pending if not an upgrade flow
   authMode = mode || 'signup';
   const isLogin = authMode === 'login';
-  const isForgot = authMode === 'forgot';
-  const isNewPw = authMode === 'newPassword';
-
-  // Reset transient UI state
+  document.getElementById('authTitle').textContent = isLogin ? 'Welcome Back' : 'Create Account';
+  document.getElementById('authSub').textContent = isLogin ? 'Log in to access your analyses' : 'Sign up to save your analyses and manage credits';
+  document.getElementById('authSubmitBtn').textContent = isLogin ? 'Log In' : 'Create Account';
+  document.getElementById('authSwitch').innerHTML = isLogin ? "Don't have an account? <a onclick=\"toggleAuthMode()\">Sign up</a>" : "Already have an account? <a onclick=\"toggleAuthMode()\">Log in</a>";
   document.getElementById('authError').classList.remove('visible');
-  document.getElementById('authError').removeAttribute('style');
-  document.getElementById('resendConfirmBtn').style.display = 'none';
-
-  // Title & subtitle
-  const titles = { signup: 'Create Account', login: 'Welcome Back', forgot: 'Reset Password', newPassword: 'Set New Password' };
-  const subs   = { signup: 'Sign up to save your analyses and manage credits', login: 'Log in to access your analyses', forgot: 'Enter your email and we\'ll send a reset link.', newPassword: 'Choose a strong new password for your account.' };
-  document.getElementById('authTitle').textContent = titles[authMode] || 'Create Account';
-  document.getElementById('authSub').textContent   = subs[authMode]   || '';
-
-  // Submit button
-  const btnText = { signup: 'Create Account', login: 'Log In', forgot: 'Send Reset Link', newPassword: 'Update Password' };
-  const btn = document.getElementById('authSubmitBtn');
-  btn.textContent = btnText[authMode] || 'Submit';
-  btn.onclick = submitAuth;
-  btn.disabled = false;
-
-  // Switch link
-  const sw = document.getElementById('authSwitch');
-  if (isForgot || isNewPw) {
-    sw.innerHTML = "<a onclick=\"showAuth('login')\" style=\"cursor:pointer;\">← Back to log in</a>";
-  } else if (isLogin) {
-    sw.innerHTML = "Don't have an account? <a onclick=\"toggleAuthMode()\">Sign up</a>";
-  } else {
-    sw.innerHTML = "Already have an account? <a onclick=\"toggleAuthMode()\">Log in</a>";
-  }
-
-  // Field visibility
-  document.getElementById('authEmail').style.display           = isNewPw ? 'none' : 'block';
-  document.getElementById('authPhone').style.display           = (isLogin || isForgot || isNewPw) ? 'none' : 'block';
-  document.getElementById('authPassword').style.display        = isForgot ? 'none' : 'block';
-  document.getElementById('authPassword').placeholder          = isNewPw ? 'New password' : 'Password';
-  document.getElementById('authPasswordConfirmNew').style.display = isNewPw ? 'block' : 'none';
-  document.getElementById('forgotLink').style.display          = isLogin ? 'block' : 'none';
-  document.getElementById('signupExtra').style.display         = (authMode === 'signup') ? 'block' : 'none';
-
+  document.getElementById('signupExtra').style.display = isLogin ? 'none' : 'block';
+  document.getElementById('authPhone').style.display = isLogin ? 'none' : 'block';
   document.getElementById('authModal').classList.add('visible');
 }
 
@@ -2596,55 +2685,6 @@ async function submitAuth() {
   const btn = document.getElementById('authSubmitBtn');
   const errEl = document.getElementById('authError');
   errEl.classList.remove('visible');
-  errEl.removeAttribute('style');
-  document.getElementById('resendConfirmBtn').style.display = 'none';
-
-  // ── Forgot password mode ─────────────────────────────────────────────
-  if (authMode === 'forgot') {
-    if (!email) { errEl.textContent = 'Please enter your email address.'; errEl.classList.add('visible'); return; }
-    btn.textContent = 'Sending...'; btn.disabled = true;
-    try {
-      await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'forgotPassword', email }) });
-    } catch(e) {}
-    errEl.style.background = 'rgba(0,255,180,0.08)';
-    errEl.style.borderColor = 'rgba(0,255,180,0.3)';
-    errEl.style.color = 'var(--teal)';
-    errEl.textContent = '✓ If that email is registered, a reset link is on its way. Check your inbox.';
-    errEl.classList.add('visible');
-    btn.textContent = 'Send Reset Link'; btn.disabled = false;
-    return;
-  }
-
-  // ── Set new password mode (after clicking reset email link) ──────────
-  if (authMode === 'newPassword') {
-    if (!password) { errEl.textContent = 'Please enter a new password.'; errEl.classList.add('visible'); return; }
-    const pwError = validatePassword(password);
-    if (pwError) { errEl.textContent = pwError; errEl.classList.add('visible'); return; }
-    const confirm = document.getElementById('authPasswordConfirmNew').value;
-    if (password !== confirm) { errEl.textContent = 'Passwords do not match.'; errEl.classList.add('visible'); return; }
-    btn.textContent = 'Updating...'; btn.disabled = true;
-    try {
-      const res = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'updatePassword', token: window._recoveryToken, password }) });
-      const data = await res.json();
-      if (data.error) { errEl.textContent = data.error; errEl.classList.add('visible'); btn.textContent = 'Update Password'; btn.disabled = false; return; }
-      window._recoveryToken = null;
-      window.history.replaceState({}, '', window.location.pathname);
-      errEl.style.background = 'rgba(0,255,180,0.08)';
-      errEl.style.borderColor = 'rgba(0,255,180,0.3)';
-      errEl.style.color = 'var(--teal)';
-      errEl.textContent = '✓ Password updated! You can now log in with your new password.';
-      errEl.classList.add('visible');
-      btn.textContent = 'Go to Log In →'; btn.disabled = false;
-      const switchToLogin = () => { errEl.classList.remove('visible'); errEl.removeAttribute('style'); btn.onclick = submitAuth; showAuth('login'); };
-      btn.onclick = switchToLogin;
-      setTimeout(switchToLogin, 2500);
-    } catch(e) { errEl.textContent = 'Something went wrong. Please try again.'; errEl.classList.add('visible'); btn.textContent = 'Update Password'; btn.disabled = false; }
-    return;
-  }
-
-  // ── Signup / login ───────────────────────────────────────────────────
   if (!email || !password) { errEl.textContent = 'Please enter your email and password.'; errEl.classList.add('visible'); return; }
   if (authMode === 'signup') {
     const pwError = validatePassword(password);
@@ -2664,10 +2704,6 @@ async function submitAuth() {
     const data = await res.json();
     if (data.error) {
       errEl.textContent = data.error; errEl.classList.add('visible');
-      // If email not confirmed, offer to resend the confirmation link
-      if (data.error.toLowerCase().includes('confirm your email')) {
-        document.getElementById('resendConfirmBtn').style.display = 'block';
-      }
       btn.textContent = authMode === 'login' ? 'Log In' : 'Create Account'; btn.disabled = false;
       return;
     }
@@ -2692,39 +2728,6 @@ async function submitAuth() {
     errEl.textContent = 'Something went wrong. Please try again.'; errEl.classList.add('visible');
     btn.textContent = authMode === 'login' ? 'Log In' : 'Create Account'; btn.disabled = false;
   }
-}
-
-// ── Resend confirmation email ─────────────────────────────────────────
-async function doResendConfirmation() {
-  const email = document.getElementById('authEmail').value.trim();
-  const errEl = document.getElementById('authError');
-  const btn = document.getElementById('resendConfirmBtn');
-  if (!email) { errEl.textContent = 'Enter your email above, then click Resend.'; errEl.classList.add('visible'); return; }
-  btn.textContent = 'Sending...'; btn.disabled = true;
-  try {
-    await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'resendConfirmation', email }) });
-  } catch(e) {}
-  errEl.style.background = 'rgba(0,255,180,0.08)';
-  errEl.style.borderColor = 'rgba(0,255,180,0.3)';
-  errEl.style.color = 'var(--teal)';
-  errEl.textContent = '✓ Confirmation email resent — check your inbox.';
-  errEl.classList.add('visible');
-  btn.style.display = 'none';
-}
-
-// ── Detect Supabase recovery token in URL hash (password reset flow) ──
-function checkRecoveryToken() {
-  const hash = window.location.hash.slice(1); // strip leading #
-  if (!hash) return;
-  const params = new URLSearchParams(hash);
-  if (params.get('type') !== 'recovery') return;
-  const token = params.get('access_token');
-  if (!token) return;
-  window._recoveryToken = token;
-  // Clear the hash so the token isn't visible or accidentally reused
-  window.history.replaceState({}, '', window.location.pathname);
-  showAuth('newPassword');
 }
 
 async function ensureFreshToken() {
@@ -2815,6 +2818,8 @@ async function analyzeContract() {
     const subtitle = document.getElementById('headerSubtitle');
     if (subtitle) subtitle.style.display = 'none';
     if (authToken) { autoSaveAnalysis(result, text); } else { setTimeout(() => showSaveNudge(), 1500); }
+    // Show email capture modal to anonymous users who haven't signed up yet
+    if (!authToken) { setTimeout(() => maybeShowEmailCapture('post-analysis'), 2200); }
   } catch(err) {
     document.getElementById('loading').classList.remove('visible');
     document.getElementById('analysisSteps').style.display = 'none';
@@ -2956,7 +2961,6 @@ window.addEventListener('load', async () => {
     window.history.replaceState({}, '', window.location.pathname);
   }
   updateUsageUI();
-  checkRecoveryToken(); // detect Supabase password-reset links (?type=recovery in hash)
 });
 
 const dropZone = document.getElementById('dropZone');
@@ -3395,6 +3399,136 @@ function startRename(id) {
     finishRename();
   }, { once: true });
 }
+
+// ── Email Capture ─────────────────────────────────────────────────────────
+// Keys used in localStorage:
+//   atc_ec_done     → '1' if user already submitted their email
+//   atc_ec_skipped  → timestamp when user last skipped (don't re-show for 7 days)
+//   atc_ec_shown    → '1' if modal has already been shown this session
+
+const EC_SKIP_DAYS = 7;
+
+function ecAlreadyHandled() {
+  if (localStorage.getItem('atc_ec_done')) return true;
+  const skipped = parseInt(localStorage.getItem('atc_ec_skipped') || '0', 10);
+  if (skipped && Date.now() - skipped < EC_SKIP_DAYS * 86400 * 1000) return true;
+  return false;
+}
+
+function maybeShowEmailCapture(source) {
+  // Don't show to logged-in users or users who've already submitted/recently skipped
+  if (authToken) return;
+  if (ecAlreadyHandled()) return;
+  if (localStorage.getItem('atc_ec_shown')) return;
+  localStorage.setItem('atc_ec_shown', '1');
+  openEmailCapture(source);
+}
+
+function openEmailCapture(source) {
+  const modal = document.getElementById('ecModal');
+  if (!modal) return;
+  modal._source = source || 'modal';
+  // Reset to default state
+  document.getElementById('ecDefault').style.display = '';
+  document.getElementById('ecSuccess').style.display = 'none';
+  document.getElementById('ecError').textContent = '';
+  document.getElementById('ecEmail').value = '';
+  document.getElementById('ecEmail').classList.remove('error');
+  modal.classList.add('visible');
+  setTimeout(() => document.getElementById('ecEmail').focus(), 300);
+}
+
+function dismissEmailCapture(reason) {
+  document.getElementById('ecModal').classList.remove('visible');
+  if (reason === 'skip' || reason === 'close') {
+    localStorage.setItem('atc_ec_skipped', Date.now().toString());
+  }
+}
+
+async function submitEmailCapture() {
+  const emailEl  = document.getElementById('ecEmail');
+  const errorEl  = document.getElementById('ecError');
+  const submitBtn = document.getElementById('ecSubmitBtn');
+  const email    = emailEl.value.trim();
+  const source   = document.getElementById('ecModal')._source || 'modal';
+
+  // Client-side validation
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+    emailEl.classList.add('error');
+    errorEl.textContent = 'Please enter a valid email address.';
+    emailEl.focus();
+    return;
+  }
+  emailEl.classList.remove('error');
+  errorEl.textContent = '';
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Sending…';
+
+  try {
+    const res = await fetch('/api/email-capture', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, source }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      errorEl.textContent = data.error || 'Something went wrong. Please try again.';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Claim It →';
+      return;
+    }
+
+    // Mark as done so we never show again
+    localStorage.setItem('atc_ec_done', '1');
+
+    // Also grant +1 credit locally so the UI reflects it immediately
+    const u = getUsage();
+    u.paid = (u.paid || 0) + 1;
+    saveUsage(u);
+    updateUsageUI();
+
+    // Show success state
+    document.getElementById('ecDefault').style.display = 'none';
+    document.getElementById('ecSuccess').style.display = '';
+
+    // Auto-close after 3s
+    setTimeout(() => dismissEmailCapture('done'), 3000);
+
+  } catch (err) {
+    errorEl.textContent = 'Network error. Please try again.';
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Claim It →';
+  }
+}
+
+// Allow Enter key to submit
+document.addEventListener('DOMContentLoaded', () => {
+  const emailInput = document.getElementById('ecEmail');
+  if (emailInput) {
+    emailInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') submitEmailCapture();
+    });
+  }
+});
+
+// ── Exit-intent trigger ───────────────────────────────────────────────────
+// Fires when the mouse leaves the viewport toward the top (tab-close intent)
+// Only on desktop, only once per session, only if not already handled
+let exitIntentArmed = false;
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => { exitIntentArmed = true; }, 5000); // arm after 5s on page
+});
+document.addEventListener('mouseleave', (e) => {
+  if (!exitIntentArmed) return;
+  if (e.clientY > 10) return;       // only top-of-screen exits
+  if (authToken) return;
+  if (ecAlreadyHandled()) return;
+  if (localStorage.getItem('atc_ec_shown')) return;
+  exitIntentArmed = false;          // only fire once
+  localStorage.setItem('atc_ec_shown', '1');
+  openEmailCapture('exit-intent');
+});
 </script>
 
 

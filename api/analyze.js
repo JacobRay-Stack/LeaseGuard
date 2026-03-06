@@ -26,7 +26,7 @@ function supabaseReq(path, method, body, useService, token) {
     if (!isGet && data) headers['Content-Length'] = Buffer.byteLength(data);
 
     const req = https.request(
-      { hostname: 'gbzyzsxuxwmdlzagkrvt.supabase.co', path, method, headers },
+      { hostname: new URL(process.env.SUPABASE_URL || 'https://gbzyzsxuxwmdlzagkrvt.supabase.co').hostname, path, method, headers },
       (res) => {
         let d = '';
         res.on('data', (c) => (d += c));

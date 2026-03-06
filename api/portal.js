@@ -15,7 +15,7 @@ function supabaseReq(path, method, body, token) {
     if (!isGet && data) headers['Content-Length'] = Buffer.byteLength(data);
 
     const req = https.request(
-      { hostname: 'gbzyzsxuxwmdlzagkrvt.supabase.co', path, method, headers },
+      { hostname: new URL(process.env.SUPABASE_URL || 'https://gbzyzsxuxwmdlzagkrvt.supabase.co').hostname, path, method, headers },
       (res) => {
         let d = '';
         res.on('data', (c) => (d += c));
@@ -92,7 +92,7 @@ module.exports = async function handler(req, res) {
       }
 
       // Create Stripe customer portal session
-      const origin = req.headers.origin || 'https://www.analyzethiscontract.com';
+      const origin = req.headers.origin || 'https://analyzethiscontract.com';
       const session = await stripeReq('/v1/billing_portal/sessions', 'POST', {
         customer: stripeCustomerId,
         return_url: `${origin}/app`,

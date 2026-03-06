@@ -673,26 +673,24 @@
   .section-gate {
     position: relative;
   }
-
-  /* Items after the first get blurred individually */
-  .gate-blurred {
-    filter: blur(5px);
-    user-select: none;
-    pointer-events: none;
-    opacity: 0.6;
-  }
-
-  /* Upgrade CTA shown below the first item when gate is active */
   .section-gate-overlay {
     display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    border-radius: var(--radius);
+    cursor: pointer;
   }
   .section-gate.active .section-gate-overlay {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 0 4px;
   }
-
+  .section-gate.active .section-gate-blur {
+    filter: blur(4px);
+    user-select: none;
+    pointer-events: none;
+  }
   .gate-pill {
     background: rgba(6,8,16,0.88);
     border: 1px solid rgba(0,200,255,0.25);
@@ -703,7 +701,7 @@
     color: var(--cyan);
     backdrop-filter: blur(8px);
     white-space: nowrap;
-    cursor: pointer;
+    pointer-events: all;
     transition: border-color 0.2s, box-shadow 0.2s;
   }
   .gate-pill:hover {
@@ -1036,6 +1034,31 @@
   .ai-disclaimer a:hover { text-decoration: underline; }
 
   /* ── Usage counter ─────────────────────────────────────────────────── */
+  #usageCounter {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin: 12px 0 4px;
+  }
+
+  .usage-dots {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 6px;
+  }
+
+  .usage-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+
+  .usage-dot.used {
+    background: var(--cyan);
+    box-shadow: 0 0 8px rgba(0,200,255,0.5);
+  }
 
   /* ── Auth overlay ──────────────────────────────────────────────────── */
   .auth-overlay {
@@ -1790,11 +1813,10 @@
       position: static !important;
       overflow: visible !important;
     }
-    /* Remove all blur gating in print */
-    .gate-blurred {
+    .section-gate-blur {
       filter: none !important;
+      -webkit-filter: none !important;
       opacity: 1 !important;
-      pointer-events: auto !important;
     }
     .section-gate-overlay { display: none !important; }
 
@@ -2094,9 +2116,14 @@
     <h2 id="authTitle">Create Account</h2>
     <p class="auth-sub" id="authSub">Sign up to save your analyses and manage credits</p>
     <div class="auth-error" id="authError"></div>
+    <button id="resendConfirmBtn" onclick="doResendConfirmation()" style="display:none;width:100%;margin-bottom:12px;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--muted);font-size:13px;padding:10px 14px;border-radius:8px;cursor:pointer;text-align:center;transition:border-color 0.2s;" onmouseover="this.style.borderColor='rgba(0,200,255,0.3)'" onmouseout="this.style.borderColor='var(--border)'">↩ Resend confirmation email</button>
     <input class="auth-input" type="email" id="authEmail" placeholder="Email address">
     <input class="auth-input" type="tel" id="authPhone" placeholder="Phone number (optional)" style="display:none;">
     <input class="auth-input" type="password" id="authPassword" placeholder="Password">
+    <input class="auth-input" type="password" id="authPasswordConfirmNew" placeholder="Confirm new password" style="display:none;">
+    <div id="forgotLink" style="display:none;text-align:right;margin:-8px 0 12px;">
+      <a onclick="showAuth('forgot')" style="font-size:12px;color:var(--muted);cursor:pointer;text-decoration:none;border-bottom:1px dotted rgba(138,143,158,0.5);">Forgot password?</a>
+    </div>
     <div id="signupExtra" style="display:none;">
       <input class="auth-input" type="password" id="authPasswordConfirm" placeholder="Confirm password">
       <div style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.6;">
@@ -2117,13 +2144,13 @@
 
   <header>
     <div class="header-top">
-      <a href="/" class="logo" style="text-decoration:none;">
+      <div class="logo">
         <div class="logo-icon">⚖️</div>
         <div class="logo-wordmark">
           <span class="line1">AnalyzeThis</span>
           <span class="line2 shimmer">Contract</span>
         </div>
-      </a>
+      </div>
       <div id="topNav" class="top-nav-right"></div>
     </div>
 
@@ -2156,7 +2183,10 @@
     <label class="input-label" for="contractText">Paste text manually</label>
     <textarea id="contractText" placeholder="Paste the full text of your contract here..."></textarea>
 
-
+    <div id="usageCounter" style="display:none;">
+      <div class="usage-dots" id="usageDots"></div>
+      <span id="usageText"></span>
+    </div>
 
     <div class="error-msg" id="errorMsg"></div>
 
@@ -2238,7 +2268,7 @@
     <div class="section-gate" id="termsGate">
       <div class="glass result-card">
         <h3>📋 Key Terms</h3>
-        <div id="termsGrid"></div>
+        <div id="termsGrid" class="section-gate-blur"></div>
       </div>
       <div class="section-gate-overlay" onclick="startCheckout('pro', this)">
         <div class="gate-pill">✦ Unlock all key terms — Upgrade to Pro</div>
@@ -2249,7 +2279,7 @@
     <div class="section-gate" id="flagsGate">
       <div class="glass result-card">
         <h3> Red Flags</h3>
-        <ul id="flagsList" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;"></ul>
+        <ul id="flagsList" class="section-gate-blur" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;"></ul>
       </div>
       <div class="section-gate-overlay" onclick="startCheckout('pro', this)">
         <div class="gate-pill">✦ Unlock all red flags — Upgrade to Pro</div>
@@ -2260,7 +2290,7 @@
     <div class="section-gate" id="missingGate">
       <div class="glass result-card">
         <h3>⚠️ Missing or Unclear Clauses</h3>
-        <ul id="missingList" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;"></ul>
+        <ul id="missingList" class="section-gate-blur" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;"></ul>
       </div>
       <div class="section-gate-overlay" onclick="startCheckout('pro', this)">
         <div class="gate-pill">✦ Unlock all missing clauses — Upgrade to Pro</div>
@@ -2278,7 +2308,7 @@
           <div class="tips-upsell-headline">Negotiation tips are a Pro feature</div>
           <div class="tips-upsell-sub">Know exactly what to push back on — and how to word it. Upgrade to unlock all 4 tips for this contract.</div>
           <button class="tips-upsell-btn" onclick="startCheckout('pro', this)">Unlock Pro — $12.99/mo →</button>
-          <button class="tips-upsell-free" id="tipsSecondaryBtn" onclick="showAuth('signup')">or create a free account</button>
+          <button class="tips-upsell-free" onclick="showAuth('signup')">or create a free account</button>
         </div>
       </div>
     </div>
@@ -2359,7 +2389,7 @@
 
 <!-- ── All original JS — completely unchanged ─────────────────────────── -->
 <script>
-const FREE_LIMIT = 3;
+const FREE_LIMIT = 5;
 
 function todayStr() { return new Date().toISOString().slice(0,10); }
 function getUsage() {
@@ -2385,22 +2415,29 @@ function incrementUsage() {
   }
   saveUsage(u);
 }
-// Returns true if user (guest or free logged-in) has used at least 1 analysis
+// Returns true if free user has already used at least 1 analysis (ever, not just today)
 function shouldSoftGate() {
-  // Pro users: never gated
+  if (authToken) return false; // logged in users never soft-gated
   if (window._userCredits && window._userCredits.plan === 'pro') return false;
   const u = getUsage();
   if (u.pro) return false;
-  // Logged-in free user: gate if they've consumed at least 1 server credit
-  if (authToken && window._userCredits) {
-    const totalCredits = window._userCredits.credits || 0;
-    const startingCredits = 3; // free plan starts with 3
-    return totalCredits < startingCredits; // has used at least 1
-  }
-  // Guest: gate after first ever analysis
   return (u.totalFree || 0) >= 1;
 }
-function updateUsageUI() { /* usage counter removed */ }
+function updateUsageUI() {
+  const { remaining } = getRemainingAnalyses();
+  const dots = document.getElementById('usageDots');
+  const text = document.getElementById('usageText');
+  if (!dots) return;
+  dots.innerHTML = '';
+  const used = FREE_LIMIT - remaining;
+  for (let i = 0; i < FREE_LIMIT; i++) {
+    const d = document.createElement('div');
+    d.className = 'usage-dot' + (i < used ? ' used' : '');
+    dots.appendChild(d);
+  }
+  if (remaining === 0) { text.textContent = 'No analyses remaining'; text.style.color = 'var(--red)'; }
+  else { text.textContent = `${remaining} free ${remaining === 1 ? 'analysis' : 'analyses'} remaining`; text.style.color = ''; }
+}
 
 function showToast(msg, type) {
   const t = document.createElement('div');
@@ -2498,16 +2535,49 @@ function resumePendingCheckout() {
 }
 
 function showAuth(mode, fromUpgrade) {
-  if (!fromUpgrade) pendingCheckoutPlan = null;  // clear pending if not an upgrade flow
+  if (!fromUpgrade) pendingCheckoutPlan = null;
   authMode = mode || 'signup';
   const isLogin = authMode === 'login';
-  document.getElementById('authTitle').textContent = isLogin ? 'Welcome Back' : 'Create Account';
-  document.getElementById('authSub').textContent = isLogin ? 'Log in to access your analyses' : 'Sign up to save your analyses and manage credits';
-  document.getElementById('authSubmitBtn').textContent = isLogin ? 'Log In' : 'Create Account';
-  document.getElementById('authSwitch').innerHTML = isLogin ? "Don't have an account? <a onclick=\"toggleAuthMode()\">Sign up</a>" : "Already have an account? <a onclick=\"toggleAuthMode()\">Log in</a>";
+  const isForgot = authMode === 'forgot';
+  const isNewPw = authMode === 'newPassword';
+
+  // Reset transient UI state
   document.getElementById('authError').classList.remove('visible');
-  document.getElementById('signupExtra').style.display = isLogin ? 'none' : 'block';
-  document.getElementById('authPhone').style.display = isLogin ? 'none' : 'block';
+  document.getElementById('authError').removeAttribute('style');
+  document.getElementById('resendConfirmBtn').style.display = 'none';
+
+  // Title & subtitle
+  const titles = { signup: 'Create Account', login: 'Welcome Back', forgot: 'Reset Password', newPassword: 'Set New Password' };
+  const subs   = { signup: 'Sign up to save your analyses and manage credits', login: 'Log in to access your analyses', forgot: 'Enter your email and we\'ll send a reset link.', newPassword: 'Choose a strong new password for your account.' };
+  document.getElementById('authTitle').textContent = titles[authMode] || 'Create Account';
+  document.getElementById('authSub').textContent   = subs[authMode]   || '';
+
+  // Submit button
+  const btnText = { signup: 'Create Account', login: 'Log In', forgot: 'Send Reset Link', newPassword: 'Update Password' };
+  const btn = document.getElementById('authSubmitBtn');
+  btn.textContent = btnText[authMode] || 'Submit';
+  btn.onclick = submitAuth;
+  btn.disabled = false;
+
+  // Switch link
+  const sw = document.getElementById('authSwitch');
+  if (isForgot || isNewPw) {
+    sw.innerHTML = "<a onclick=\"showAuth('login')\" style=\"cursor:pointer;\">← Back to log in</a>";
+  } else if (isLogin) {
+    sw.innerHTML = "Don't have an account? <a onclick=\"toggleAuthMode()\">Sign up</a>";
+  } else {
+    sw.innerHTML = "Already have an account? <a onclick=\"toggleAuthMode()\">Log in</a>";
+  }
+
+  // Field visibility
+  document.getElementById('authEmail').style.display           = isNewPw ? 'none' : 'block';
+  document.getElementById('authPhone').style.display           = (isLogin || isForgot || isNewPw) ? 'none' : 'block';
+  document.getElementById('authPassword').style.display        = isForgot ? 'none' : 'block';
+  document.getElementById('authPassword').placeholder          = isNewPw ? 'New password' : 'Password';
+  document.getElementById('authPasswordConfirmNew').style.display = isNewPw ? 'block' : 'none';
+  document.getElementById('forgotLink').style.display          = isLogin ? 'block' : 'none';
+  document.getElementById('signupExtra').style.display         = (authMode === 'signup') ? 'block' : 'none';
+
   document.getElementById('authModal').classList.add('visible');
 }
 
@@ -2526,6 +2596,55 @@ async function submitAuth() {
   const btn = document.getElementById('authSubmitBtn');
   const errEl = document.getElementById('authError');
   errEl.classList.remove('visible');
+  errEl.removeAttribute('style');
+  document.getElementById('resendConfirmBtn').style.display = 'none';
+
+  // ── Forgot password mode ─────────────────────────────────────────────
+  if (authMode === 'forgot') {
+    if (!email) { errEl.textContent = 'Please enter your email address.'; errEl.classList.add('visible'); return; }
+    btn.textContent = 'Sending...'; btn.disabled = true;
+    try {
+      await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'forgotPassword', email }) });
+    } catch(e) {}
+    errEl.style.background = 'rgba(0,255,180,0.08)';
+    errEl.style.borderColor = 'rgba(0,255,180,0.3)';
+    errEl.style.color = 'var(--teal)';
+    errEl.textContent = '✓ If that email is registered, a reset link is on its way. Check your inbox.';
+    errEl.classList.add('visible');
+    btn.textContent = 'Send Reset Link'; btn.disabled = false;
+    return;
+  }
+
+  // ── Set new password mode (after clicking reset email link) ──────────
+  if (authMode === 'newPassword') {
+    if (!password) { errEl.textContent = 'Please enter a new password.'; errEl.classList.add('visible'); return; }
+    const pwError = validatePassword(password);
+    if (pwError) { errEl.textContent = pwError; errEl.classList.add('visible'); return; }
+    const confirm = document.getElementById('authPasswordConfirmNew').value;
+    if (password !== confirm) { errEl.textContent = 'Passwords do not match.'; errEl.classList.add('visible'); return; }
+    btn.textContent = 'Updating...'; btn.disabled = true;
+    try {
+      const res = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'updatePassword', token: window._recoveryToken, password }) });
+      const data = await res.json();
+      if (data.error) { errEl.textContent = data.error; errEl.classList.add('visible'); btn.textContent = 'Update Password'; btn.disabled = false; return; }
+      window._recoveryToken = null;
+      window.history.replaceState({}, '', window.location.pathname);
+      errEl.style.background = 'rgba(0,255,180,0.08)';
+      errEl.style.borderColor = 'rgba(0,255,180,0.3)';
+      errEl.style.color = 'var(--teal)';
+      errEl.textContent = '✓ Password updated! You can now log in with your new password.';
+      errEl.classList.add('visible');
+      btn.textContent = 'Go to Log In →'; btn.disabled = false;
+      const switchToLogin = () => { errEl.classList.remove('visible'); errEl.removeAttribute('style'); btn.onclick = submitAuth; showAuth('login'); };
+      btn.onclick = switchToLogin;
+      setTimeout(switchToLogin, 2500);
+    } catch(e) { errEl.textContent = 'Something went wrong. Please try again.'; errEl.classList.add('visible'); btn.textContent = 'Update Password'; btn.disabled = false; }
+    return;
+  }
+
+  // ── Signup / login ───────────────────────────────────────────────────
   if (!email || !password) { errEl.textContent = 'Please enter your email and password.'; errEl.classList.add('visible'); return; }
   if (authMode === 'signup') {
     const pwError = validatePassword(password);
@@ -2545,6 +2664,10 @@ async function submitAuth() {
     const data = await res.json();
     if (data.error) {
       errEl.textContent = data.error; errEl.classList.add('visible');
+      // If email not confirmed, offer to resend the confirmation link
+      if (data.error.toLowerCase().includes('confirm your email')) {
+        document.getElementById('resendConfirmBtn').style.display = 'block';
+      }
       btn.textContent = authMode === 'login' ? 'Log In' : 'Create Account'; btn.disabled = false;
       return;
     }
@@ -2569,6 +2692,39 @@ async function submitAuth() {
     errEl.textContent = 'Something went wrong. Please try again.'; errEl.classList.add('visible');
     btn.textContent = authMode === 'login' ? 'Log In' : 'Create Account'; btn.disabled = false;
   }
+}
+
+// ── Resend confirmation email ─────────────────────────────────────────
+async function doResendConfirmation() {
+  const email = document.getElementById('authEmail').value.trim();
+  const errEl = document.getElementById('authError');
+  const btn = document.getElementById('resendConfirmBtn');
+  if (!email) { errEl.textContent = 'Enter your email above, then click Resend.'; errEl.classList.add('visible'); return; }
+  btn.textContent = 'Sending...'; btn.disabled = true;
+  try {
+    await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'resendConfirmation', email }) });
+  } catch(e) {}
+  errEl.style.background = 'rgba(0,255,180,0.08)';
+  errEl.style.borderColor = 'rgba(0,255,180,0.3)';
+  errEl.style.color = 'var(--teal)';
+  errEl.textContent = '✓ Confirmation email resent — check your inbox.';
+  errEl.classList.add('visible');
+  btn.style.display = 'none';
+}
+
+// ── Detect Supabase recovery token in URL hash (password reset flow) ──
+function checkRecoveryToken() {
+  const hash = window.location.hash.slice(1); // strip leading #
+  if (!hash) return;
+  const params = new URLSearchParams(hash);
+  if (params.get('type') !== 'recovery') return;
+  const token = params.get('access_token');
+  if (!token) return;
+  window._recoveryToken = token;
+  // Clear the hash so the token isn't visible or accidentally reused
+  window.history.replaceState({}, '', window.location.pathname);
+  showAuth('newPassword');
 }
 
 async function ensureFreshToken() {
@@ -2632,7 +2788,7 @@ async function analyzeContract() {
   } else {
     // Show upsell cards staggered
     document.getElementById('loadingUpsell').style.display = 'flex';
-    document.getElementById('loadingUpsellCta').style.display = 'block';
+    if (isGuest) document.getElementById('loadingUpsellCta').style.display = 'block';
     const cards = document.querySelectorAll('.upsell-card');
     cards.forEach((c, i) => { setTimeout(() => c.classList.add('visible'), 400 + i * 600); });
   }
@@ -2695,12 +2851,13 @@ function removeUpsellForPro() {
     const gate = document.getElementById(id);
     if (!gate) return;
     gate.classList.remove('active');
-    // Remove blur classes and ensure all items visible
-    gate.querySelectorAll('.gate-blurred').forEach(el => {
-      el.classList.remove('gate-blurred');
-      el.style.display = '';
-    });
-    gate.querySelectorAll('.term-row').forEach(r => { r.style.display = ''; r.classList.remove('gate-blurred'); });
+    // Show all hidden items
+    const list = gate.querySelector('ul') || gate.querySelector('#termsGrid');
+    if (list) {
+      [...list.children].forEach(item => { item.style.display = ''; });
+    }
+    const rows = gate.querySelectorAll('.term-row');
+    rows.forEach(r => { r.style.display = ''; });
   });
 }
 
@@ -2799,6 +2956,7 @@ window.addEventListener('load', async () => {
     window.history.replaceState({}, '', window.location.pathname);
   }
   updateUsageUI();
+  checkRecoveryToken(); // detect Supabase password-reset links (?type=recovery in hash)
 });
 
 const dropZone = document.getElementById('dropZone');
@@ -2995,9 +3153,6 @@ function renderResults(data) {
     const isPro = (window._userCredits && window._userCredits.plan === 'pro') || getUsage().pro;
     overlay.style.display = isPro ? 'none' : 'flex';
     if (tipsCard) { isPro ? tipsCard.classList.remove('gated') : tipsCard.classList.add('gated'); }
-    // Hide "create free account" button for already logged-in users
-    const tipsSecBtn = document.getElementById('tipsSecondaryBtn');
-    if (tipsSecBtn) tipsSecBtn.style.display = authToken ? 'none' : '';
   }
 
   // Soft gate: blur extra items after first free analysis
@@ -3006,40 +3161,35 @@ function renderResults(data) {
 
 function applySoftGate() {
   const gate = shouldSoftGate();
-  const usage = getUsage();
-  console.log('[GATE] shouldSoftGate:', gate, '| authToken:', !!authToken, '| totalFree:', usage.totalFree, '| _userCredits:', window._userCredits);
 
+  // Helper: hide all but first item in a list, then activate gate if any hidden
   function gateList(listId, gateId) {
     const list = document.getElementById(listId);
     const gateEl = document.getElementById(gateId);
     if (!list || !gateEl) return;
-    const items = Array.from(list.children);
-    items.forEach(el => { el.style.display = ''; el.classList.remove('gate-blurred'); });
-    console.log('[GATE]', listId, '| gate:', gate, '| items:', items.length);
+    const items = list.children;
     if (!gate || items.length <= 1) {
       gateEl.classList.remove('active');
       return;
     }
-    items.slice(1).forEach(el => el.classList.add('gate-blurred'));
+    for (let i = 0; i < items.length; i++) {
+      items[i].style.display = i === 0 ? '' : 'none';
+    }
     gateEl.classList.add('active');
-    console.log('[GATE]', gateId, 'activated, blurred', items.length - 1, 'items');
   }
 
+  // Helper: hide all but first N rows in termsGrid
   function gateTerms(gridId, gateId) {
     const grid = document.getElementById(gridId);
     const gateEl = document.getElementById(gateId);
     if (!grid || !gateEl) return;
-    const rows = Array.from(grid.querySelectorAll('.term-row:not(.not-found)'));
-    rows.forEach(r => { r.style.display = ''; r.classList.remove('gate-blurred'); });
-    Array.from(grid.querySelectorAll('.term-row.not-found')).forEach(r => r.style.display = '');
-    console.log('[GATE]', gridId, '| gate:', gate, '| rows:', rows.length);
+    const rows = grid.querySelectorAll('.term-row');
     if (!gate || rows.length <= 1) {
       gateEl.classList.remove('active');
       return;
     }
-    Array.from(grid.querySelectorAll('.term-row')).slice(1).forEach(r => r.classList.add('gate-blurred'));
+    rows.forEach((r, i) => { r.style.display = i === 0 ? '' : 'none'; });
     gateEl.classList.add('active');
-    console.log('[GATE]', gateId, 'activated');
   }
 
   gateTerms('termsGrid', 'termsGate');

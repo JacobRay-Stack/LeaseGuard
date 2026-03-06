@@ -672,38 +672,25 @@
   /* ── Soft gate (blur after first free analysis) ─────────────────── */
   .section-gate {
     position: relative;
-    overflow: hidden;
-    border-radius: var(--radius);
   }
 
-  /* Individual items after the first get this class */
+  /* Items after the first get blurred individually */
   .gate-blurred {
-    filter: blur(4px);
+    filter: blur(5px);
     user-select: none;
     pointer-events: none;
+    opacity: 0.6;
   }
 
-  /* Gradient overlay anchored to bottom, covers blurred items */
+  /* Upgrade CTA shown below the first item when gate is active */
   .section-gate-overlay {
     display: none;
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 65%;
-    z-index: 10;
-    cursor: pointer;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
-    padding-bottom: 18px;
-    background: linear-gradient(
-      to bottom,
-      transparent 0%,
-      rgba(6,8,16,0.75) 50%,
-      rgba(6,8,16,0.96) 100%
-    );
   }
   .section-gate.active .section-gate-overlay {
     display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 0 4px;
   }
 
   .gate-pill {
@@ -716,7 +703,7 @@
     color: var(--cyan);
     backdrop-filter: blur(8px);
     white-space: nowrap;
-    pointer-events: all;
+    cursor: pointer;
     transition: border-color 0.2s, box-shadow 0.2s;
   }
   .gate-pill:hover {
@@ -1803,10 +1790,11 @@
       position: static !important;
       overflow: visible !important;
     }
-    .section-gate-blur {
+    /* Remove all blur gating in print */
+    .gate-blurred {
       filter: none !important;
-      -webkit-filter: none !important;
       opacity: 1 !important;
+      pointer-events: auto !important;
     }
     .section-gate-overlay { display: none !important; }
 
@@ -2250,7 +2238,7 @@
     <div class="section-gate" id="termsGate">
       <div class="glass result-card">
         <h3>📋 Key Terms</h3>
-        <div id="termsGrid" class="section-gate-blur"></div>
+        <div id="termsGrid"></div>
       </div>
       <div class="section-gate-overlay" onclick="startCheckout('pro', this)">
         <div class="gate-pill">✦ Unlock all key terms — Upgrade to Pro</div>
@@ -2261,7 +2249,7 @@
     <div class="section-gate" id="flagsGate">
       <div class="glass result-card">
         <h3> Red Flags</h3>
-        <ul id="flagsList" class="section-gate-blur" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;"></ul>
+        <ul id="flagsList" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;"></ul>
       </div>
       <div class="section-gate-overlay" onclick="startCheckout('pro', this)">
         <div class="gate-pill">✦ Unlock all red flags — Upgrade to Pro</div>
@@ -2272,7 +2260,7 @@
     <div class="section-gate" id="missingGate">
       <div class="glass result-card">
         <h3>⚠️ Missing or Unclear Clauses</h3>
-        <ul id="missingList" class="section-gate-blur" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;"></ul>
+        <ul id="missingList" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;"></ul>
       </div>
       <div class="section-gate-overlay" onclick="startCheckout('pro', this)">
         <div class="gate-pill">✦ Unlock all missing clauses — Upgrade to Pro</div>

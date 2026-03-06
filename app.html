@@ -672,25 +672,40 @@
   /* ── Soft gate (blur after first free analysis) ─────────────────── */
   .section-gate {
     position: relative;
-  }
-  .section-gate-overlay {
-    display: none;
-    position: absolute;
-    inset: 0;
-    z-index: 10;
+    overflow: hidden;
     border-radius: var(--radius);
-    cursor: pointer;
   }
-  .section-gate.active .section-gate-overlay {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .section-gate.active .section-gate-blur {
+
+  /* Individual items after the first get this class */
+  .gate-blurred {
     filter: blur(4px);
     user-select: none;
     pointer-events: none;
   }
+
+  /* Gradient overlay anchored to bottom, covers blurred items */
+  .section-gate-overlay {
+    display: none;
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 65%;
+    z-index: 10;
+    cursor: pointer;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 18px;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(6,8,16,0.75) 50%,
+      rgba(6,8,16,0.96) 100%
+    );
+  }
+  .section-gate.active .section-gate-overlay {
+    display: flex;
+  }
+
   .gate-pill {
     background: rgba(6,8,16,0.88);
     border: 1px solid rgba(0,200,255,0.25);
@@ -2692,13 +2707,12 @@ function removeUpsellForPro() {
     const gate = document.getElementById(id);
     if (!gate) return;
     gate.classList.remove('active');
-    // Show all hidden items
-    const list = gate.querySelector('ul') || gate.querySelector('#termsGrid');
-    if (list) {
-      [...list.children].forEach(item => { item.style.display = ''; });
-    }
-    const rows = gate.querySelectorAll('.term-row');
-    rows.forEach(r => { r.style.display = ''; });
+    // Remove blur classes and ensure all items visible
+    gate.querySelectorAll('.gate-blurred').forEach(el => {
+      el.classList.remove('gate-blurred');
+      el.style.display = '';
+    });
+    gate.querySelectorAll('.term-row').forEach(r => { r.style.display = ''; r.classList.remove('gate-blurred'); });
   });
 }
 
@@ -3005,33 +3019,38 @@ function renderResults(data) {
 function applySoftGate() {
   const gate = shouldSoftGate();
 
-  // Helper: hide all but first item in a list, then activate gate if any hidden
+  // Mark items after the first with 'gate-blurred', remove if not gating
   function gateList(listId, gateId) {
     const list = document.getElementById(listId);
     const gateEl = document.getElementById(gateId);
     if (!list || !gateEl) return;
-    const items = list.children;
+    const items = Array.from(list.children);
+    // Always ensure all items are visible
+    items.forEach(el => { el.style.display = ''; el.classList.remove('gate-blurred'); });
     if (!gate || items.length <= 1) {
       gateEl.classList.remove('active');
       return;
     }
-    for (let i = 0; i < items.length; i++) {
-      items[i].style.display = i === 0 ? '' : 'none';
-    }
+    // Blur everything after the first item
+    items.slice(1).forEach(el => el.classList.add('gate-blurred'));
     gateEl.classList.add('active');
   }
 
-  // Helper: hide all but first N rows in termsGrid
+  // Terms grid: blur all rows after the first visible one
   function gateTerms(gridId, gateId) {
     const grid = document.getElementById(gridId);
     const gateEl = document.getElementById(gateId);
     if (!grid || !gateEl) return;
-    const rows = grid.querySelectorAll('.term-row');
+    const rows = Array.from(grid.querySelectorAll('.term-row:not(.not-found)'));
+    rows.forEach(r => { r.style.display = ''; r.classList.remove('gate-blurred'); });
+    // Also show not-found rows but blur them too
+    Array.from(grid.querySelectorAll('.term-row.not-found')).forEach(r => r.style.display = '');
     if (!gate || rows.length <= 1) {
       gateEl.classList.remove('active');
       return;
     }
-    rows.forEach((r, i) => { r.style.display = i === 0 ? '' : 'none'; });
+    // Blur all rows after the first found one
+    Array.from(grid.querySelectorAll('.term-row')).slice(1).forEach(r => r.classList.add('gate-blurred'));
     gateEl.classList.add('active');
   }
 

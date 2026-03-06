@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-DTKX7EGMB4"></script>
   <script>
@@ -25,12 +24,21 @@
   <meta name="twitter:title" content="AnalyzeThisContract — Read before you sign." />
   <meta name="twitter:description" content="Upload your lease and instantly find red flags, missing clauses, and what to negotiate — powered by Claude AI." />
   <meta name="twitter:image" content="https://www.analyzethiscontract.com/og-image.png" />
-
+  <!-- Meta description for Google -->
+  <meta name="description" content="AI-powered lease analyzer. Upload your rental contract and instantly get a plain-English breakdown of red flags, missing clauses, key terms, and negotiation tips — powered by Claude AI. Free to try." />
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AnalyzeThisContract — Understand Any Lease or Contract in Seconds</title>
 <meta name="description" content="Upload any lease or real estate contract and get an instant plain-English breakdown. Red flags, missing clauses, and key terms — no lawyer needed.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://analyzethiscontract.com/">
+<meta property="og:title" content="AnalyzeThisContract — Understand Any Lease in Seconds">
+<meta property="og:description" content="Upload any lease and get an instant plain-English breakdown — red flags, missing clauses, and key terms explained. No lawyer needed. Free to try.">
+<meta property="og:url" content="https://analyzethiscontract.com/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AnalyzeThisContract — No Jargon. Instant Results.">
+<meta name="twitter:description" content="Upload any lease or contract and get a plain-English breakdown instantly.">
 
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjMWUyMTI4Ii8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMTMxNTFhIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9InVybCgjYmcpIi8+PHRleHQgeD0iMzIiIHk9IjM4IiBmb250LWZhbWlseT0iQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzAwYzhmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QUk8L3RleHQ+PC9zdmc+">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
@@ -411,7 +419,7 @@ footer {
     <div class="nav-logo-icon">⚖️</div>
     <div class="nav-logo-text">AnalyzeThis<span>Contract</span></div>
   </a>
-  <div class="nav-actions" id="landingNav">
+  <div class="nav-actions">
     <a href="/app" class="btn-ghost">Log In</a>
     <a href="/app" class="btn-primary">Try Free →</a>
   </div>
@@ -699,21 +707,6 @@ document.querySelectorAll('.steps, .features-grid, .audience-grid, .testimonials
     card.style.transitionDelay = i * 80 + 'ms';
   });
 });
-
-// Auth-aware nav: if user is already logged in, show Go to App button
-(function() {
-  try {
-    const token = localStorage.getItem('atc_token');
-    const userRaw = localStorage.getItem('atc_user');
-    if (!token || !userRaw) return;
-    const user = JSON.parse(userRaw);
-    if (!user || !user.email) return;
-    const nav = document.getElementById('landingNav');
-    if (!nav) return;
-    const email = user.email.length > 22 ? user.email.slice(0, 20) + '…' : user.email;
-    nav.innerHTML = `<span style="font-size:12px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${user.email}">${email}</span><a href="/app" class="btn-primary">Go to App →</a>`;
-  } catch(e) {}
-})();
 </script>
 </body>
 </html>

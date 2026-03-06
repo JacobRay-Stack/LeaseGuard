@@ -673,46 +673,24 @@
   .section-gate {
     position: relative;
   }
-
-  /* Overlay sits at bottom half of the card, not full-card */
   .section-gate-overlay {
     display: none;
     position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 72%;
+    inset: 0;
     z-index: 10;
-    border-radius: 0 0 var(--radius) var(--radius);
+    border-radius: var(--radius);
     cursor: pointer;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
-    padding-bottom: 20px;
-    /* gradient mask so first item stays sharp, rest fade into blur */
-    background: linear-gradient(
-      to bottom,
-      transparent 0%,
-      rgba(6,8,16,0.55) 40%,
-      rgba(6,8,16,0.92) 100%
-    );
   }
   .section-gate.active .section-gate-overlay {
     display: flex;
+    align-items: center;
+    justify-content: center;
   }
-
-  /* Blur only the items after the first — achieved by blurring the whole
-     list but the overlay gradient masks the top (first item) area */
   .section-gate.active .section-gate-blur {
-    filter: blur(3px);
+    filter: blur(4px);
     user-select: none;
     pointer-events: none;
   }
-
-  /* Un-blur the first child of each gated list so it stays readable */
-  .section-gate.active .section-gate-blur > *:first-child {
-    filter: blur(0) !important;
-    opacity: 1 !important;
-  }
-
   .gate-pill {
     background: rgba(6,8,16,0.88);
     border: 1px solid rgba(0,200,255,0.25);
@@ -1368,36 +1346,24 @@
     position: absolute;
     inset: 0;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
-    padding-bottom: 24px;
     z-index: 10;
     border-radius: var(--radius);
   }
 
   .tips-blur-bg {
     position: absolute;
-    /* Start gradient at ~30% down so the first tip is visible above it */
-    top: 30%; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(
-      to bottom,
-      transparent 0%,
-      rgba(6,8,16,0.7) 30%,
-      rgba(6,8,16,0.92) 70%
-    );
-    border-radius: 0 0 var(--radius) var(--radius);
+    inset: 0;
+    background: rgba(6, 8, 16, 0.82);
+    border-radius: var(--radius);
   }
 
   /* Blur list items directly — cross-browser reliable */
   #tipsCard.gated #tipsList {
-    filter: blur(3px);
+    filter: blur(5px);
     user-select: none;
     pointer-events: none;
-  }
-  /* Keep first tip readable */
-  #tipsCard.gated #tipsList > li:first-child {
-    filter: blur(0) !important;
-    opacity: 1 !important;
   }
 
   .tips-upsell {
@@ -2173,13 +2139,13 @@
 
   <header>
     <div class="header-top">
-      <div class="logo">
+      <a href="/" class="logo" style="text-decoration:none;">
         <div class="logo-icon">⚖️</div>
         <div class="logo-wordmark">
           <span class="line1">AnalyzeThis</span>
           <span class="line2 shimmer">Contract</span>
         </div>
-      </div>
+      </a>
       <div id="topNav" class="top-nav-right"></div>
     </div>
 
@@ -3071,31 +3037,33 @@ function renderResults(data) {
 function applySoftGate() {
   const gate = shouldSoftGate();
 
-  // Helper: show all items (no hiding), activate gate overlay + blur
+  // Helper: hide all but first item in a list, then activate gate if any hidden
   function gateList(listId, gateId) {
     const list = document.getElementById(listId);
     const gateEl = document.getElementById(gateId);
     if (!list || !gateEl) return;
-    // Always make sure all items are visible
-    [...list.children].forEach(item => { item.style.display = ''; });
-    if (!gate || list.children.length <= 1) {
+    const items = list.children;
+    if (!gate || items.length <= 1) {
       gateEl.classList.remove('active');
       return;
+    }
+    for (let i = 0; i < items.length; i++) {
+      items[i].style.display = i === 0 ? '' : 'none';
     }
     gateEl.classList.add('active');
   }
 
-  // Helper: show all term rows, activate gate
+  // Helper: hide all but first N rows in termsGrid
   function gateTerms(gridId, gateId) {
     const grid = document.getElementById(gridId);
     const gateEl = document.getElementById(gateId);
     if (!grid || !gateEl) return;
-    grid.querySelectorAll('.term-row').forEach(r => { r.style.display = ''; });
-    const rows = grid.querySelectorAll('.term-row:not(.not-found)');
+    const rows = grid.querySelectorAll('.term-row');
     if (!gate || rows.length <= 1) {
       gateEl.classList.remove('active');
       return;
     }
+    rows.forEach((r, i) => { r.style.display = i === 0 ? '' : 'none'; });
     gateEl.classList.add('active');
   }
 

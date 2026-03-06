@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-DTKX7EGMB4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-DTKX7EGMB4');
+  </script>
+
+  <!-- SEO -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog — AnalyzeThisContract | Lease Tips & Contract Advice</title>
+  <meta name="description" content="Expert guides on reading lease agreements, spotting red flags, and negotiating better rental terms. Practical advice for renters and first-time signers.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://analyzethiscontract.com/blog">
+
+  <!-- OG -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AnalyzeThisContract" />
+  <meta property="og:url" content="https://www.analyzethiscontract.com/blog" />
+  <meta property="og:title" content="Blog — AnalyzeThisContract" />
+  <meta property="og:description" content="Expert guides on reading leases, spotting red flags, and negotiating better rental terms." />
+  <meta property="og:image" content="https://www.analyzethiscontract.com/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Blog — AnalyzeThisContract" />
+  <meta name="twitter:description" content="Practical lease advice. No jargon." />
+  <meta name="twitter:image" content="https://www.analyzethiscontract.com/og-image.png" />
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjMWUyMTI4Ii8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMTMxNTFhIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9InVybCgjYmcpIi8+PHRleHQgeD0iMzIiIHk9IjM4IiBmb250LWZhbWlseT0iQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzAwYzhmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QUk8L3RleHQ+PC9zdmc+">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Syne:wght@700;800&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:      #060810;
+      --surface: rgba(255,255,255,0.035);
+      --border:  rgba(255,255,255,0.08);
+      --cyan:    #00c8ff;
+      --purple:  #bf00ff;
+      --teal:    #00ffb4;
+      --red:     #ff5577;
+      --amber:   #ffb347;
+      --text:    #e8f0ff;
+      --muted:   #4a6080;
+      --radius:  18px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body {
+      background:var(--bg); color:var(--text);
+      font-family:'Inter',sans-serif; min-height:100vh;
+      overflow-x:hidden; line-height:1.6;
+    }
+    body::before {
+      content:''; position:fixed; inset:0;
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 20%, rgba(0,200,255,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 90% 10%, rgba(191,0,255,0.05) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 50% 100%, rgba(0,255,180,0.04) 0%, transparent 60%);
+      pointer-events:none; z-index:0;
+    }
+    body::after {
+      content:''; position:fixed; inset:0;
+      background-image:
+        linear-gradient(rgba(0,200,255,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,200,255,0.015) 1px, transparent 1px);
+      background-size:48px 48px; pointer-events:none; z-index:0;
+    }
+    .z1 { position:relative; z-index:1; }
+
+    /* ── Nav ── */
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:100;
+      padding:16px 40px;
+      display:flex; align-items:center; justify-content:space-between;
+      background:rgba(6,8,16,0.85); backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);
+    }
+    .nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .nav-logo-icon {
+      width:36px; height:36px;
+      background:rgba(0,200,255,0.08); border:1px solid rgba(0,200,255,0.25);
+      border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px;
+    }
+    .nav-logo-text { font-size:16px; font-weight:700; color:var(--text); }
+    .nav-logo-text span {
+      background:linear-gradient(135deg,#00c8ff,#bf00ff);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .nav-actions { display:flex; gap:10px; align-items:center; }
+    .btn-ghost {
+      padding:8px 18px; border-radius:10px;
+      font-size:13px; font-weight:500; cursor:pointer;
+      border:1px solid var(--border); background:transparent;
+      color:var(--muted); text-decoration:none; transition:all 0.2s;
+    }
+    .btn-ghost:hover { color:var(--cyan); border-color:rgba(0,200,255,0.3); }
+    .btn-primary {
+      padding:8px 20px; border-radius:10px;
+      font-size:13px; font-weight:600; cursor:pointer;
+      border:1px solid rgba(0,200,255,0.35); background:rgba(0,200,255,0.12);
+      color:var(--cyan); text-decoration:none; transition:all 0.2s;
+    }
+    .btn-primary:hover { background:rgba(0,200,255,0.22); box-shadow:0 0 24px rgba(0,200,255,0.15); }
+
+    /* ── Page wrapper ── */
+    .page { padding-top:100px; }
+
+    /* ── Blog Hero ── */
+    .blog-hero {
+      text-align:center;
+      padding:72px 24px 56px;
+      max-width:760px;
+      margin:0 auto;
+    }
+    .blog-hero .eyebrow {
+      display:inline-block;
+      font-size:11px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase;
+      color:var(--cyan); border:1px solid rgba(0,200,255,0.25);
+      background:rgba(0,200,255,0.07);
+      padding:5px 14px; border-radius:100px; margin-bottom:28px;
+    }
+    .blog-hero h1 {
+      font-family:'Syne',sans-serif;
+      font-size:clamp(36px,6vw,64px); font-weight:800; line-height:1.08;
+      color:var(--text); margin-bottom:20px;
+    }
+    .blog-hero h1 em {
+      font-style:normal;
+      background:linear-gradient(135deg,#00c8ff,#bf00ff);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .blog-hero p {
+      font-size:17px; color:var(--muted); line-height:1.7; max-width:560px; margin:0 auto;
+    }
+
+    /* ── Featured post ── */
+    .featured-wrap {
+      max-width:1100px; margin:0 auto 64px; padding:0 24px;
+    }
+    .featured-post {
+      display:grid; grid-template-columns:1fr 1fr; gap:0;
+      border:1px solid var(--border); border-radius:var(--radius);
+      overflow:hidden; background:var(--surface);
+      transition:border-color 0.25s, box-shadow 0.25s;
+      text-decoration:none; color:inherit;
+    }
+    .featured-post:hover {
+      border-color:rgba(0,200,255,0.3);
+      box-shadow:0 0 48px rgba(0,200,255,0.07);
+    }
+    .featured-visual {
+      background:linear-gradient(135deg, rgba(0,200,255,0.12), rgba(191,0,255,0.08));
+      display:flex; align-items:center; justify-content:center;
+      min-height:320px; position:relative; overflow:hidden;
+    }
+    .featured-visual::before {
+      content:''; position:absolute; inset:0;
+      background:
+        radial-gradient(circle at 30% 40%, rgba(0,200,255,0.18) 0%, transparent 55%),
+        radial-gradient(circle at 75% 70%, rgba(191,0,255,0.12) 0%, transparent 50%);
+    }
+    .featured-icon {
+      font-size:80px; position:relative; z-index:1;
+      filter:drop-shadow(0 0 32px rgba(0,200,255,0.4));
+    }
+    .featured-content { padding:48px 40px; display:flex; flex-direction:column; justify-content:center; }
+    .tag {
+      display:inline-flex; align-items:center; gap:6px;
+      font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase;
+      padding:4px 12px; border-radius:100px; margin-bottom:20px; width:fit-content;
+    }
+    .tag-red { color:var(--red); background:rgba(255,85,119,0.1); border:1px solid rgba(255,85,119,0.2); }
+    .tag-cyan { color:var(--cyan); background:rgba(0,200,255,0.1); border:1px solid rgba(0,200,255,0.2); }
+    .tag-teal { color:var(--teal); background:rgba(0,255,180,0.08); border:1px solid rgba(0,255,180,0.18); }
+    .tag-amber { color:var(--amber); background:rgba(255,179,71,0.1); border:1px solid rgba(255,179,71,0.2); }
+    .tag-purple { color:#bf00ff; background:rgba(191,0,255,0.09); border:1px solid rgba(191,0,255,0.2); }
+    .featured-content h2 {
+      font-family:'Syne',sans-serif;
+      font-size:clamp(22px,3vw,32px); font-weight:800; line-height:1.18;
+      color:var(--text); margin-bottom:14px;
+    }
+    .featured-content p {
+      font-size:15px; color:var(--muted); line-height:1.75; margin-bottom:28px;
+    }
+    .post-meta {
+      display:flex; align-items:center; gap:16px;
+      font-size:12px; color:var(--muted);
+    }
+    .post-meta .dot { width:3px; height:3px; border-radius:50%; background:var(--muted); }
+    .read-link {
+      display:inline-flex; align-items:center; gap:6px;
+      font-size:13px; font-weight:600; color:var(--cyan); text-decoration:none;
+      transition:gap 0.2s;
+    }
+    .read-link:hover { gap:10px; }
+
+    /* ── Section label ── */
+    .section-label {
+      max-width:1100px; margin:0 auto 28px; padding:0 24px;
+      display:flex; align-items:center; gap:14px;
+    }
+    .section-label h2 {
+      font-size:13px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted);
+    }
+    .section-label::after {
+      content:''; flex:1; height:1px; background:var(--border);
+    }
+
+    /* ── Post grid ── */
+    .posts-grid {
+      max-width:1100px; margin:0 auto 80px; padding:0 24px;
+      display:grid; grid-template-columns:repeat(3,1fr); gap:20px;
+    }
+    .post-card {
+      border:1px solid var(--border); border-radius:16px;
+      background:var(--surface); overflow:hidden;
+      display:flex; flex-direction:column;
+      text-decoration:none; color:inherit;
+      transition:border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+    }
+    .post-card:hover {
+      border-color:rgba(0,200,255,0.25);
+      box-shadow:0 8px 40px rgba(0,200,255,0.06);
+      transform:translateY(-3px);
+    }
+    .card-visual {
+      height:160px; display:flex; align-items:center; justify-content:center;
+      font-size:52px; position:relative; overflow:hidden;
+    }
+    .cv-red    { background:linear-gradient(135deg, rgba(255,85,119,0.12), rgba(255,85,119,0.04)); }
+    .cv-cyan   { background:linear-gradient(135deg, rgba(0,200,255,0.12), rgba(0,200,255,0.04)); }
+    .cv-teal   { background:linear-gradient(135deg, rgba(0,255,180,0.1), rgba(0,255,180,0.03)); }
+    .cv-amber  { background:linear-gradient(135deg, rgba(255,179,71,0.12), rgba(255,179,71,0.04)); }
+    .cv-purple { background:linear-gradient(135deg, rgba(191,0,255,0.1), rgba(191,0,255,0.03)); }
+    .card-body { padding:24px; flex:1; display:flex; flex-direction:column; gap:10px; }
+    .card-body h3 {
+      font-family:'Syne',sans-serif;
+      font-size:17px; font-weight:800; line-height:1.3; color:var(--text);
+    }
+    .card-body p { font-size:13px; color:var(--muted); line-height:1.7; flex:1; }
+    .card-footer {
+      padding:0 24px 20px;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .card-footer .post-meta { font-size:11px; }
+
+    /* ── CTA Banner ── */
+    .cta-banner {
+      max-width:1100px; margin:0 auto 100px; padding:0 24px;
+    }
+    .cta-inner {
+      border:1px solid rgba(0,200,255,0.2);
+      border-radius:var(--radius);
+      background:linear-gradient(135deg, rgba(0,200,255,0.07), rgba(191,0,255,0.05));
+      padding:56px 48px;
+      display:flex; align-items:center; justify-content:space-between; gap:32px;
+      position:relative; overflow:hidden;
+    }
+    .cta-inner::before {
+      content:''; position:absolute; inset:0;
+      background:radial-gradient(ellipse 60% 80% at 0% 50%, rgba(0,200,255,0.08) 0%, transparent 60%);
+      pointer-events:none;
+    }
+    .cta-text { position:relative; z-index:1; }
+    .cta-text h2 {
+      font-family:'Syne',sans-serif; font-size:28px; font-weight:800;
+      color:var(--text); margin-bottom:8px;
+    }
+    .cta-text p { font-size:15px; color:var(--muted); }
+    .cta-btn {
+      position:relative; z-index:1; white-space:nowrap;
+      padding:14px 32px; border-radius:12px;
+      font-size:15px; font-weight:700; cursor:pointer;
+      border:1px solid rgba(0,200,255,0.5); background:rgba(0,200,255,0.15);
+      color:var(--cyan); text-decoration:none; transition:all 0.2s; flex-shrink:0;
+    }
+    .cta-btn:hover { background:rgba(0,200,255,0.28); box-shadow:0 0 32px rgba(0,200,255,0.2); }
+
+    /* ── Footer ── */
+    footer {
+      border-top:1px solid var(--border);
+      padding:28px 40px;
+      display:flex; align-items:center; justify-content:space-between;
+      font-size:12px; color:var(--muted); position:relative; z-index:1;
+    }
+    footer a { color:var(--muted); text-decoration:none; transition:color 0.2s; }
+    footer a:hover { color:var(--cyan); }
+    .footer-links { display:flex; gap:20px; }
+
+    /* ── Individual article page ── */
+    .article-wrap {
+      max-width:720px; margin:0 auto; padding:60px 24px 100px;
+    }
+    .article-header { margin-bottom:48px; }
+    .article-header h1 {
+      font-family:'Syne',sans-serif;
+      font-size:clamp(28px,5vw,48px); font-weight:800; line-height:1.12;
+      color:var(--text); margin:16px 0 20px;
+    }
+    .article-header .lead {
+      font-size:18px; color:var(--muted); line-height:1.75;
+    }
+    .article-divider {
+      height:1px; background:var(--border); margin:40px 0;
+    }
+    .article-body { font-family:'Lora', Georgia, serif; font-size:17px; line-height:1.85; color:#c8d8f0; }
+    .article-body h2 {
+      font-family:'Syne',sans-serif; font-size:24px; font-weight:800;
+      color:var(--text); margin:52px 0 18px; line-height:1.2;
+    }
+    .article-body h3 {
+      font-family:'Syne',sans-serif; font-size:18px; font-weight:700;
+      color:var(--text); margin:36px 0 12px;
+    }
+    .article-body p { margin-bottom:24px; }
+    .article-body ul, .article-body ol { margin:0 0 28px 24px; }
+    .article-body li { margin-bottom:10px; }
+    .article-body strong { color:var(--text); font-weight:600; }
+    .callout {
+      border:1px solid rgba(255,85,119,0.25);
+      background:rgba(255,85,119,0.06);
+      border-radius:12px; padding:20px 24px;
+      margin:32px 0; font-family:'Inter',sans-serif;
+      font-size:14px; line-height:1.7;
+    }
+    .callout.info {
+      border-color:rgba(0,200,255,0.25); background:rgba(0,200,255,0.06);
+    }
+    .callout.tip {
+      border-color:rgba(0,255,180,0.22); background:rgba(0,255,180,0.05);
+    }
+    .callout-label {
+      font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase;
+      margin-bottom:8px;
+    }
+    .callout .callout-label { color:var(--red); }
+    .callout.info .callout-label { color:var(--cyan); }
+    .callout.tip .callout-label { color:var(--teal); }
+    .article-cta {
+      margin:56px 0 0;
+      border:1px solid rgba(0,200,255,0.2);
+      border-radius:16px;
+      background:linear-gradient(135deg, rgba(0,200,255,0.07), rgba(191,0,255,0.04));
+      padding:36px 32px; text-align:center;
+    }
+    .article-cta h3 { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; color:var(--text); margin-bottom:10px; }
+    .article-cta p { font-size:14px; color:var(--muted); margin-bottom:24px; font-family:'Inter',sans-serif; }
+
+    /* ── Animations ── */
+    .reveal { opacity:0; transform:translateY(22px); transition:opacity 0.55s ease, transform 0.55s ease; }
+    .reveal.visible { opacity:1; transform:none; }
+
+    /* ── Responsive ── */
+    @media (max-width:900px) {
+      .featured-post { grid-template-columns:1fr; }
+      .featured-visual { min-height:200px; }
+      .posts-grid { grid-template-columns:repeat(2,1fr); }
+      .cta-inner { flex-direction:column; text-align:center; }
+    }
+    @media (max-width:600px) {
+      nav { padding:14px 20px; }
+      .posts-grid { grid-template-columns:1fr; }
+      .featured-content { padding:28px 24px; }
+      .cta-inner { padding:36px 24px; }
+      footer { flex-direction:column; gap:12px; text-align:center; }
+    }
+
+    /* Blog index vs article toggle */
+    .view-blog { display:block; }
+    .view-article { display:none; }
+    body.article .view-blog { display:none; }
+    body.article .view-article { display:block; }
+  </style>
+</head>
+
+<body>
+
+<!-- ════ NAV ════ -->
+<nav class="z1">
+  <a href="/" class="nav-logo">
+    <div class="nav-logo-icon">⚖️</div>
+    <div class="nav-logo-text">Analyze<span>This</span>Contract</div>
+  </a>
+  <div class="nav-actions">
+    <a href="/blog" class="btn-ghost">Blog</a>
+    <a href="/services.html" class="btn-ghost">Pricing</a>
+    <a href="/app" class="btn-primary">Try Free →</a>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════
+     BLOG INDEX VIEW
+════════════════════════════════════════ -->
+<div class="view-blog page z1">
+
+  <!-- Hero -->
+  <div class="blog-hero reveal">
+    <div class="eyebrow">📋 The Contract Brief</div>
+    <h1>Know what you're<br><em>signing.</em></h1>
+    <p>Plain-English guides on lease agreements, renter rights, and how to negotiate before you put pen to paper.</p>
+  </div>
+
+  <!-- Featured -->
+  <div class="featured-wrap reveal">
+    <a href="#" class="featured-post" onclick="openArticle(event,'art1')">
+      <div class="featured-visual">
+        <div class="featured-icon">🚩</div>
+      </div>
+      <div class="featured-content">
+        <div class="tag tag-red">🔴 Red Flags</div>
+        <h2>10 Red Flags in Apartment Leases Most Renters Miss</h2>
+        <p>Landlords have lawyers. Most renters have a weekend to decide. Here's what to look for before you sign — the clauses that cost people thousands every year.</p>
+        <div class="post-meta">
+          <span>June 12, 2025</span>
+          <div class="dot"></div>
+          <span>8 min read</span>
+          <div class="dot"></div>
+          <span class="read-link">Read article →</span>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Grid label -->
+  <div class="section-label z1">
+    <h2>All Articles</h2>
+  </div>
+
+  <!-- Post grid -->
+  <div class="posts-grid z1">
+
+    <a href="#" class="post-card reveal" onclick="openArticle(event,'art2')">
+      <div class="card-visual cv-cyan">📝</div>
+      <div class="card-body">
+        <div class="tag tag-cyan">Lease Basics</div>
+        <h3>What Is an Automatic Renewal Clause — and How to Escape One</h3>
+        <p>Your lease may silently renew for another full year if you miss a 60-day window. Here's how to spot it and what to do.</p>
+      </div>
+      <div class="card-footer">
+        <div class="post-meta"><span>May 28, 2025</span><div class="dot"></div><span>5 min read</span></div>
+      </div>
+    </a>
+
+    <a href="#" class="post-card reveal" onclick="openArticle(event,'art3')">
+      <div class="card-visual cv-amber">🔑</div>
+      <div class="card-body">
+        <div class="tag tag-amber">Negotiation</div>
+        <h3>What to Negotiate Before Signing a Lease (Most Renters Never Ask)</h3>
+        <p>A lease is not a take-it-or-leave-it document. Landlords expect negotiation. Here's what's actually on the table.</p>
+      </div>
+      <div class="card-footer">
+        <div class="post-meta"><span>May 14, 2025</span><div class="dot"></div><span>6 min read</span></div>
+      </div>
+    </a>
+
+    <a href="#" class="post-card reveal" onclick="openArticle(event,'art4')">
+      <div class="card-visual cv-teal">🛡️</div>
+      <div class="card-body">
+        <div class="tag tag-teal">Renter Rights</div>
+        <h3>Normal Wear and Tear vs. Damage: What Landlords Can Actually Charge For</h3>
+        <p>Security deposit disputes are the #1 landlord-tenant conflict. Know the difference before you move out.</p>
+      </div>
+      <div class="card-footer">
+        <div class="post-meta"><span>April 30, 2025</span><div class="dot"></div><span>5 min read</span></div>
+      </div>
+    </a>
+
+    <a href="#" class="post-card reveal" onclick="openArticle(event,'art5')">
+      <div class="card-visual cv-red">⚠️</div>
+      <div class="card-body">
+        <div class="tag tag-red">Red Flags</div>
+        <h3>Subletting Clauses: What Happens If You Need to Leave Early</h3>
+        <p>Job change. Breakup. Family emergency. If you ever need to leave before your lease ends, this clause determines everything.</p>
+      </div>
+      <div class="card-footer">
+        <div class="post-meta"><span>April 16, 2025</span><div class="dot"></div><span>4 min read</span></div>
+      </div>
+    </a>
+
+    <a href="#" class="post-card reveal" onclick="openArticle(event,'art6')">
+      <div class="card-visual cv-purple">💡</div>
+      <div class="card-body">
+        <div class="tag tag-purple">Deep Dive</div>
+        <h3>The 7 Missing Clauses That Should Worry Any Renter</h3>
+        <p>What a lease <em>doesn't</em> say is often more dangerous than what it does. These omissions leave you completely unprotected.</p>
+      </div>
+      <div class="card-footer">
+        <div class="post-meta"><span>April 2, 2025</span><div class="dot"></div><span>7 min read</span></div>
+      </div>
+    </a>
+
+    <a href="#" class="post-card reveal" onclick="openArticle(event,'art7')">
+      <div class="card-visual cv-cyan">🏠</div>
+      <div class="card-body">
+        <div class="tag tag-cyan">First-Time Renters</div>
+        <h3>First Apartment Lease: A Room-by-Room Checklist Before You Sign</h3>
+        <p>From utility responsibility to pet addendums — the complete walkthrough for anyone signing their first lease.</p>
+      </div>
+      <div class="card-footer">
+        <div class="post-meta"><span>March 19, 2025</span><div class="dot"></div><span>9 min read</span></div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- CTA Banner -->
+  <div class="cta-banner reveal">
+    <div class="cta-inner">
+      <div class="cta-text">
+        <h2>Don't read legalese alone.</h2>
+        <p>Paste your lease and get a plain-English breakdown in under 30 seconds. Free to try — no account needed.</p>
+      </div>
+      <a href="/app" class="cta-btn">Analyze My Lease Free →</a>
+    </div>
+  </div>
+
+</div><!-- /view-blog -->
+
+
+<!-- ════════════════════════════════════════
+     ARTICLE: 10 RED FLAGS
+════════════════════════════════════════ -->
+<div class="view-article page z1" id="art1">
+  <div class="article-wrap">
+    <a href="#" onclick="closArticle(event)" style="font-size:13px;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:32px;">← Back to Blog</a>
+    <div class="article-header">
+      <div class="tag tag-red" style="margin-bottom:16px;">🔴 Red Flags</div>
+      <h1>10 Red Flags in Apartment Leases Most Renters Miss</h1>
+      <div class="post-meta" style="margin-bottom:20px;">
+        <span>June 12, 2025</span><div class="dot"></div><span>8 min read</span>
+      </div>
+      <p class="lead">Landlords have lawyers. Most renters have a weekend to decide and no one in their corner. Here are the clauses that cost people thousands every year — and how to spot them before you sign.</p>
+    </div>
+    <div class="article-divider"></div>
+    <div class="article-body">
+
+      <p>Most renters spend more time researching a new TV than reading their lease agreement. That's understandable — leases are long, dense, and written by attorneys whose clients are not you. But buried in that dense language are clauses that can cost you your security deposit, trap you in a renewal, or leave you with no recourse when things go wrong.</p>
+
+      <p>We analyzed hundreds of real lease agreements through AnalyzeThisContract, and the same problematic clauses appear again and again. Here are the ten you should look for before you ever pick up a pen.</p>
+
+      <h2>1. The Automatic Renewal Clause</h2>
+      <p>Also called an "auto-renew" or "holdover" clause, this provision automatically extends your lease — sometimes for a full year — if you fail to give written notice of non-renewal within a specified window. That window is often 60 days, but we've seen leases require 90.</p>
+      <div class="callout">
+        <div class="callout-label">⚠️ Watch For</div>
+        Language like: <em>"Tenant shall provide written notice of intent to vacate no fewer than [60] days prior to the lease termination date. Failure to provide such notice shall constitute Tenant's election to renew the lease for an additional [12-month] term under the same terms and conditions."</em>
+      </div>
+      <p>Set a calendar reminder the day you sign. If your lease ends December 31, your notice deadline may be October 1.</p>
+
+      <h2>2. Vague or Unlimited Landlord Entry Rights</h2>
+      <p>Most states require landlords to give 24–48 hours notice before entering your unit except in emergencies. But some leases grant far broader rights. Watch for clauses that allow entry "at any reasonable time" or "upon reasonable notice" without defining what "reasonable" means.</p>
+      <div class="callout info">
+        <div class="callout-label">ℹ️ Know Your Rights</div>
+        Look up your state's entry notification law. If the lease gives the landlord fewer protections than the law requires, the law usually prevails — but you still don't want to fight about it.
+      </div>
+
+      <h2>3. Buried Fees That Compound</h2>
+      <p>Late fees are expected. What renters miss are the compounding structures. Some leases charge a flat late fee <em>plus</em> a daily rate after a grace period. A $1,500 rent payment that's 10 days late can accumulate $200+ in fees in leases with aggressive language.</p>
+      <p>Also watch for: administrative fees, NSF fees (returned payment), lease renewal processing fees, and move-out inspection fees charged regardless of condition.</p>
+
+      <h2>4. The "As-Is" Condition Clause</h2>
+      <p>If a lease states you accept the unit "as-is" or "in its current condition," you may have waived your right to demand pre-existing repairs be made. Always document the unit thoroughly — video walkthrough, photos with timestamps — before signing, and get any promised repairs in writing as an addendum, not a verbal promise.</p>
+
+      <h2>5. Renter Responsible for All Repairs Under a Threshold</h2>
+      <p>Some leases make tenants responsible for all repairs under a dollar amount — typically $100–$200. This sounds minor until you're paying for a plumber to snake a drain that was clogged on move-in, or replacing a garbage disposal you never used.</p>
+      <div class="callout">
+        <div class="callout-label">⚠️ Red Flag</div>
+        "Tenant shall be responsible for all repairs costing less than $150. Repairs above this threshold shall be the responsibility of Landlord at Landlord's sole discretion."
+      </div>
+
+      <h2>6. Landlord's Right to Terminate With Short Notice</h2>
+      <p>Most leases protect tenants from arbitrary eviction during the lease term. But some contain clauses allowing the landlord to terminate with as little as 30–60 days notice if they intend to sell, move in themselves, or renovate. These are often legal but rarely disclosed upfront.</p>
+      <p>Ask directly: "Do you have any plans to sell or occupy this property in the next 12 months?" Get the answer in writing.</p>
+
+      <h2>7. The Joint and Several Liability Clause</h2>
+      <p>If you're signing a lease with roommates, this clause makes each of you individually responsible for the entire rent — not just your share. If your roommate disappears in month four, you owe the full amount. This is standard language, but most renters don't realize what it means until they're in trouble.</p>
+      <div class="callout tip">
+        <div class="callout-label">💡 Tip</div>
+        Consider a roommate agreement separate from the lease that spells out each person's financial obligations and what happens if someone needs to leave early.
+      </div>
+
+      <h2>8. No Subletting — Ever</h2>
+      <p>Many leases prohibit subletting entirely, or require landlord approval that can be withheld "in the landlord's sole discretion." If there's any chance you'll need to leave before your lease ends — job change, relationship, health — this clause can trap you in a contract with no exit.</p>
+      <p>Try to negotiate for: landlord approval not to be "unreasonably withheld," and a buyout clause (typically 1–2 months rent) as an alternative.</p>
+
+      <h2>9. Utilities "To Be Determined"</h2>
+      <p>Leases that leave utility responsibility vague — "utilities as agreed" or "see addendum" without attaching said addendum — create disputes later. Before signing, get in writing exactly which utilities are included, which you pay, and how shared utilities (water in a multi-unit building) are calculated and billed.</p>
+
+      <h2>10. Waiver of Jury Trial / Mandatory Arbitration</h2>
+      <p>Some residential leases include clauses requiring disputes to go to arbitration rather than court, or waiving your right to a jury trial. These clauses significantly limit your options if you need to fight an illegal eviction or wrongful deposit withholding. They're increasingly common — and often enforceable.</p>
+      <p>If you see this language: "Tenant and Landlord agree to resolve any dispute through binding arbitration..." — understand what you're giving up before you sign.</p>
+
+      <div class="article-divider"></div>
+
+      <h2>The Bottom Line</h2>
+      <p>A lease is a legal contract. The fact that it's presented as standard doesn't mean every clause is non-negotiable. Landlords expect some back-and-forth, especially on terms that fall outside local norms. The more you know about what you're signing, the better position you're in to ask for changes — or to walk away.</p>
+
+      <div class="article-cta">
+        <h3>See exactly what's in your lease.</h3>
+        <p>Paste your lease into AnalyzeThisContract and get a plain-English breakdown of red flags, missing clauses, and what to negotiate. Takes 30 seconds. Free to try.</p>
+        <a href="/app" class="cta-btn" style="display:inline-block;">Analyze My Lease Free →</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     ARTICLE: AUTOMATIC RENEWAL
+════════════════════════════════════════ -->
+<div class="view-article page z1" id="art2" style="display:none;">
+  <div class="article-wrap">
+    <a href="#" onclick="closArticle(event)" style="font-size:13px;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:32px;">← Back to Blog</a>
+    <div class="article-header">
+      <div class="tag tag-cyan" style="margin-bottom:16px;">Lease Basics</div>
+      <h1>What Is an Automatic Renewal Clause — and How to Escape One</h1>
+      <div class="post-meta" style="margin-bottom:20px;">
+        <span>May 28, 2025</span><div class="dot"></div><span>5 min read</span>
+      </div>
+      <p class="lead">Your lease may silently renew for another full year if you miss a narrow notice window. Here's how to find the clause, what it means, and what to do about it.</p>
+    </div>
+    <div class="article-divider"></div>
+    <div class="article-body">
+
+      <p>It happens more often than you'd think. A tenant decides not to renew their lease, starts making plans to move, and then discovers — sometimes after they've already moved out — that their lease automatically renewed three months ago because they missed a notice deadline buried in clause 14(b).</p>
+
+      <p>Automatic renewal clauses are common, often legal, and almost always a bad deal for tenants. Here's everything you need to know.</p>
+
+      <h2>What Is an Automatic Renewal Clause?</h2>
+      <p>An automatic renewal clause (sometimes called a "holdover" or "auto-renew" provision) states that if you don't give written notice of your intent to leave within a specified period before your lease ends, the lease automatically renews for another term — often a full year.</p>
+
+      <div class="callout">
+        <div class="callout-label">⚠️ Example Language</div>
+        "This Lease shall automatically renew for successive one-year terms unless Tenant provides written notice of termination no less than sixty (60) days prior to the end of the then-current lease term."
+      </div>
+
+      <p>The key details to note: the notice period (60, 90 days), the notice method (written, certified mail?), and the renewal term length (month-to-month or another full year).</p>
+
+      <h2>Is It Legal?</h2>
+      <p>In most states, yes — with some conditions. Many states require landlords to specifically remind tenants of the auto-renewal clause a certain number of days before the deadline. California, New York, and several other states have explicit disclosure requirements. But in states without these rules, the clause can silently bind you.</p>
+
+      <p>The safest approach is to treat the clause as fully enforceable regardless of what you think the law requires. Fighting it later is expensive and uncertain.</p>
+
+      <h2>How to Find It in Your Lease</h2>
+      <p>Search for these keywords in your lease document: "automatic renewal," "auto-renew," "holdover," "notice of non-renewal," "intent to vacate," or "successive terms." It's often in a section titled "Term," "Lease Renewal," or "Termination."</p>
+
+      <h2>What to Do If Your Lease Has One</h2>
+      <p><strong>Before signing:</strong> Try to negotiate the clause out, shorten the notice period, or convert the renewal to month-to-month instead of a full year. Many landlords will accept month-to-month holdover language.</p>
+      <p><strong>After signing:</strong> Set a calendar reminder the day you sign, triggered well before the deadline. If your lease ends December 31 and the notice period is 60 days, set reminders for October 15 and November 1.</p>
+      <p><strong>If you've already missed the deadline:</strong> Talk to the landlord directly. Many will waive enforcement, especially if you find a qualified replacement tenant. Check your state's law — some have protections that override the clause if the landlord didn't give proper notice of the auto-renewal requirement.</p>
+
+      <h2>What to Put in Your Non-Renewal Notice</h2>
+      <p>Keep it simple and formal. Include your name, unit address, a statement that you will not be renewing, your intended move-out date, and a request for confirmation. Send it via email <em>and</em> certified mail if the lease specifies written notice.</p>
+
+      <div class="callout tip">
+        <div class="callout-label">💡 Pro Tip</div>
+        Keep a copy of your notice with delivery confirmation. If a dispute ever arises, proof that you gave timely written notice is everything.
+      </div>
+
+      <div class="article-cta">
+        <h3>Not sure if your lease has this clause?</h3>
+        <p>Paste it into AnalyzeThisContract. We'll find the auto-renewal language, tell you exactly what it means, and flag the notice deadline you need to know.</p>
+        <a href="/app" class="cta-btn" style="display:inline-block;">Check My Lease →</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     ARTICLE: NEGOTIATION
+════════════════════════════════════════ -->
+<div class="view-article page z1" id="art3" style="display:none;">
+  <div class="article-wrap">
+    <a href="#" onclick="closArticle(event)" style="font-size:13px;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:32px;">← Back to Blog</a>
+    <div class="article-header">
+      <div class="tag tag-amber" style="margin-bottom:16px;">🔑 Negotiation</div>
+      <h1>What to Negotiate Before Signing a Lease (Most Renters Never Ask)</h1>
+      <div class="post-meta" style="margin-bottom:20px;">
+        <span>May 14, 2025</span><div class="dot"></div><span>6 min read</span>
+      </div>
+      <p class="lead">A lease is not a take-it-or-leave-it document. Landlords expect some back-and-forth. Here's what experienced renters ask for — and what they actually get.</p>
+    </div>
+    <div class="article-divider"></div>
+    <div class="article-body">
+
+      <p>The myth that a lease is non-negotiable is one of the most expensive beliefs a renter can hold. Landlords — especially individual property owners — draft leases knowing they'll face some pushback. In a normal rental market, they'd rather adjust a few terms than lose a qualified tenant and leave a unit vacant for 30–60 days.</p>
+
+      <p>Here's what's actually on the table.</p>
+
+      <h2>Rent Price and Incentives</h2>
+      <p>Asking for lower rent on a market-rate unit rarely works in tight markets — but it's not the only lever. More effective asks:</p>
+      <ul>
+        <li><strong>Free first month or last month</strong> — common for newer buildings with vacancies</li>
+        <li><strong>Reduced first month</strong> — often granted if you sign a longer lease</li>
+        <li><strong>Locked rent for 24 months</strong> — no increase in exchange for a 2-year commitment</li>
+        <li><strong>Move-in fee waived</strong> — administrative or application fees are often negotiable</li>
+      </ul>
+
+      <h2>Security Deposit Amount</h2>
+      <p>Many jurisdictions cap security deposits at 1–2 months rent by law, but landlords may ask for less if you have excellent credit. Some landlords also accept a smaller upfront deposit in exchange for a security deposit installment plan spread over 3–6 months.</p>
+
+      <h2>Pet Policy and Fees</h2>
+      <p>If you have a pet, negotiating pet terms upfront beats asking for forgiveness later. Common asks: waive or reduce the one-time pet fee, reduce monthly pet rent, or get specific breeds/sizes approved in writing. Offer to pay for professional carpet cleaning at move-out as a trade.</p>
+
+      <h2>Early Termination Clause</h2>
+      <p>Standard leases often have no graceful exit — you're on the hook for the remainder of the term. Negotiate for a buyout option: typically 1–2 months rent as a termination fee, after which you're released. This is especially important if your job involves relocation or you have any uncertainty about the next 12 months.</p>
+
+      <h2>Parking, Storage, and Amenities</h2>
+      <p>If a parking spot or storage unit is listed as optional, ask to have it included in the base rent rather than added monthly. The math is the same for the landlord — but it's simpler for you and eliminates a separate renewal decision each year.</p>
+
+      <h2>Repairs and Unit Improvements</h2>
+      <p>Negotiate any promised repairs or improvements in writing as a lease addendum — never as a verbal promise. Common wins: fresh paint, replacement appliances, updated fixtures. Landlords often prefer to do this pre-occupancy rather than during tenancy.</p>
+
+      <h2>Renewal Terms</h2>
+      <p>Ask to convert the auto-renewal language from a full-year renewal to month-to-month. Ask for a cap on rent increases at renewal — often 3–5% — written into the lease itself.</p>
+
+      <div class="callout tip">
+        <div class="callout-label">💡 How to Ask</div>
+        Don't send a list of demands. Have a conversation, identify 2–3 terms that matter most, and frame each ask with a reason. "I'm interested in signing a 2-year lease — would you be open to locking the rent for that period?" is a much easier ask to say yes to than "I want you to lower the rent."
+      </div>
+
+      <h2>What Usually Doesn't Move</h2>
+      <p>In competitive markets: rent price, lease length, and pet policy on buildings with breed restrictions. Individual landlords are more flexible than property management companies, who often can't deviate from standard terms without corporate approval.</p>
+
+      <div class="article-cta">
+        <h3>Know what to negotiate before you ask.</h3>
+        <p>AnalyzeThisContract flags the specific clauses in your lease worth pushing back on — and explains exactly what each term means in plain English.</p>
+        <a href="/app" class="cta-btn" style="display:inline-block;">Review My Lease →</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     FOOTER (shared)
+════════════════════════════════════════ -->
+<footer class="z1">
+  <div>⚖️ &nbsp;© 2026 AnalyzeThisContract &nbsp;·&nbsp; Not legal advice</div>
+  <div class="footer-links">
+    <a href="/app">App</a>
+    <a href="/blog">Blog</a>
+    <a href="/services.html">Pricing</a>
+    <a href="/privacy">Privacy</a>
+  </div>
+</footer>
+
+<script>
+// Reveal on scroll
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+  });
+}, { threshold: 0.08, rootMargin:'0px 0px -30px 0px' });
+document.querySelectorAll('.reveal').forEach((el, i) => {
+  el.style.transitionDelay = (i % 6) * 70 + 'ms';
+  observer.observe(el);
+});
+
+// Article routing (simple SPA for the blog)
+function openArticle(e, id) {
+  e.preventDefault();
+  document.querySelectorAll('.view-article').forEach(a => a.style.display = 'none');
+  document.querySelector('#' + id).style.display = 'block';
+  document.querySelector('.view-blog').style.display = 'none';
+  window.scrollTo({top:0});
+  history.pushState({article: id}, '', '/blog/' + id.replace('art','article-'));
+}
+
+function closArticle(e) {
+  e.preventDefault();
+  document.querySelectorAll('.view-article').forEach(a => a.style.display = 'none');
+  document.querySelector('.view-blog').style.display = 'block';
+  window.scrollTo({top:0});
+  history.pushState({}, '', '/blog');
+}
+
+// Handle browser back
+window.onpopstate = function(e) {
+  if (e.state && e.state.article) {
+    openArticle({preventDefault:()=>{}}, e.state.article);
+  } else {
+    closArticle({preventDefault:()=>{}});
+  }
+};
+
+// Year in footer
+document.querySelectorAll('#yr').forEach(el => el.textContent = new Date().getFullYear());
+</script>
+</body>
+</html>

@@ -3006,40 +3006,40 @@ function renderResults(data) {
 
 function applySoftGate() {
   const gate = shouldSoftGate();
+  const usage = getUsage();
+  console.log('[GATE] shouldSoftGate:', gate, '| authToken:', !!authToken, '| totalFree:', usage.totalFree, '| _userCredits:', window._userCredits);
 
-  // Mark items after the first with 'gate-blurred', remove if not gating
   function gateList(listId, gateId) {
     const list = document.getElementById(listId);
     const gateEl = document.getElementById(gateId);
     if (!list || !gateEl) return;
     const items = Array.from(list.children);
-    // Always ensure all items are visible
     items.forEach(el => { el.style.display = ''; el.classList.remove('gate-blurred'); });
+    console.log('[GATE]', listId, '| gate:', gate, '| items:', items.length);
     if (!gate || items.length <= 1) {
       gateEl.classList.remove('active');
       return;
     }
-    // Blur everything after the first item
     items.slice(1).forEach(el => el.classList.add('gate-blurred'));
     gateEl.classList.add('active');
+    console.log('[GATE]', gateId, 'activated, blurred', items.length - 1, 'items');
   }
 
-  // Terms grid: blur all rows after the first visible one
   function gateTerms(gridId, gateId) {
     const grid = document.getElementById(gridId);
     const gateEl = document.getElementById(gateId);
     if (!grid || !gateEl) return;
     const rows = Array.from(grid.querySelectorAll('.term-row:not(.not-found)'));
     rows.forEach(r => { r.style.display = ''; r.classList.remove('gate-blurred'); });
-    // Also show not-found rows but blur them too
     Array.from(grid.querySelectorAll('.term-row.not-found')).forEach(r => r.style.display = '');
+    console.log('[GATE]', gridId, '| gate:', gate, '| rows:', rows.length);
     if (!gate || rows.length <= 1) {
       gateEl.classList.remove('active');
       return;
     }
-    // Blur all rows after the first found one
     Array.from(grid.querySelectorAll('.term-row')).slice(1).forEach(r => r.classList.add('gate-blurred'));
     gateEl.classList.add('active');
+    console.log('[GATE]', gateId, 'activated');
   }
 
   gateTerms('termsGrid', 'termsGate');
